@@ -1,0 +1,683 @@
+import Phaser from 'phaser';
+import { COLORS, SIZES, ANIMATIONS } from '../../../config/theme.js';
+import { DEVICE_CONFIG } from '../../../config/device.js';
+import { getLetterConfig, LETTER_ORDER } from '../../../config/letters.js';
+import { getDifficulty } from '../../../config/difficulty.js';
+import { gameStore } from '../../../state/gameStore.js';
+import { StarDisplay } from '../../../shared/ui/StarDisplay.js';
+
+/**
+ * Letter Game Scene — Core gameplay
+ * 
+ * Flow:
+ * 1. Letter Introduction — Show the letter big + animal + audio
+ * 2. Letter Tracing — Trace the letter shape (simplified for MVP)
+ * 3. Letter Matching — Find the correct letter among options
+ * 4. Results — Stars, Ubuntu value reveal, celebration
+ */
+export class LetterGameScene extends Phaser.Scene {
+  constructor() {
+    super({ key: 'LetterGame' });
+  }
+
+  init(data) {
+    this.letter = data.letter;
+    this.difficulty = data.difficulty;
+    this.letterConfig = getLetterConfig(this.letter);
+    this.diffConfig = getDifficulty(this.difficulty);
+    
+    this.score = 0;
+    this.mistakes = 0;
+    this.phase = 'intro'; // intro → trace → match → results
+  }
+
+  create() {
+    const { width, height } = DEVICE_CONFIG;
+    this.centerX = width / 2;
+    this.centerY = height / 2;
+
+    this.cameras.main.setBackgroundColor(COLORS.bgWarm);
+
+    // Back button
+    this.backBtn = this.add
+      .text(30, 40, '← Back', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '22px',
+        color: COLORS.primary,
+      })
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.scene.start('DifficultySelect', { letter: this.letter }));
+
+    // Start with intro phase
+    this.showIntro();
+  }
+
+  // ==================== PHASE 1: INTRODUCTION ====================
+  showIntro() {
+    this.phase = 'intro';
+    this.clearPhase();
+
+    const { width } = DEVICE_CONFIG;
+
+    // Big letter with entrance animation
+    this.bigLetter = this.add
+      .text(this.centerX, 250, this.letter, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '200px',
+        fontStyle: 'bold',
+        color: this.letterConfig.animal.color,
+      })
+      .setOrigin(0.5)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: this.bigLetter,
+      scale: 1,
+      duration: 600,
+      ease: 'Back.easeOut',
+    });
+
+    // Lowercase
+    this.smallLetter = this.add
+      .text(this.centerX + 100, 330, this.letterConfig.lower, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '80px',
+        color: this.letterConfig.animal.color,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: this.smallLetter,
+      alpha: 0.7,
+      duration: 400,
+      delay: 400,
+    });
+
+    // Animal name
+    this.animalText = this.add
+      .text(this.centerX, 480, `${this.letter} is for ${this.letterConfig.animal.name}`, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '32px',
+        fontStyle: 'bold',
+        color: COLORS.textDark,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: this.animalText,
+      alpha: 1,
+      duration: 400,
+      delay: 700,
+    });
+
+    // Animal Zulu name
+    this.zuluText = this.add
+      .text(this.centerX, 520, this.letterConfig.animal.zuluName, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '20px',
+        fontStyle: 'italic',
+        color: COLORS.textMuted,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: this.zuluText,
+      alpha: 1,
+      duration: 400,
+      delay: 900,
+    });
+
+    // Phonics hint (guided mode)
+    if (this.diffConfig.showHints) {
+      this.phonicsHint = this.add
+        .text(this.centerX, 580, `🔊 "${this.letterConfig.phonics.sound}"`, {
+          fontFamily: 'Nunito, Arial, sans-serif',
+          fontSize: '20px',
+          color: COLORS.primary,
+        })
+        .setOrigin(0.5)
+        .setAlpha(0);
+
+      this.tweens.add({
+        targets: this.phonicsHint,
+        alpha: 1,
+        duration: 400,
+        delay: 1100,
+      });
+    }
+
+    // Animal placeholder (colored circle until real sprites)
+    this.animalPlaceholder = this.add.graphics();
+    this.animalPlaceholder.fillStyle(
+      Phaser.Display.Color.HexStringToColor(this.letterConfig.animal.color).color,
+      0.3
+    );
+    this.animalPlaceholder.fillCircle(this.centerX, 750, 100);
+    
+    this.animalEmoji = this.add
+      .text(this.centerX, 750, this.getAnimalEmoji(), {
+        fontSize: '80px',
+      })
+      .setOrigin(0.5)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: this.animalEmoji,
+      scale: 1,
+      duration: 500,
+      delay: 600,
+      ease: 'Back.easeOut',
+    });
+
+    // "Tap to continue" prompt
+    this.continueText = this.add
+      .text(this.centerX, 950, 'Tap to continue →', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '22px',
+        color: COLORS.primary,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: this.continueText,
+      alpha: 1,
+      duration: 400,
+      delay: 1500,
+    });
+
+    // Pulse animation on continue text
+    this.time.delayedCall(1500, () => {
+      this.tweens.add({
+        targets: this.continueText,
+        alpha: 0.4,
+        duration: 800,
+        yoyo: true,
+        repeat: -1,
+      });
+    });
+
+    // Tap anywhere to proceed
+    this.input.once('pointerdown', () => {
+      this.time.delayedCall(200, () => this.showTracing());
+    });
+  }
+
+  // ==================== PHASE 2: TRACING ====================
+  showTracing() {
+    this.phase = 'trace';
+    this.clearPhase();
+
+    const { width } = DEVICE_CONFIG;
+
+    // Phase label
+    this.phaseLabel = this.add
+      .text(this.centerX, 100, 'Trace the letter!', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '30px',
+        fontStyle: 'bold',
+        color: COLORS.textDark,
+      })
+      .setOrigin(0.5);
+
+    // Ghost letter (large, faded — trace target)
+    this.ghostLetter = this.add
+      .text(this.centerX, 450, this.letter, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '300px',
+        fontStyle: 'bold',
+        color: this.letterConfig.animal.color,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0.15);
+
+    // Drawing surface
+    this.traceGraphics = this.add.graphics();
+    this.traceGraphics.lineStyle(12, Phaser.Display.Color.HexStringToColor(this.letterConfig.animal.color).color, 1);
+
+    this.isDrawing = false;
+    this.tracePoints = [];
+
+    // Track touch/mouse input for drawing
+    this.input.on('pointerdown', (pointer) => {
+      this.isDrawing = true;
+      this.tracePoints = [{ x: pointer.x, y: pointer.y }];
+      this.traceGraphics.beginPath();
+      this.traceGraphics.moveTo(pointer.x, pointer.y);
+    });
+
+    this.input.on('pointermove', (pointer) => {
+      if (!this.isDrawing) return;
+      this.tracePoints.push({ x: pointer.x, y: pointer.y });
+      this.traceGraphics.lineTo(pointer.x, pointer.y);
+      this.traceGraphics.strokePath();
+      this.traceGraphics.beginPath();
+      this.traceGraphics.moveTo(pointer.x, pointer.y);
+    });
+
+    this.input.on('pointerup', () => {
+      this.isDrawing = false;
+      // Simple validation: did they draw enough?
+      if (this.tracePoints.length > 20) {
+        this.onTraceComplete();
+      }
+    });
+
+    // Hint: show trace path in guided mode
+    if (this.diffConfig.showHints) {
+      this.hintText = this.add
+        .text(this.centerX, 650, '👆 Use your finger to trace over the letter', {
+          fontFamily: 'Nunito, Arial, sans-serif',
+          fontSize: '18px',
+          color: COLORS.textMuted,
+          align: 'center',
+        })
+        .setOrigin(0.5);
+    }
+
+    // Skip button (for testing/accessibility)
+    this.add
+      .text(width - 30, 40, 'Skip →', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '18px',
+        color: COLORS.textMuted,
+      })
+      .setOrigin(1, 0)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.onTraceComplete());
+  }
+
+  onTraceComplete() {
+    // Celebrate the trace
+    this.score += 10;
+    
+    // Remove input listeners for tracing
+    this.input.removeAllListeners();
+
+    // Show success feedback
+    const feedback = this.add
+      .text(this.centerX, 800, '✓ Great tracing!', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '28px',
+        fontStyle: 'bold',
+        color: COLORS.success,
+      })
+      .setOrigin(0.5)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: feedback,
+      scale: 1,
+      duration: 300,
+      ease: 'Back.easeOut',
+    });
+
+    this.time.delayedCall(1200, () => this.showMatching());
+  }
+
+  // ==================== PHASE 3: MATCHING ====================
+  showMatching() {
+    this.phase = 'match';
+    this.clearPhase();
+
+    const { width } = DEVICE_CONFIG;
+
+    // Phase label
+    this.add
+      .text(this.centerX, 100, `Find the letter ${this.letter}!`, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '30px',
+        fontStyle: 'bold',
+        color: COLORS.textDark,
+      })
+      .setOrigin(0.5);
+
+    // Generate options (correct + distractors)
+    const options = this.generateOptions();
+    const shuffled = Phaser.Utils.Array.Shuffle([...options]);
+
+    // Show as grid of big tappable letters
+    const cols = 3;
+    const cardSize = 160;
+    const gap = 30;
+    const startX = this.centerX - ((cols - 1) * (cardSize + gap)) / 2;
+    const startY = 350;
+
+    this.matchAttempts = 0;
+
+    shuffled.forEach((opt, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      const x = startX + col * (cardSize + gap);
+      const y = startY + row * (cardSize + gap);
+
+      // Card background
+      const card = this.add.graphics();
+      card.fillStyle(0xffffff, 1);
+      card.fillRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
+      card.lineStyle(3, Phaser.Display.Color.HexStringToColor(COLORS.textMuted).color, 0.3);
+      card.strokeRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
+
+      // Letter text
+      const letterText = this.add
+        .text(x, y, opt, {
+          fontFamily: 'Nunito, Arial, sans-serif',
+          fontSize: '80px',
+          fontStyle: 'bold',
+          color: COLORS.textDark,
+        })
+        .setOrigin(0.5);
+
+      // Hit area
+      const hitArea = this.add
+        .rectangle(x, y, cardSize, cardSize)
+        .setInteractive({ useHandCursor: true })
+        .setAlpha(0.001);
+
+      hitArea.on('pointerdown', () => {
+        if (opt === this.letter || opt === this.letterConfig.lower) {
+          this.onCorrectMatch(card, letterText, x, y, cardSize);
+        } else {
+          this.onWrongMatch(card, letterText, x, y, cardSize);
+        }
+      });
+    });
+
+    // Hint for guided
+    if (this.diffConfig.showHints) {
+      this.time.delayedCall(3000, () => {
+        // Highlight the correct answer after 3 seconds
+        // (In a real version, add a subtle glow)
+      });
+    }
+  }
+
+  generateOptions() {
+    const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const distractors = allLetters
+      .filter((l) => l !== this.letter)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4);
+
+    // Mix of upper and lower case for the correct answer
+    return [this.letter, this.letterConfig.lower, ...distractors.slice(0, 4)];
+  }
+
+  onCorrectMatch(card, letterText, x, y, cardSize) {
+    this.score += 20;
+    
+    // Green highlight
+    card.clear();
+    card.fillStyle(Phaser.Display.Color.HexStringToColor(COLORS.success).color, 0.2);
+    card.fillRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
+    card.lineStyle(4, Phaser.Display.Color.HexStringToColor(COLORS.success).color);
+    card.strokeRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
+
+    letterText.setColor(COLORS.success);
+
+    // Bounce
+    this.tweens.add({
+      targets: letterText,
+      scale: 1.3,
+      duration: 200,
+      yoyo: true,
+    });
+
+    // Success text
+    const successMsg = this.add
+      .text(this.centerX, 800, '🎉 Correct!', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '36px',
+        fontStyle: 'bold',
+        color: COLORS.success,
+      })
+      .setOrigin(0.5)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: successMsg,
+      scale: 1,
+      duration: 300,
+      ease: 'Back.easeOut',
+    });
+
+    this.time.delayedCall(1500, () => this.showResults());
+  }
+
+  onWrongMatch(card, letterText, x, y, cardSize) {
+    this.mistakes += 1;
+    this.matchAttempts += 1;
+
+    // Red shake
+    card.clear();
+    card.fillStyle(Phaser.Display.Color.HexStringToColor(COLORS.error).color, 0.1);
+    card.fillRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
+
+    this.tweens.add({
+      targets: letterText,
+      x: letterText.x + 10,
+      duration: 50,
+      yoyo: true,
+      repeat: 3,
+    });
+
+    // Encouraging message
+    if (this.diffConfig.audioPrompts) {
+      const msgs = ['Try again!', 'Almost!', 'Keep looking!', 'You can do it!'];
+      const msg = msgs[this.matchAttempts % msgs.length];
+      
+      const hint = this.add
+        .text(this.centerX, 800, msg, {
+          fontFamily: 'Nunito, Arial, sans-serif',
+          fontSize: '24px',
+          color: COLORS.secondary,
+        })
+        .setOrigin(0.5);
+
+      this.tweens.add({
+        targets: hint,
+        alpha: 0,
+        duration: 1000,
+        delay: 800,
+        onComplete: () => hint.destroy(),
+      });
+    }
+
+    // After max attempts in non-guided, auto-complete
+    if (this.diffConfig.maxAttempts !== Infinity && this.matchAttempts >= this.diffConfig.maxAttempts) {
+      this.time.delayedCall(500, () => this.showResults());
+    }
+  }
+
+  // ==================== PHASE 4: RESULTS ====================
+  showResults() {
+    this.phase = 'results';
+    this.clearPhase();
+
+    const { width, height } = DEVICE_CONFIG;
+
+    // Calculate stars
+    let stars = 1; // Completed = 1 star minimum
+    if (this.mistakes === 0) stars = 3;
+    else if (this.mistakes <= 2) stars = 2;
+
+    // Save progress
+    gameStore.getState().completeLevel(this.letter, this.difficulty, this.score, stars);
+    gameStore.getState().collectUbuntuValue(this.letterConfig.ubuntuValue.english);
+
+    // "Well done!" header
+    this.add
+      .text(this.centerX, 120, 'Well Done!', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '48px',
+        fontStyle: 'bold',
+        color: COLORS.primary,
+      })
+      .setOrigin(0.5);
+
+    // Star display
+    const starDisplay = new StarDisplay(this, this.centerX, 220);
+    this.time.delayedCall(500, () => starDisplay.award(stars));
+
+    // Score
+    this.add
+      .text(this.centerX, 300, `Score: ${this.score}`, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '28px',
+        color: COLORS.textDark,
+      })
+      .setOrigin(0.5);
+
+    // Ubuntu value reveal
+    const ubuntuCard = this.add.graphics();
+    ubuntuCard.fillStyle(Phaser.Display.Color.HexStringToColor(COLORS.primary).color, 0.1);
+    ubuntuCard.fillRoundedRect(this.centerX - 280, 370, 560, 200, 20);
+
+    this.add
+      .text(this.centerX, 400, '🌍 Ubuntu Value Earned', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '18px',
+        color: COLORS.textMuted,
+      })
+      .setOrigin(0.5);
+
+    this.add
+      .text(this.centerX, 440, this.letterConfig.ubuntuValue.english, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '36px',
+        fontStyle: 'bold',
+        color: COLORS.primary,
+      })
+      .setOrigin(0.5);
+
+    this.add
+      .text(this.centerX, 480, `"${this.letterConfig.ubuntuValue.description}"`, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '18px',
+        fontStyle: 'italic',
+        color: COLORS.textDark,
+        wordWrap: { width: 500 },
+        align: 'center',
+      })
+      .setOrigin(0.5);
+
+    this.add
+      .text(this.centerX, 530, `Zulu: ${this.letterConfig.ubuntuValue.zulu}`, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '16px',
+        color: COLORS.textMuted,
+      })
+      .setOrigin(0.5);
+
+    // Celebration particles
+    this.createCelebration();
+
+    // Buttons
+    const btnY = 700;
+
+    // Replay button
+    this.add
+      .text(this.centerX - 120, btnY, '🔄 Replay', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '24px',
+        fontStyle: 'bold',
+        color: COLORS.secondary,
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => {
+        this.scene.start('LetterGame', {
+          letter: this.letter,
+          difficulty: this.difficulty,
+        });
+      });
+
+    // Next letter button
+    const nextLetterIndex = LETTER_ORDER.indexOf(this.letter) + 1;
+    if (nextLetterIndex < LETTER_ORDER.length) {
+      const nextLetter = LETTER_ORDER[nextLetterIndex];
+      this.add
+        .text(this.centerX + 120, btnY, `Next: ${nextLetter} →`, {
+          fontFamily: 'Nunito, Arial, sans-serif',
+          fontSize: '24px',
+          fontStyle: 'bold',
+          color: COLORS.primary,
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+          this.scene.start('DifficultySelect', { letter: nextLetter });
+        });
+    }
+
+    // Menu button
+    this.add
+      .text(this.centerX, btnY + 60, 'Back to Menu', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '20px',
+        color: COLORS.textMuted,
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.scene.start('Menu'));
+  }
+
+  createCelebration() {
+    // Simple particle-like celebration with text emojis
+    const emojis = ['⭐', '🌟', '✨', '🎉', '🌈'];
+    
+    for (let i = 0; i < 15; i++) {
+      const emoji = Phaser.Utils.Array.GetRandom(emojis);
+      const x = Phaser.Math.Between(50, DEVICE_CONFIG.width - 50);
+      const startY = -50;
+
+      const particle = this.add
+        .text(x, startY, emoji, { fontSize: '32px' })
+        .setOrigin(0.5);
+
+      this.tweens.add({
+        targets: particle,
+        y: Phaser.Math.Between(100, DEVICE_CONFIG.height - 200),
+        x: x + Phaser.Math.Between(-100, 100),
+        angle: Phaser.Math.Between(-180, 180),
+        alpha: 0,
+        duration: Phaser.Math.Between(1500, 3000),
+        delay: i * 100,
+        ease: 'Quad.easeOut',
+        onComplete: () => particle.destroy(),
+      });
+    }
+  }
+
+  // ==================== UTILITIES ====================
+
+  clearPhase() {
+    // Remove all children except the back button
+    this.children.removeAll(true);
+    
+    // Re-add back button
+    this.backBtn = this.add
+      .text(30, 40, '← Back', {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '22px',
+        color: COLORS.primary,
+      })
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.scene.start('DifficultySelect', { letter: this.letter }));
+  }
+
+  getAnimalEmoji() {
+    const map = {
+      A: '🐜', // Aardvark (closest emoji)
+      B: '🐃', // Buffalo
+      C: '🦎', // Chameleon
+      D: '🪰', // Dragonfly (closest)
+      E: '🐘', // Elephant
+      F: '🦩', // Flamingo
+    };
+    return map[this.letter] || '🐾';
+  }
+}

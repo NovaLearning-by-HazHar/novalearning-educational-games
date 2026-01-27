@@ -1,0 +1,36 @@
+{
+  "name": "novalearning-games",
+  "version": "0.1.0",
+  "description": "NovaLearning AR-enhanced educational games for Grade R — Ubuntu philosophy meets South African culture",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/",
+    "test": "vitest"
+  },
+  "keywords": [
+    "education",
+    "phaser",
+    "south-africa",
+    "ubuntu",
+    "grade-r",
+    "ar",
+    "novalearning"
+  ],
+  "author": "Damian Hans",
+  "license": "PROPRIETARY",
+  "private": true,
+  "dependencies": {
+    "howler": "2.2.4",
+    "phaser": "3.88.2",
+    "vite": "7.3.1",
+    "vite-plugin-pwa": "1.2.0",
+    "zustand": "5.0.10"
+  },
+  "devDependencies": {
+    "eslint": "9.39.2",
+    "vitest": "4.0.18"
+  }
+}
