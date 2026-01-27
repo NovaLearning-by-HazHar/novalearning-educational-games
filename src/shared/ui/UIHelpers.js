@@ -432,46 +432,77 @@ export function screenFlash(scene, width, height, color = 0xffffff, duration = 3
 }
 
 /**
- * Create an animal placeholder that looks good
- * Colored circle with shadow, highlight, and emoji — until real sprites arrive
+ * Create an animal display — uses real sprite if loaded, falls back to styled placeholder
+ * @param {string} spriteKey - Optional sprite texture key (from letters.js animal.sprite)
  */
-export function createAnimalPlaceholder(scene, x, y, letter, colorHex, size = 180) {
+export function createAnimalPlaceholder(scene, x, y, letter, colorHex, size = 180, spriteKey = null) {
   const container = scene.add.container(0, 0);
   const color = Phaser.Display.Color.HexStringToColor(colorHex).color;
 
-  // Shadow
-  const shadow = scene.add.graphics();
-  shadow.fillStyle(0x000000, 0.15);
-  shadow.fillCircle(x + 3, y + 5, size / 2);
-  container.add(shadow);
+  // Check if real sprite is loaded
+  const hasSprite = spriteKey && scene.textures.exists(spriteKey) &&
+    scene.textures.get(spriteKey).key !== '__MISSING';
 
-  // Main circle
-  const body = scene.add.graphics();
-  body.fillStyle(color, 0.85);
-  body.fillCircle(x, y, size / 2);
-  container.add(body);
+  if (hasSprite) {
+    // === REAL SPRITE ===
+    // Shadow underneath
+    const shadow = scene.add.graphics();
+    shadow.fillStyle(0x000000, 0.12);
+    shadow.fillEllipse(x, y + size * 0.42, size * 0.7, size * 0.15);
+    container.add(shadow);
 
-  // Highlight (top-left shine)
-  const highlight = scene.add.graphics();
-  highlight.fillStyle(0xffffff, 0.25);
-  highlight.fillCircle(x - size * 0.15, y - size * 0.15, size * 0.3);
-  container.add(highlight);
+    // Sprite image — fit to size
+    const sprite = scene.add.image(x, y, spriteKey)
+      .setOrigin(0.5)
+      .setDepth(5);
 
-  // Border ring
-  const ring = scene.add.graphics();
-  ring.lineStyle(3, 0xffffff, 0.4);
-  ring.strokeCircle(x, y, size / 2);
-  container.add(ring);
+    // Scale to fit within size bounds
+    const scale = Math.min(size / sprite.width, size / sprite.height) * 0.9;
+    sprite.setScale(scale);
 
-  // Emoji
-  const emojiMap = {
-    A: '🐜', B: '🐃', C: '🦎', D: '🪰', E: '🐘', F: '🦩',
-  };
-  const emoji = emojiMap[letter] || '🐾';
-  const emojiText = scene.add.text(x, y, emoji, { fontSize: `${Math.floor(size * 0.45)}px` })
-    .setOrigin(0.5)
-    .setDepth(5);
-  container.add(emojiText);
+    container.add(sprite);
+
+    // Subtle colored ring behind
+    const ring = scene.add.graphics();
+    ring.lineStyle(3, color, 0.3);
+    ring.strokeCircle(x, y, size / 2);
+    container.add(ring);
+  } else {
+    // === PLACEHOLDER (styled circle + emoji) ===
+    // Shadow
+    const shadow = scene.add.graphics();
+    shadow.fillStyle(0x000000, 0.15);
+    shadow.fillCircle(x + 3, y + 5, size / 2);
+    container.add(shadow);
+
+    // Main circle
+    const body = scene.add.graphics();
+    body.fillStyle(color, 0.85);
+    body.fillCircle(x, y, size / 2);
+    container.add(body);
+
+    // Highlight (top-left shine)
+    const highlight = scene.add.graphics();
+    highlight.fillStyle(0xffffff, 0.25);
+    highlight.fillCircle(x - size * 0.15, y - size * 0.15, size * 0.3);
+    container.add(highlight);
+
+    // Border ring
+    const ring = scene.add.graphics();
+    ring.lineStyle(3, 0xffffff, 0.4);
+    ring.strokeCircle(x, y, size / 2);
+    container.add(ring);
+
+    // Emoji
+    const emojiMap = {
+      A: '🐜', B: '🐒', C: '🐊', D: '🦌', E: '🐘', F: '🦩',
+    };
+    const emoji = emojiMap[letter] || '🐾';
+    const emojiText = scene.add.text(x, y, emoji, { fontSize: `${Math.floor(size * 0.45)}px` })
+      .setOrigin(0.5)
+      .setDepth(5);
+    container.add(emojiText);
+  }
 
   return container;
 }

@@ -15,13 +15,18 @@
 
 ## Phase 1 Assets Needed (A-F Only)
 
-### Animals (SA themed)
-- [ ] `aardvark.png` — A
-- [ ] `buffalo.png` — B
-- [ ] `chameleon.png` — C
-- [ ] `dragonfly.png` — D
-- [ ] `elephant.png` — E
-- [ ] `flamingo.png` — F
+### Animals (SA themed) — Updated Jan 27
+- [ ] `a-aardvark.png` — A (Aardvark)
+- [ ] `b-baboon.png` — B (Baboon) ← was Buffalo
+- [ ] `c-crocodile.png` — C (Crocodile) ← was Chameleon
+- [ ] `d-duiker.png` — D (Duiker) ← was Dragonfly
+- [ ] `e-elephant.png` — E (Elephant)
+- [ ] `f-flamingo.png` — F (Flamingo)
+
+**Drop location:** `public/assets/sprites/animals/`
+**Sprite key format:** `{letter}-{animal}` (e.g., `a-aardvark`)
+**Auto-loaded:** BootScene preloads all sprite keys from letters.js
+**Fallback:** Styled placeholder circles + emojis when file not found
 
 ### Letters
 - [ ] `letter-A.png` through `letter-F.png` (uppercase, bold, child-friendly)

@@ -146,8 +146,8 @@ export class LetterGameScene extends Phaser.Scene {
       delay: 500,
     });
 
-    // Animal showcase
-    const animal = createAnimalPlaceholder(this, this.centerX, 560, this.letter, color, 160);
+    // Animal showcase (real sprite if loaded, placeholder otherwise)
+    const animal = createAnimalPlaceholder(this, this.centerX, 560, this.letter, color, 160, this.letterConfig.animal.sprite);
     animal.setDepth(8);
 
     // Animal name banner
@@ -835,7 +835,7 @@ export class LetterGameScene extends Phaser.Scene {
   // ==================== UTILITY ====================
   getAnimalEmoji() {
     const map = {
-      A: '🐜', B: '🐃', C: '🦎', D: '🪰', E: '🐘', F: '🦩',
+      A: '🐜', B: '🐒', C: '🐊', D: '🦌', E: '🐘', F: '🦩',
     };
     return map[this.letter] || '🐾';
   }

@@ -87,8 +87,8 @@ export class DifficultySelectScene extends Phaser.Scene {
       depth: 10,
     }).setAlpha(0.7);
 
-    // Animal placeholder
-    createAnimalPlaceholder(this, centerX + 100, 170, this.letter, animalColor, 130);
+    // Animal display (real sprite if loaded, placeholder otherwise)
+    createAnimalPlaceholder(this, centerX + 100, 170, this.letter, animalColor, 130, config.animal.sprite);
 
     // Animal name + Ubuntu value
     createChunkyText(this, centerX, 270, `${config.animal.name}`, {

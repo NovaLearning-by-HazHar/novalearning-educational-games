@@ -155,9 +155,9 @@ export class MenuScene extends Phaser.Scene {
       depth: 8,
     }).setAlpha(0.8);
 
-    // Animal placeholder (vibrant circle with emoji)
+    // Animal display (real sprite if loaded, placeholder otherwise)
     const animalSize = 110;
-    createAnimalPlaceholder(this, x, y + 10, letter, config.animal.color, animalSize);
+    createAnimalPlaceholder(this, x, y + 10, letter, config.animal.color, animalSize, config.animal.sprite);
 
     // Animal name
     createChunkyText(this, x, y + animalSize / 2 + 28, config.animal.name, {
