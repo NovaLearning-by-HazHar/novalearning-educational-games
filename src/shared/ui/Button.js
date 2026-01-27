@@ -112,7 +112,11 @@ export class Button {
 
   setDisabled(disabled) {
     this._disabled = disabled;
-    this.hitArea.setInteractive(!disabled);
+    if (disabled) {
+      this.hitArea.disableInteractive();
+    } else {
+      this.hitArea.setInteractive({ useHandCursor: true });
+    }
     this.container.setAlpha(disabled ? 0.5 : 1);
   }
 

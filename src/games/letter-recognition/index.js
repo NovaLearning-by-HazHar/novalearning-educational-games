@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PHASER_CONFIG } from '../../config/device.js';
+import { createPhaserConfig } from '../../config/device.js';
 import { BootScene } from '../../engine/BootScene.js';
 import { MenuScene } from './scenes/MenuScene.js';
 import { DifficultySelectScene } from './scenes/DifficultySelectScene.js';
@@ -12,7 +12,7 @@ import { LetterGameScene } from './scenes/LetterGameScene.js';
  */
 export function launchLetterGame(parentElement) {
   const config = {
-    ...PHASER_CONFIG,
+    ...createPhaserConfig(Phaser),
     parent: parentElement || 'game-container',
     scene: [BootScene, MenuScene, DifficultySelectScene, LetterGameScene],
   };

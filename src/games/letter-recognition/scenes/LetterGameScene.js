@@ -200,9 +200,19 @@ export class LetterGameScene extends Phaser.Scene {
       });
     });
 
-    // Tap anywhere to proceed
-    this.input.once('pointerdown', () => {
-      this.time.delayedCall(200, () => this.showTracing());
+    // Tap zone covering the content area (below back button) to proceed
+    // Using a zone instead of global input.once to avoid capturing back button taps
+    this.time.delayedCall(1500, () => {
+      const { width, height } = DEVICE_CONFIG;
+      const tapZone = this.add
+        .rectangle(width / 2, height / 2 + 40, width, height - 80)
+        .setInteractive({ useHandCursor: true })
+        .setAlpha(0.001);
+
+      tapZone.once('pointerdown', () => {
+        tapZone.destroy();
+        this.time.delayedCall(200, () => this.showTracing());
+      });
     });
   }
 
@@ -234,37 +244,44 @@ export class LetterGameScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setAlpha(0.15);
 
-    // Drawing surface
+    // Drawing surface — use a hit zone so tracing doesn't conflict with back/skip buttons
     this.traceGraphics = this.add.graphics();
     this.traceGraphics.lineStyle(12, Phaser.Display.Color.HexStringToColor(this.letterConfig.animal.color).color, 1);
 
     this.isDrawing = false;
     this.tracePoints = [];
 
-    // Track touch/mouse input for drawing
-    this.input.on('pointerdown', (pointer) => {
+    // Invisible drawing zone (centered, below header, above hints)
+    const drawZone = this.add
+      .rectangle(DEVICE_CONFIG.width / 2, 450, DEVICE_CONFIG.width - 40, 500)
+      .setInteractive()
+      .setAlpha(0.001);
+
+    // Track touch/mouse input for drawing within the zone
+    this._onTraceDown = (pointer) => {
       this.isDrawing = true;
       this.tracePoints = [{ x: pointer.x, y: pointer.y }];
       this.traceGraphics.beginPath();
       this.traceGraphics.moveTo(pointer.x, pointer.y);
-    });
-
-    this.input.on('pointermove', (pointer) => {
+    };
+    this._onTraceMove = (pointer) => {
       if (!this.isDrawing) return;
       this.tracePoints.push({ x: pointer.x, y: pointer.y });
       this.traceGraphics.lineTo(pointer.x, pointer.y);
       this.traceGraphics.strokePath();
       this.traceGraphics.beginPath();
       this.traceGraphics.moveTo(pointer.x, pointer.y);
-    });
-
-    this.input.on('pointerup', () => {
+    };
+    this._onTraceUp = () => {
       this.isDrawing = false;
-      // Simple validation: did they draw enough?
       if (this.tracePoints.length > 20) {
         this.onTraceComplete();
       }
-    });
+    };
+
+    this.input.on('pointerdown', this._onTraceDown);
+    this.input.on('pointermove', this._onTraceMove);
+    this.input.on('pointerup', this._onTraceUp);
 
     // Hint: show trace path in guided mode
     if (this.diffConfig.showHints) {
@@ -294,8 +311,10 @@ export class LetterGameScene extends Phaser.Scene {
     // Celebrate the trace
     this.score += 10;
     
-    // Remove input listeners for tracing
-    this.input.removeAllListeners();
+    // Remove only tracing input listeners (not all listeners)
+    this.input.off('pointerdown', this._onTraceDown);
+    this.input.off('pointermove', this._onTraceMove);
+    this.input.off('pointerup', this._onTraceUp);
 
     // Show success feedback
     const feedback = this.add
