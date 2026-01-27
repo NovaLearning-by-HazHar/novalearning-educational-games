@@ -31,15 +31,17 @@ export class BootScene extends Phaser.Scene {
     const centerY = height / 2;
 
     // Background
-    this.cameras.main.setBackgroundColor(COLORS.bgWarm);
+    this.cameras.main.setBackgroundColor(COLORS.bgCream || '#FEF7EC');
 
     // "NovaLearning" text
     this.add
       .text(centerX, centerY - 100, 'NovaLearning', {
-        fontFamily: 'Nunito, Arial, sans-serif',
+        fontFamily: 'Fredoka One, Nunito, Arial, sans-serif',
         fontSize: '48px',
         fontStyle: 'bold',
         color: COLORS.primary,
+        stroke: '#7C2D12',
+        strokeThickness: 3,
       })
       .setOrigin(0.5);
 

@@ -5,11 +5,12 @@ import { DIFFICULTY, DIFFICULTY_ORDER } from '../../../config/difficulty.js';
 import { getLetterConfig } from '../../../config/letters.js';
 import { gameStore } from '../../../state/gameStore.js';
 import {
-  createGradientBackground,
+  createThemedBackground,
   createFloatingDecor,
   createChunkyText,
   createGameButton,
-  createAnimalPlaceholder,
+  createAnimalDisplay,
+  createBackButton,
   drawCard,
 } from '../../../shared/ui/UIHelpers.js';
 
@@ -33,28 +34,16 @@ export class DifficultySelectScene extends Phaser.Scene {
     const animalColor = config.animal.color;
 
     // === BACKGROUND ===
-    createGradientBackground(this, width, height, '#E8F4E8', '#FFE8A0');
+    createThemedBackground(this, 'jungle');
 
-    createFloatingDecor(this, width, height, {
+    createFloatingDecor(this, {
       emojis: ['🌿', '🍃', '✨', '🌻'],
       count: 6,
       depth: -10,
     });
 
-    // === BACK BUTTON (padded 64px hit area) ===
-    createChunkyText(this, 60, 40, '← Back', {
-      fontSize: '22px',
-      color: '#FFFFFF',
-      strokeColor: '#2D9B4E',
-      strokeThickness: 4,
-      depth: 20,
-    });
-
-    this.add.rectangle(60, 40, 140, 64)
-      .setInteractive({ useHandCursor: true })
-      .setAlpha(0.001)
-      .setDepth(21)
-      .on('pointerdown', () => this.scene.start('Menu'));
+    // === BACK BUTTON ===
+    createBackButton(this, () => this.scene.start('Menu'));
 
     // === LETTER HERO SECTION ===
     // Big card showing the letter + animal
@@ -88,7 +77,7 @@ export class DifficultySelectScene extends Phaser.Scene {
     }).setAlpha(0.7);
 
     // Animal display (real sprite if loaded, placeholder otherwise)
-    createAnimalPlaceholder(this, centerX + 100, 170, this.letter, animalColor, 130, config.animal.sprite);
+    createAnimalDisplay(this, centerX + 100, 170, this.letter, animalColor, 130, config.animal.sprite);
 
     // Animal name + Ubuntu value
     createChunkyText(this, centerX, 270, `${config.animal.name}`, {
@@ -134,9 +123,9 @@ export class DifficultySelectScene extends Phaser.Scene {
     const buttonSpacing = 95;
 
     const difficultyStyles = {
-      guided: { color: 0x2D9B4E, icon: '🌱', label: 'Guided' },
-      assisted: { color: 0xE8A317, icon: '🌿', label: 'Assisted' },
-      independent: { color: 0xD94B2B, icon: '🌳', label: 'Independent' },
+      guided: { color: 0x4ADE80, icon: '🌱', label: 'Guided' },
+      assisted: { color: 0xFB923C, icon: '🌿', label: 'Assisted' },
+      independent: { color: 0x38BDF8, icon: '🌳', label: 'Independent' },
     };
 
     DIFFICULTY_ORDER.forEach((diffId, index) => {

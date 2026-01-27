@@ -1,15 +1,16 @@
 import Phaser from 'phaser';
-import { COLORS, SIZES, ANIMATIONS } from '../../../config/theme.js';
+import { COLORS, SIZES, NOVA } from '../../../config/theme.js';
 import { DEVICE_CONFIG } from '../../../config/device.js';
 import { LETTER_ORDER, getLetterConfig } from '../../../config/letters.js';
 import { gameStore } from '../../../state/gameStore.js';
 import {
-  createGradientBackground,
+  createThemedBackground,
   createFloatingDecor,
   createBanner,
   createChunkyText,
   drawCard,
-  createAnimalPlaceholder,
+  createAnimalDisplay,
+  drawStar,
 } from '../../../shared/ui/UIHelpers.js';
 
 /**
@@ -27,11 +28,9 @@ export class MenuScene extends Phaser.Scene {
     const centerX = width / 2;
 
     // === BACKGROUND ===
-    // Rich gradient (African sunset feel — warm gold to deep green)
-    createGradientBackground(this, width, height, '#FFE8A0', '#A8D5A2');
+    createThemedBackground(this, 'safari');
 
-    // Floating decorative elements
-    createFloatingDecor(this, width, height, {
+    createFloatingDecor(this, {
       emojis: ['🌿', '🍃', '✨', '🌻', '🦋'],
       count: 10,
       depth: -10,
@@ -39,7 +38,7 @@ export class MenuScene extends Phaser.Scene {
 
     // === HEADER BANNER ===
     createBanner(this, centerX, 55, 500, 'NovaLearning', {
-      bgColor: 0x2D9B4E,
+      bgColor: 0xFB923C,
       fontSize: '36px',
       height: 56,
     });
@@ -47,7 +46,7 @@ export class MenuScene extends Phaser.Scene {
     // Subtitle
     createChunkyText(this, centerX, 105, '🌍 Choose Your Letter!', {
       fontSize: '22px',
-      color: '#4A3728',
+      color: COLORS.textDark,
       strokeColor: '#FFFFFF',
       strokeThickness: 3,
       shadowOffsetY: 2,
@@ -157,7 +156,7 @@ export class MenuScene extends Phaser.Scene {
 
     // Animal display (real sprite if loaded, placeholder otherwise)
     const animalSize = 110;
-    createAnimalPlaceholder(this, x, y + 10, letter, config.animal.color, animalSize, config.animal.sprite);
+    createAnimalDisplay(this, x, y + 10, letter, config.animal.color, animalSize, config.animal.sprite);
 
     // Animal name
     createChunkyText(this, x, y + animalSize / 2 + 28, config.animal.name, {
@@ -203,39 +202,23 @@ export class MenuScene extends Phaser.Scene {
   }
 
   createCardStars(x, y, earned, total) {
-    const starSize = 18;
-    const spacing = starSize + 2;
-    const visibleStars = Math.min(total, 9); // Show max 9
+    const starSize = 20;
+    const spacing = starSize + 4;
+    const visibleStars = Math.min(total, 9);
     const startX = x - ((visibleStars - 1) * spacing) / 2;
 
     for (let i = 0; i < visibleStars; i++) {
       const sx = startX + i * spacing;
       const filled = i < earned;
 
-      // Star shadow
-      if (filled) {
-        const glow = this.add.graphics().setDepth(7);
-        glow.fillStyle(0xFFD700, 0.3);
-        glow.fillCircle(sx, y, starSize * 0.6);
-      }
-
-      const star = this.add.text(sx, y, filled ? '⭐' : '☆', {
-        fontSize: `${starSize}px`,
-        color: filled ? '#FFD700' : '#CCC',
-      }).setOrigin(0.5).setDepth(8);
-
-      if (filled) {
-        // Subtle shine animation on earned stars
-        this.tweens.add({
-          targets: star,
-          scale: 1.1,
-          duration: 1200,
-          yoyo: true,
-          repeat: -1,
-          delay: i * 150,
-          ease: 'Sine.easeInOut',
-        });
-      }
+      drawStar(this, sx, y, starSize, {
+        fillColor: filled ? 0xFACC15 : 0xE5E7EB,
+        strokeColor: filled ? 0xCA8A04 : 0x9CA3AF,
+        strokeWidth: 1,
+        glow: filled,
+        glowAlpha: 0.2,
+        depth: 8,
+      });
     }
   }
 

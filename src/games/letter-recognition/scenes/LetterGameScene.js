@@ -7,15 +7,18 @@ import { gameStore } from '../../../state/gameStore.js';
 import { audioManager } from '../../../state/audioManager.js';
 import { StarDisplay } from '../../../shared/ui/StarDisplay.js';
 import {
-  createGradientBackground,
+  createThemedBackground,
   createFloatingDecor,
   createChunkyText,
   createGameButton,
-  createAnimalPlaceholder,
+  createAnimalDisplay,
   drawCard,
   createBurstEffect,
+  createConfetti,
   screenFlash,
   createBanner,
+  createBackButton,
+  createPhaseIndicator,
 } from '../../../shared/ui/UIHelpers.js';
 
 /**
@@ -56,29 +59,10 @@ export class LetterGameScene extends Phaser.Scene {
 
   // ==================== SHARED UI ====================
 
-  setupBackground(gradientTop = '#E8F4E8', gradientBottom = '#FFE8A0') {
-    createGradientBackground(this, this.sceneWidth, this.sceneHeight, gradientTop, gradientBottom);
-    this.decor = createFloatingDecor(this, this.sceneWidth, this.sceneHeight, {
-      emojis: ['🌿', '🍃', '✨'],
-      count: 5,
-      depth: -10,
-    });
-  }
-
-  setupBackButton() {
-    createChunkyText(this, 60, 40, '← Back', {
-      fontSize: '22px',
-      color: '#FFFFFF',
-      strokeColor: '#2D9B4E',
-      strokeThickness: 4,
-      depth: 50,
-    });
-
-    this.add.rectangle(60, 40, 140, 64)
-      .setInteractive({ useHandCursor: true })
-      .setAlpha(0.001)
-      .setDepth(51)
-      .on('pointerdown', () => this.scene.start('DifficultySelect', { letter: this.letter }));
+  setupScene(themeName = 'safari') {
+    createThemedBackground(this, themeName);
+    createFloatingDecor(this, { emojis: ['🌿', '🍃', '✨'], count: 5, depth: -10 });
+    createBackButton(this, () => this.scene.start('DifficultySelect', { letter: this.letter }));
   }
 
   // ==================== PHASE 1: INTRODUCTION ====================
@@ -87,12 +71,8 @@ export class LetterGameScene extends Phaser.Scene {
     this.children.removeAll(true);
 
     const color = this.letterConfig.animal.color;
-    // Richer gradient using the animal's color palette
-    this.setupBackground('#FFF8E7', '#E8F4E8');
-    this.setupBackButton();
-
-    // Phase indicator dots
-    this.createPhaseIndicator(1);
+    this.setupScene('safari');
+    createPhaseIndicator(this, 1);
 
     // === CINEMATIC LETTER REVEAL ===
 
@@ -147,7 +127,7 @@ export class LetterGameScene extends Phaser.Scene {
     });
 
     // Animal showcase (real sprite if loaded, placeholder otherwise)
-    const animal = createAnimalPlaceholder(this, this.centerX, 560, this.letter, color, 160, this.letterConfig.animal.sprite);
+    const animal = createAnimalDisplay(this, this.centerX, 560, this.letter, color, 160, this.letterConfig.animal.sprite);
     animal.setDepth(8);
 
     // Animal name banner
@@ -199,8 +179,10 @@ export class LetterGameScene extends Phaser.Scene {
       const continueBtn = createGameButton(this, this.centerX, 900, 'Let\'s Go!', {
         width: 280,
         height: 70,
-        bgColor: 0x2D9B4E,
-        fontSize: '28px',
+        gradientTop: 0xFB923C,
+        gradientBottom: 0xEA580C,
+        shadowColor: 0x7C2D12,
+        fontSize: 28,
         icon: '▶',
         depth: 15,
         onClick: () => this.showTracing(),
@@ -224,9 +206,8 @@ export class LetterGameScene extends Phaser.Scene {
     this.phase = 'trace';
     this.children.removeAll(true);
 
-    this.setupBackground('#FFF8E7', '#FFE8D0');
-    this.setupBackButton();
-    this.createPhaseIndicator(2);
+    this.setupScene('safari');
+    createPhaseIndicator(this, 2);
 
     // Header
     createBanner(this, this.centerX, 80, 400, 'Trace the Letter!', {
@@ -409,9 +390,8 @@ export class LetterGameScene extends Phaser.Scene {
     this.phase = 'match';
     this.children.removeAll(true);
 
-    this.setupBackground('#E8F0FF', '#FFE8A0');
-    this.setupBackButton();
-    this.createPhaseIndicator(3);
+    this.setupScene('sky');
+    createPhaseIndicator(this, 3);
 
     // Header
     createBanner(this, this.centerX, 80, 450, `Find the letter ${this.letter}!`, {
@@ -640,7 +620,7 @@ export class LetterGameScene extends Phaser.Scene {
     this.children.removeAll(true);
 
     // Celebration gradient
-    this.setupBackground('#FFE8A0', '#A8D5A2');
+    createThemedBackground(this, 'celebration');
 
     const { width, height } = DEVICE_CONFIG;
 
@@ -743,8 +723,8 @@ export class LetterGameScene extends Phaser.Scene {
     createGameButton(this, this.centerX - 130, btnY, 'Replay', {
       width: 200,
       height: 64,
-      bgColor: 0xE8A317,
-      fontSize: '22px',
+      preset: 'secondary',
+      fontSize: 22,
       icon: '🔄',
       depth: 20,
       onClick: () => {
@@ -762,8 +742,8 @@ export class LetterGameScene extends Phaser.Scene {
       createGameButton(this, this.centerX + 130, btnY, `Next: ${nextLetter}`, {
         width: 200,
         height: 64,
-        bgColor: 0x2D9B4E,
-        fontSize: '22px',
+        preset: 'success',
+        fontSize: 22,
         icon: '→',
         depth: 20,
         onClick: () => this.scene.start('DifficultySelect', { letter: nextLetter }),
@@ -774,62 +754,32 @@ export class LetterGameScene extends Phaser.Scene {
     createGameButton(this, this.centerX, btnY + 80, 'Back to Menu', {
       width: 250,
       height: 56,
-      bgColor: 0x8B7355,
-      fontSize: '20px',
+      preset: 'small',
+      fontSize: 20,
       depth: 20,
       onClick: () => this.scene.start('Menu'),
     });
   }
 
   createCelebration() {
-    // Multi-wave burst
-    createBurstEffect(this, this.centerX, 200, {
-      count: 25,
-      emojis: ['⭐', '🌟', '✨', '🎉', '💫', '🌈', '🎊'],
+    // Confetti burst (real colored shapes)
+    createConfetti(this, this.centerX, 100, {
+      count: 35,
       spread: 400,
       duration: 3000,
     });
 
-    // Second wave delayed
-    this.time.delayedCall(300, () => {
+    // Emoji burst overlay
+    this.time.delayedCall(200, () => {
       createBurstEffect(this, this.centerX, 200, {
-        count: 15,
-        emojis: ['⭐', '✨', '💛'],
-        spread: 250,
+        count: 12,
+        emojis: ['⭐', '🌟', '✨', '🎉'],
+        spread: 300,
         duration: 2500,
       });
     });
 
-    screenFlash(this, this.sceneWidth, this.sceneHeight, 0xFFD700, 400);
-  }
-
-  // ==================== PHASE INDICATOR ====================
-  createPhaseIndicator(currentPhase) {
-    const phases = ['Intro', 'Trace', 'Match', 'Done'];
-    const dotSpacing = 50;
-    const startX = this.centerX - ((phases.length - 1) * dotSpacing) / 2;
-    const y = this.sceneHeight - 30;
-
-    phases.forEach((label, i) => {
-      const x = startX + i * dotSpacing;
-      const isActive = i + 1 === currentPhase;
-      const isPast = i + 1 < currentPhase;
-
-      const dot = this.add.graphics().setDepth(40);
-      if (isActive) {
-        dot.fillStyle(0x2D9B4E, 1);
-        dot.fillCircle(x, y, 8);
-        // Glow
-        dot.fillStyle(0x2D9B4E, 0.3);
-        dot.fillCircle(x, y, 12);
-      } else if (isPast) {
-        dot.fillStyle(0x2D9B4E, 0.6);
-        dot.fillCircle(x, y, 6);
-      } else {
-        dot.fillStyle(0xCCCCCC, 0.5);
-        dot.fillCircle(x, y, 6);
-      }
-    });
+    screenFlash(this, 0xFACC15, 400);
   }
 
   // ==================== UTILITY ====================
