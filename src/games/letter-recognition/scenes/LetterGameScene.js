@@ -280,8 +280,12 @@ export class LetterGameScene extends Phaser.Scene {
     };
     this._onTraceUp = () => {
       this.isDrawing = false;
-      if (this.tracePoints.length > 20) {
+      // Validate: enough points AND roughly covered the ghost letter area
+      if (this.tracePoints.length > 15 && this.validateTrace()) {
         this.onTraceComplete();
+      } else if (this.tracePoints.length > 5) {
+        // Some effort but not enough — encourage
+        this.showTraceHint('Keep going! Trace the whole letter.');
       }
     };
 
@@ -311,6 +315,62 @@ export class LetterGameScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.onTraceComplete());
+  }
+
+  /**
+   * Validate trace quality — did the child draw in roughly the right area?
+   * Not checking letter accuracy (too hard for MVP), just coverage.
+   */
+  validateTrace() {
+    if (this.tracePoints.length < 15) return false;
+
+    // Ghost letter is centered at (this.centerX, 450), ~300px font = ~240px actual
+    // Check: did the trace points overlap the letter's bounding area?
+    const letterBounds = {
+      minX: this.centerX - 120,
+      maxX: this.centerX + 120,
+      minY: 450 - 140,
+      maxY: 450 + 140,
+    };
+
+    const pointsInBounds = this.tracePoints.filter(
+      (p) =>
+        p.x >= letterBounds.minX &&
+        p.x <= letterBounds.maxX &&
+        p.y >= letterBounds.minY &&
+        p.y <= letterBounds.maxY
+    );
+
+    // At least 40% of points should be in the letter area
+    return pointsInBounds.length / this.tracePoints.length >= 0.4;
+  }
+
+  /**
+   * Show encouraging hint when trace attempt wasn't quite right
+   */
+  showTraceHint(message) {
+    // Remove existing hint if any
+    if (this._traceHintText) this._traceHintText.destroy();
+
+    this._traceHintText = this.add
+      .text(this.centerX, 750, message, {
+        fontFamily: 'Nunito, Arial, sans-serif',
+        fontSize: '20px',
+        color: COLORS.secondary,
+        align: 'center',
+      })
+      .setOrigin(0.5);
+
+    this.tweens.add({
+      targets: this._traceHintText,
+      alpha: 0,
+      duration: 800,
+      delay: 2000,
+      onComplete: () => {
+        if (this._traceHintText) this._traceHintText.destroy();
+        this._traceHintText = null;
+      },
+    });
   }
 
   onTraceComplete() {
@@ -366,11 +426,14 @@ export class LetterGameScene extends Phaser.Scene {
     const shuffled = Phaser.Utils.Array.Shuffle([...options]);
 
     // Show as grid of big tappable letters
+    // Adaptive grid: 3 columns, rows depend on option count
     const cols = 3;
-    const cardSize = 160;
+    const cardSize = 160; // 160px well above 64px minimum for kids
     const gap = 30;
     const startX = this.centerX - ((cols - 1) * (cardSize + gap)) / 2;
-    const startY = 350;
+    const rows = Math.ceil(shuffled.length / cols);
+    const totalGridHeight = rows * (cardSize + gap) - gap;
+    const startY = 350 + (DEVICE_CONFIG.height - 350 - 200 - totalGridHeight) / 2; // Center vertically in available space
 
     this.matchAttempts = 0;
 
@@ -412,24 +475,55 @@ export class LetterGameScene extends Phaser.Scene {
       });
     });
 
-    // Hint for guided
+    // Hint for guided mode — subtle glow on correct answers after 5 seconds
     if (this.diffConfig.showHints) {
-      this.time.delayedCall(3000, () => {
-        // Highlight the correct answer after 3 seconds
-        // (In a real version, add a subtle glow)
+      this._hintTimer = this.time.delayedCall(5000, () => {
+        // Find all correct option cards and pulse them
+        this.children.each((child) => {
+          if (child.type === 'Text' && child.style &&
+              (child.text === this.letter || child.text === this.letterConfig.lower)) {
+            this.tweens.add({
+              targets: child,
+              scale: 1.15,
+              duration: 600,
+              yoyo: true,
+              repeat: 2,
+              ease: 'Sine.easeInOut',
+            });
+          }
+        });
       });
     }
   }
 
   generateOptions() {
-    const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const distractors = allLetters
-      .filter((l) => l !== this.letter)
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 4);
+    // Visually similar letters for meaningful distractors (Grade R appropriate)
+    const similarLetters = {
+      A: ['H', 'V', 'M', 'N', 'W'],
+      B: ['D', 'P', 'R', 'E', 'G'],
+      C: ['G', 'O', 'Q', 'U', 'S'],
+      D: ['B', 'P', 'O', 'Q', 'G'],
+      E: ['F', 'B', 'L', 'T', 'H'],
+      F: ['E', 'T', 'P', 'L', 'I'],
+    };
 
-    // Mix of upper and lower case for the correct answer
-    return [this.letter, this.letterConfig.lower, ...distractors.slice(0, 4)];
+    const pool = similarLetters[this.letter] || 'GHIJKLMNOPQRSTUVWXYZ'.split('');
+    const shuffledPool = Phaser.Utils.Array.Shuffle([...pool]);
+    
+    // Pick distractors based on difficulty
+    let numDistractors;
+    if (this.difficulty === 'guided') {
+      numDistractors = 3; // 5 total (2 correct + 3 wrong) — easier
+    } else if (this.difficulty === 'assisted') {
+      numDistractors = 4; // 6 total
+    } else {
+      numDistractors = 4; // 6 total, but visually harder
+    }
+
+    const distractors = shuffledPool.slice(0, numDistractors);
+
+    // Include both upper and lower case of the correct letter
+    return [this.letter, this.letterConfig.lower, ...distractors];
   }
 
   onCorrectMatch(card, letterText, x, y, cardSize) {
@@ -479,10 +573,12 @@ export class LetterGameScene extends Phaser.Scene {
     this.matchAttempts += 1;
     audioManager.playFeedback('wrong');
 
-    // Red shake
+    // Red shake + disable this card so it can't be tapped again
     card.clear();
     card.fillStyle(Phaser.Display.Color.HexStringToColor(COLORS.error).color, 0.1);
     card.fillRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
+
+    letterText.setAlpha(0.3); // Fade wrong answer
 
     this.tweens.add({
       targets: letterText,
