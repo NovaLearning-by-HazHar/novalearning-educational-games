@@ -4,11 +4,18 @@ import { DEVICE_CONFIG } from '../../../config/device.js';
 import { DIFFICULTY, DIFFICULTY_ORDER } from '../../../config/difficulty.js';
 import { getLetterConfig } from '../../../config/letters.js';
 import { gameStore } from '../../../state/gameStore.js';
-import { Button } from '../../../shared/ui/Button.js';
+import {
+  createGradientBackground,
+  createFloatingDecor,
+  createChunkyText,
+  createGameButton,
+  createAnimalPlaceholder,
+  drawCard,
+} from '../../../shared/ui/UIHelpers.js';
 
 /**
  * Difficulty Select Scene — Choose Guided / Assisted / Independent
- * Shows which levels are unlocked based on star progress
+ * Game-quality design with depth, animation, and rich visuals
  */
 export class DifficultySelectScene extends Phaser.Scene {
   constructor() {
@@ -23,126 +30,151 @@ export class DifficultySelectScene extends Phaser.Scene {
     const { width, height } = DEVICE_CONFIG;
     const centerX = width / 2;
     const config = getLetterConfig(this.letter);
+    const animalColor = config.animal.color;
 
-    this.cameras.main.setBackgroundColor(COLORS.bgWarm);
+    // === BACKGROUND ===
+    createGradientBackground(this, width, height, '#E8F4E8', '#FFE8A0');
 
-    // Back button with padded hit area (64px min for kids)
-    this.add
-      .text(30, 40, '← Back', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '22px',
-        color: COLORS.primary,
-        padding: { x: 16, y: 12 },
-      })
-      .setInteractive({ useHandCursor: true, hitArea: new Phaser.Geom.Rectangle(-10, -10, 140, 64), hitAreaCallback: Phaser.Geom.Rectangle.Contains })
+    createFloatingDecor(this, width, height, {
+      emojis: ['🌿', '🍃', '✨', '🌻'],
+      count: 6,
+      depth: -10,
+    });
+
+    // === BACK BUTTON (padded 64px hit area) ===
+    createChunkyText(this, 60, 40, '← Back', {
+      fontSize: '22px',
+      color: '#FFFFFF',
+      strokeColor: '#2D9B4E',
+      strokeThickness: 4,
+      depth: 20,
+    });
+
+    this.add.rectangle(60, 40, 140, 64)
+      .setInteractive({ useHandCursor: true })
+      .setAlpha(0.001)
+      .setDepth(21)
       .on('pointerdown', () => this.scene.start('Menu'));
 
-    // Letter display
-    this.add
-      .text(centerX, 100, this.letter, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '120px',
-        fontStyle: 'bold',
-        color: config.animal.color,
-      })
-      .setOrigin(0.5);
+    // === LETTER HERO SECTION ===
+    // Big card showing the letter + animal
+    const heroCard = drawCard(this, centerX, 190, width - 60, 280, {
+      fillColor: 0xFFFFF5,
+      radius: 28,
+      shadowAlpha: 0.2,
+      shadowOffsetY: 8,
+      strokeColor: Phaser.Display.Color.HexStringToColor(animalColor).color,
+      strokeWidth: 3,
+      depth: 5,
+    });
 
-    this.add
-      .text(centerX, 190, `${config.animal.name} — ${config.ubuntuValue.english}`, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '22px',
-        color: COLORS.textDark,
-      })
-      .setOrigin(0.5);
+    // Giant letter
+    createChunkyText(this, centerX - 120, 160, this.letter, {
+      fontSize: '140px',
+      color: animalColor,
+      strokeColor: '#FFFFFF',
+      strokeThickness: 6,
+      shadowOffsetY: 5,
+      depth: 10,
+    });
 
-    // Ubuntu value description
-    this.add
-      .text(centerX, 225, config.ubuntuValue.description, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '16px',
-        fontStyle: 'italic',
-        color: COLORS.textMuted,
-        wordWrap: { width: width - 80 },
-        align: 'center',
-      })
-      .setOrigin(0.5);
+    // Lowercase
+    createChunkyText(this, centerX - 40, 200, config.lower, {
+      fontSize: '60px',
+      color: animalColor,
+      strokeColor: '#FFFFFF',
+      strokeThickness: 4,
+      depth: 10,
+    }).setAlpha(0.7);
 
-    // Difficulty buttons
-    this.createDifficultyButtons(centerX, 340);
+    // Animal placeholder
+    createAnimalPlaceholder(this, centerX + 100, 170, this.letter, animalColor, 130);
 
-    // Animal fact
-    this.add
-      .text(centerX, height - 120, `💡 ${config.animal.fact}`, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '14px',
-        color: COLORS.textMuted,
-        wordWrap: { width: width - 60 },
-        align: 'center',
-      })
-      .setOrigin(0.5);
+    // Animal name + Ubuntu value
+    createChunkyText(this, centerX, 270, `${config.animal.name}`, {
+      fontSize: '24px',
+      color: '#4A3728',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 3,
+      depth: 10,
+    });
+
+    this.add.text(centerX, 300, `"${config.ubuntuValue.description}"`, {
+      fontFamily: 'Nunito, Arial, sans-serif',
+      fontSize: '15px',
+      fontStyle: 'italic',
+      color: COLORS.textMuted,
+      wordWrap: { width: width - 100 },
+      align: 'center',
+    }).setOrigin(0.5).setDepth(10);
+
+    // === DIFFICULTY BUTTONS ===
+    this.createDifficultyButtons(centerX, 400);
+
+    // === ANIMAL FACT ===
+    const factCard = drawCard(this, centerX, height - 90, width - 40, 100, {
+      fillColor: 0x2D9B4E,
+      fillAlpha: 0.1,
+      radius: 16,
+      shadowAlpha: 0,
+      depth: 5,
+    });
+
+    this.add.text(centerX, height - 90, `💡 ${config.animal.fact}`, {
+      fontFamily: 'Nunito, Arial, sans-serif',
+      fontSize: '13px',
+      color: COLORS.textMuted,
+      wordWrap: { width: width - 80 },
+      align: 'center',
+    }).setOrigin(0.5).setDepth(10);
   }
 
   createDifficultyButtons(centerX, startY) {
     const state = gameStore.getState();
-    const buttonSpacing = 120;
+    const buttonSpacing = 95;
 
-    const difficultyColors = {
-      guided: COLORS.primary,
-      assisted: COLORS.secondary,
-      independent: COLORS.accent,
-    };
-
-    const difficultyEmojis = {
-      guided: '🌱',
-      assisted: '🌿',
-      independent: '🌳',
+    const difficultyStyles = {
+      guided: { color: 0x2D9B4E, icon: '🌱', label: 'Guided' },
+      assisted: { color: 0xE8A317, icon: '🌿', label: 'Assisted' },
+      independent: { color: 0xD94B2B, icon: '🌳', label: 'Independent' },
     };
 
     DIFFICULTY_ORDER.forEach((diffId, index) => {
-      const diff = Object.values(DIFFICULTY).find((d) => d.id === diffId);
+      const style = difficultyStyles[diffId];
       const y = startY + index * buttonSpacing;
       const isUnlocked = state.isLevelUnlocked(this.letter, diffId);
       const progress = state.letterProgress[this.letter]?.[diffId];
 
-      // Button
-      const btn = new Button(this, centerX, y, `${difficultyEmojis[diffId]} ${diff.label}`, {
-        width: 400,
-        height: 80,
-        bgColor: isUnlocked ? difficultyColors[diffId] : '#CCCCCC',
-        fontSize: '28px',
-        onClick: () => {
-          if (!isUnlocked) return;
+      const btn = createGameButton(this, centerX, y, style.label, {
+        width: 420,
+        height: 72,
+        bgColor: isUnlocked ? style.color : 0x999999,
+        fontSize: '26px',
+        icon: isUnlocked ? style.icon : '🔒',
+        depth: 10,
+        onClick: isUnlocked ? () => {
           gameStore.getState().setCurrentDifficulty(diffId);
           this.scene.start('LetterGame', {
             letter: this.letter,
             difficulty: diffId,
           });
-        },
+        } : null,
       });
 
       if (!isUnlocked) {
-        btn.setDisabled(true);
+        btn.setEnabled(false);
       }
 
       // Stars for this difficulty
-      if (progress) {
-        const stars = '★'.repeat(progress.stars) + '☆'.repeat(3 - progress.stars);
-        this.add
-          .text(centerX, y + 45, stars, {
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '20px',
-            color: isUnlocked ? COLORS.star : '#CCCCCC',
-          })
-          .setOrigin(0.5);
-      }
-
-      // Lock icon for locked levels
-      if (!isUnlocked) {
-        this.add
-          .text(centerX + 220, y, '🔒', {
-            fontSize: '24px',
-          })
-          .setOrigin(0.5);
+      if (progress && progress.stars > 0) {
+        const starsText = '⭐'.repeat(progress.stars) + '☆'.repeat(3 - progress.stars);
+        createChunkyText(this, centerX, y + 42, starsText, {
+          fontSize: '16px',
+          color: '#FFD700',
+          strokeColor: '#4A3728',
+          strokeThickness: 2,
+          depth: 11,
+        });
       }
     });
   }

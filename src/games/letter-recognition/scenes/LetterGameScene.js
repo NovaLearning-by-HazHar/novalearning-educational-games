@@ -6,15 +6,26 @@ import { getDifficulty } from '../../../config/difficulty.js';
 import { gameStore } from '../../../state/gameStore.js';
 import { audioManager } from '../../../state/audioManager.js';
 import { StarDisplay } from '../../../shared/ui/StarDisplay.js';
+import {
+  createGradientBackground,
+  createFloatingDecor,
+  createChunkyText,
+  createGameButton,
+  createAnimalPlaceholder,
+  drawCard,
+  createBurstEffect,
+  screenFlash,
+  createBanner,
+} from '../../../shared/ui/UIHelpers.js';
 
 /**
- * Letter Game Scene — Core gameplay
- * 
+ * Letter Game Scene — Core gameplay (redesigned with game-quality visuals)
+ *
  * Flow:
- * 1. Letter Introduction — Show the letter big + animal + audio
- * 2. Letter Tracing — Trace the letter shape (simplified for MVP)
- * 3. Letter Matching — Find the correct letter among options
- * 4. Results — Stars, Ubuntu value reveal, celebration
+ * 1. Letter Introduction — Cinematic reveal with animal + audio
+ * 2. Letter Tracing — Draw over the ghost letter
+ * 3. Letter Matching — Find correct letter among rich card options
+ * 4. Results — Celebration, stars, Ubuntu value reveal
  */
 export class LetterGameScene extends Phaser.Scene {
   constructor() {
@@ -26,198 +37,184 @@ export class LetterGameScene extends Phaser.Scene {
     this.difficulty = data.difficulty;
     this.letterConfig = getLetterConfig(this.letter);
     this.diffConfig = getDifficulty(this.difficulty);
-    
+
     this.score = 0;
     this.mistakes = 0;
-    this.phase = 'intro'; // intro → trace → match → results
+    this.phase = 'intro';
   }
 
   create() {
     const { width, height } = DEVICE_CONFIG;
     this.centerX = width / 2;
     this.centerY = height / 2;
+    this.sceneWidth = width;
+    this.sceneHeight = height;
 
-    this.cameras.main.setBackgroundColor(COLORS.bgWarm);
-
-    // Back button with padded hit area (64px min for kids)
-    this.backBtn = this.add
-      .text(30, 40, '← Back', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '22px',
-        color: COLORS.primary,
-        padding: { x: 16, y: 12 },
-      })
-      .setInteractive({ useHandCursor: true, hitArea: new Phaser.Geom.Rectangle(-10, -10, 140, 64), hitAreaCallback: Phaser.Geom.Rectangle.Contains })
-      .on('pointerdown', () => this.scene.start('DifficultySelect', { letter: this.letter }));
-
-    // Start with intro phase
+    // Start with intro
     this.showIntro();
+  }
+
+  // ==================== SHARED UI ====================
+
+  setupBackground(gradientTop = '#E8F4E8', gradientBottom = '#FFE8A0') {
+    createGradientBackground(this, this.sceneWidth, this.sceneHeight, gradientTop, gradientBottom);
+    this.decor = createFloatingDecor(this, this.sceneWidth, this.sceneHeight, {
+      emojis: ['🌿', '🍃', '✨'],
+      count: 5,
+      depth: -10,
+    });
+  }
+
+  setupBackButton() {
+    createChunkyText(this, 60, 40, '← Back', {
+      fontSize: '22px',
+      color: '#FFFFFF',
+      strokeColor: '#2D9B4E',
+      strokeThickness: 4,
+      depth: 50,
+    });
+
+    this.add.rectangle(60, 40, 140, 64)
+      .setInteractive({ useHandCursor: true })
+      .setAlpha(0.001)
+      .setDepth(51)
+      .on('pointerdown', () => this.scene.start('DifficultySelect', { letter: this.letter }));
   }
 
   // ==================== PHASE 1: INTRODUCTION ====================
   showIntro() {
     this.phase = 'intro';
-    this.clearPhase();
+    this.children.removeAll(true);
 
-    const { width } = DEVICE_CONFIG;
+    const color = this.letterConfig.animal.color;
+    // Richer gradient using the animal's color palette
+    this.setupBackground('#FFF8E7', '#E8F4E8');
+    this.setupBackButton();
 
-    // Big letter with entrance animation
-    this.bigLetter = this.add
-      .text(this.centerX, 250, this.letter, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '200px',
-        fontStyle: 'bold',
-        color: this.letterConfig.animal.color,
-      })
-      .setOrigin(0.5)
-      .setScale(0);
+    // Phase indicator dots
+    this.createPhaseIndicator(1);
+
+    // === CINEMATIC LETTER REVEAL ===
+
+    // Large colored backdrop circle
+    const backdropColor = Phaser.Display.Color.HexStringToColor(color).color;
+    const backdrop = this.add.graphics().setDepth(1);
+    backdrop.fillStyle(backdropColor, 0.12);
+    backdrop.fillCircle(this.centerX, 300, 180);
+
+    // Big letter — starts off-screen, bounces in
+    const bigLetter = createChunkyText(this, this.centerX, 280, this.letter, {
+      fontSize: '200px',
+      color: color,
+      strokeColor: '#FFFFFF',
+      strokeThickness: 8,
+      shadowOffsetY: 6,
+      depth: 10,
+    });
+    bigLetter.setScale(0);
 
     this.tweens.add({
-      targets: this.bigLetter,
+      targets: bigLetter,
       scale: 1,
-      duration: 600,
+      duration: 700,
       ease: 'Back.easeOut',
       onComplete: () => {
-        // Play letter pronunciation when it lands
         audioManager.playLetterSound(this.letter);
+        // Sparkle burst on letter
+        createBurstEffect(this, this.centerX, 280, {
+          count: 8,
+          emojis: ['✨', '💫'],
+          spread: 120,
+          duration: 1000,
+        });
       },
     });
 
-    // Lowercase
-    this.smallLetter = this.add
-      .text(this.centerX + 100, 330, this.letterConfig.lower, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '80px',
-        color: this.letterConfig.animal.color,
-      })
-      .setOrigin(0.5)
-      .setAlpha(0);
-
+    // Lowercase letter
+    const smallLetter = createChunkyText(this, this.centerX + 110, 340, this.letterConfig.lower, {
+      fontSize: '80px',
+      color: color,
+      strokeColor: '#FFFFFF',
+      strokeThickness: 5,
+      depth: 10,
+    });
+    smallLetter.setAlpha(0);
     this.tweens.add({
-      targets: this.smallLetter,
+      targets: smallLetter,
       alpha: 0.7,
       duration: 400,
-      delay: 400,
+      delay: 500,
     });
 
-    // Animal name
-    this.animalText = this.add
-      .text(this.centerX, 480, `${this.letter} is for ${this.letterConfig.animal.name}`, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '32px',
-        fontStyle: 'bold',
-        color: COLORS.textDark,
-      })
-      .setOrigin(0.5)
-      .setAlpha(0);
+    // Animal showcase
+    const animal = createAnimalPlaceholder(this, this.centerX, 560, this.letter, color, 160);
+    animal.setDepth(8);
 
-    this.tweens.add({
-      targets: this.animalText,
-      alpha: 1,
-      duration: 400,
-      delay: 700,
+    // Animal name banner
+    this.time.delayedCall(600, () => {
+      const nameText = createChunkyText(this, this.centerX, 680,
+        `${this.letter} is for ${this.letterConfig.animal.name}!`, {
+          fontSize: '28px',
+          color: '#4A3728',
+          strokeColor: '#FFFFFF',
+          strokeThickness: 4,
+          depth: 10,
+        });
+      nameText.setScale(0);
+      this.tweens.add({
+        targets: nameText,
+        scale: 1,
+        duration: 400,
+        ease: 'Back.easeOut',
+      });
     });
 
-    // Animal Zulu name
-    this.zuluText = this.add
-      .text(this.centerX, 520, this.letterConfig.animal.zuluName, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '20px',
-        fontStyle: 'italic',
-        color: COLORS.textMuted,
-      })
-      .setOrigin(0.5)
-      .setAlpha(0);
-
-    this.tweens.add({
-      targets: this.zuluText,
-      alpha: 1,
-      duration: 400,
-      delay: 900,
+    // Zulu name
+    this.time.delayedCall(800, () => {
+      createChunkyText(this, this.centerX, 720, this.letterConfig.animal.zuluName, {
+        fontSize: '18px',
+        color: '#8B7355',
+        strokeColor: '#FFFFFF',
+        strokeThickness: 2,
+        depth: 10,
+      });
     });
 
     // Phonics hint (guided mode)
     if (this.diffConfig.showHints) {
-      this.phonicsHint = this.add
-        .text(this.centerX, 580, `🔊 "${this.letterConfig.phonics.sound}"`, {
-          fontFamily: 'Nunito, Arial, sans-serif',
-          fontSize: '20px',
-          color: COLORS.primary,
-        })
-        .setOrigin(0.5)
-        .setAlpha(0);
-
-      this.tweens.add({
-        targets: this.phonicsHint,
-        alpha: 1,
-        duration: 400,
-        delay: 1100,
+      this.time.delayedCall(1000, () => {
+        createChunkyText(this, this.centerX, 780,
+          `🔊 "${this.letterConfig.phonics.sound}"`, {
+            fontSize: '18px',
+            color: '#2D9B4E',
+            strokeColor: '#FFFFFF',
+            strokeThickness: 2,
+            depth: 10,
+          });
       });
     }
 
-    // Animal placeholder (colored circle until real sprites)
-    this.animalPlaceholder = this.add.graphics();
-    this.animalPlaceholder.fillStyle(
-      Phaser.Display.Color.HexStringToColor(this.letterConfig.animal.color).color,
-      0.3
-    );
-    this.animalPlaceholder.fillCircle(this.centerX, 750, 100);
-    
-    this.animalEmoji = this.add
-      .text(this.centerX, 750, this.getAnimalEmoji(), {
-        fontSize: '80px',
-      })
-      .setOrigin(0.5)
-      .setScale(0);
-
-    this.tweens.add({
-      targets: this.animalEmoji,
-      scale: 1,
-      duration: 500,
-      delay: 600,
-      ease: 'Back.easeOut',
-    });
-
-    // "Tap to continue" prompt
-    this.continueText = this.add
-      .text(this.centerX, 950, 'Tap to continue →', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '22px',
-        color: COLORS.primary,
-      })
-      .setOrigin(0.5)
-      .setAlpha(0);
-
-    this.tweens.add({
-      targets: this.continueText,
-      alpha: 1,
-      duration: 400,
-      delay: 1500,
-    });
-
-    // Pulse animation on continue text
+    // "Tap to continue" button
     this.time.delayedCall(1500, () => {
+      const continueBtn = createGameButton(this, this.centerX, 900, 'Let\'s Go!', {
+        width: 280,
+        height: 70,
+        bgColor: 0x2D9B4E,
+        fontSize: '28px',
+        icon: '▶',
+        depth: 15,
+        onClick: () => this.showTracing(),
+      });
+
+      // Gentle pulse to draw attention
       this.tweens.add({
-        targets: this.continueText,
-        alpha: 0.4,
+        targets: continueBtn,
+        scaleX: 1.03,
+        scaleY: 1.03,
         duration: 800,
         yoyo: true,
         repeat: -1,
-      });
-    });
-
-    // Tap zone covering the content area (below back button) to proceed
-    // Using a zone instead of global input.once to avoid capturing back button taps
-    this.time.delayedCall(1500, () => {
-      const { width, height } = DEVICE_CONFIG;
-      const tapZone = this.add
-        .rectangle(width / 2, height / 2 + 40, width, height - 80)
-        .setInteractive({ useHandCursor: true })
-        .setAlpha(0.001);
-
-      tapZone.once('pointerdown', () => {
-        tapZone.destroy();
-        this.time.delayedCall(200, () => this.showTracing());
+        ease: 'Sine.easeInOut',
       });
     });
   }
@@ -225,46 +222,48 @@ export class LetterGameScene extends Phaser.Scene {
   // ==================== PHASE 2: TRACING ====================
   showTracing() {
     this.phase = 'trace';
-    this.clearPhase();
+    this.children.removeAll(true);
 
-    const { width } = DEVICE_CONFIG;
+    this.setupBackground('#FFF8E7', '#FFE8D0');
+    this.setupBackButton();
+    this.createPhaseIndicator(2);
 
-    // Phase label
-    this.phaseLabel = this.add
-      .text(this.centerX, 100, 'Trace the letter!', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '30px',
-        fontStyle: 'bold',
-        color: COLORS.textDark,
-      })
-      .setOrigin(0.5);
+    // Header
+    createBanner(this, this.centerX, 80, 400, 'Trace the Letter!', {
+      bgColor: Phaser.Display.Color.HexStringToColor(this.letterConfig.animal.color).color,
+      fontSize: '26px',
+      height: 50,
+    });
+
+    // Tracing area card
+    drawCard(this, this.centerX, 440, this.sceneWidth - 60, 500, {
+      fillColor: 0xFFFFF8,
+      radius: 24,
+      shadowAlpha: 0.15,
+      shadowOffsetY: 6,
+      depth: 1,
+    });
 
     // Ghost letter (large, faded — trace target)
-    this.ghostLetter = this.add
-      .text(this.centerX, 450, this.letter, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '300px',
-        fontStyle: 'bold',
-        color: this.letterConfig.animal.color,
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.15);
+    createChunkyText(this, this.centerX, 440, this.letter, {
+      fontSize: '280px',
+      color: this.letterConfig.animal.color,
+      strokeColor: '#FFFFFF',
+      strokeThickness: 4,
+      depth: 2,
+    }).setAlpha(0.15);
 
-    // Drawing surface — use a hit zone so tracing doesn't conflict with back/skip buttons
-    this.traceGraphics = this.add.graphics();
-    this.traceGraphics.lineStyle(12, Phaser.Display.Color.HexStringToColor(this.letterConfig.animal.color).color, 1);
+    // Drawing surface
+    this.traceGraphics = this.add.graphics().setDepth(10);
+    this.traceGraphics.lineStyle(14, Phaser.Display.Color.HexStringToColor(this.letterConfig.animal.color).color, 1);
 
     this.isDrawing = false;
     this.tracePoints = [];
 
-    // Invisible drawing zone (centered, below header, above hints)
-    const drawZone = this.add
-      .rectangle(DEVICE_CONFIG.width / 2, 450, DEVICE_CONFIG.width - 40, 500)
-      .setInteractive()
-      .setAlpha(0.001);
-
-    // Track touch/mouse input for drawing within the zone
+    // Touch input handlers
     this._onTraceDown = (pointer) => {
+      // Only trace within the card area
+      if (pointer.y < 200 || pointer.y > 680) return;
       this.isDrawing = true;
       this.tracePoints = [{ x: pointer.x, y: pointer.y }];
       this.traceGraphics.beginPath();
@@ -280,11 +279,9 @@ export class LetterGameScene extends Phaser.Scene {
     };
     this._onTraceUp = () => {
       this.isDrawing = false;
-      // Validate: enough points AND roughly covered the ghost letter area
       if (this.tracePoints.length > 15 && this.validateTrace()) {
         this.onTraceComplete();
       } else if (this.tracePoints.length > 5) {
-        // Some effort but not enough — encourage
         this.showTraceHint('Keep going! Trace the whole letter.');
       }
     };
@@ -293,78 +290,61 @@ export class LetterGameScene extends Phaser.Scene {
     this.input.on('pointermove', this._onTraceMove);
     this.input.on('pointerup', this._onTraceUp);
 
-    // Hint: show trace path in guided mode
+    // Hint for guided mode
     if (this.diffConfig.showHints) {
-      this.hintText = this.add
-        .text(this.centerX, 650, '👆 Use your finger to trace over the letter', {
-          fontFamily: 'Nunito, Arial, sans-serif',
-          fontSize: '18px',
-          color: COLORS.textMuted,
-          align: 'center',
-        })
-        .setOrigin(0.5);
+      createChunkyText(this, this.centerX, 730, '👆 Trace over the letter!', {
+        fontSize: '18px',
+        color: '#8B7355',
+        strokeColor: '#FFFFFF',
+        strokeThickness: 2,
+        depth: 10,
+      });
     }
 
-    // Skip button (for testing/accessibility)
-    this.add
-      .text(width - 30, 40, 'Skip →', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '18px',
-        color: COLORS.textMuted,
-      })
-      .setOrigin(1, 0)
+    // Skip button
+    createChunkyText(this, this.sceneWidth - 60, 40, 'Skip →', {
+      fontSize: '18px',
+      color: '#FFFFFF',
+      strokeColor: '#8B7355',
+      strokeThickness: 3,
+      depth: 50,
+    });
+
+    this.add.rectangle(this.sceneWidth - 60, 40, 100, 64)
       .setInteractive({ useHandCursor: true })
+      .setAlpha(0.001)
+      .setDepth(51)
       .on('pointerdown', () => this.onTraceComplete());
   }
 
-  /**
-   * Validate trace quality — did the child draw in roughly the right area?
-   * Not checking letter accuracy (too hard for MVP), just coverage.
-   */
   validateTrace() {
     if (this.tracePoints.length < 15) return false;
-
-    // Ghost letter is centered at (this.centerX, 450), ~300px font = ~240px actual
-    // Check: did the trace points overlap the letter's bounding area?
     const letterBounds = {
       minX: this.centerX - 120,
       maxX: this.centerX + 120,
-      minY: 450 - 140,
-      maxY: 450 + 140,
+      minY: 440 - 140,
+      maxY: 440 + 140,
     };
-
     const pointsInBounds = this.tracePoints.filter(
-      (p) =>
-        p.x >= letterBounds.minX &&
-        p.x <= letterBounds.maxX &&
-        p.y >= letterBounds.minY &&
-        p.y <= letterBounds.maxY
+      (p) => p.x >= letterBounds.minX && p.x <= letterBounds.maxX &&
+             p.y >= letterBounds.minY && p.y <= letterBounds.maxY
     );
-
-    // At least 40% of points should be in the letter area
     return pointsInBounds.length / this.tracePoints.length >= 0.4;
   }
 
-  /**
-   * Show encouraging hint when trace attempt wasn't quite right
-   */
   showTraceHint(message) {
-    // Remove existing hint if any
     if (this._traceHintText) this._traceHintText.destroy();
-
-    this._traceHintText = this.add
-      .text(this.centerX, 750, message, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '20px',
-        color: COLORS.secondary,
-        align: 'center',
-      })
-      .setOrigin(0.5);
-
+    this._traceHintText = createChunkyText(this, this.centerX, 780, message, {
+      fontSize: '18px',
+      color: '#E8A317',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 2,
+      depth: 15,
+    });
     this.tweens.add({
       targets: this._traceHintText,
       alpha: 0,
-      duration: 800,
+      duration: 600,
       delay: 2000,
       onComplete: () => {
         if (this._traceHintText) this._traceHintText.destroy();
@@ -374,66 +354,93 @@ export class LetterGameScene extends Phaser.Scene {
   }
 
   onTraceComplete() {
-    // Celebrate the trace
     this.score += 10;
     audioManager.playFeedback('correct');
-    
-    // Remove only tracing input listeners (not all listeners)
+
     this.input.off('pointerdown', this._onTraceDown);
     this.input.off('pointermove', this._onTraceMove);
     this.input.off('pointerup', this._onTraceUp);
 
-    // Show success feedback
-    const feedback = this.add
-      .text(this.centerX, 800, '✓ Great tracing!', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '28px',
-        fontStyle: 'bold',
-        color: COLORS.success,
-      })
-      .setOrigin(0.5)
-      .setScale(0);
+    // Big checkmark + burst
+    const check = createChunkyText(this, this.centerX, 440, '✓', {
+      fontSize: '120px',
+      color: '#2D9B4E',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 6,
+      depth: 20,
+    });
+    check.setScale(0);
 
+    this.tweens.add({
+      targets: check,
+      scale: 1,
+      duration: 400,
+      ease: 'Back.easeOut',
+    });
+
+    createBurstEffect(this, this.centerX, 440, {
+      count: 12,
+      emojis: ['⭐', '✨', '💫'],
+      spread: 150,
+      duration: 1200,
+    });
+
+    const feedback = createChunkyText(this, this.centerX, 600, 'Great Tracing!', {
+      fontSize: '28px',
+      color: '#2D9B4E',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 4,
+      depth: 20,
+    });
+    feedback.setScale(0);
     this.tweens.add({
       targets: feedback,
       scale: 1,
       duration: 300,
+      delay: 200,
       ease: 'Back.easeOut',
     });
 
-    this.time.delayedCall(1200, () => this.showMatching());
+    this.time.delayedCall(1500, () => this.showMatching());
   }
 
   // ==================== PHASE 3: MATCHING ====================
   showMatching() {
     this.phase = 'match';
-    this.clearPhase();
+    this.children.removeAll(true);
 
-    const { width } = DEVICE_CONFIG;
+    this.setupBackground('#E8F0FF', '#FFE8A0');
+    this.setupBackButton();
+    this.createPhaseIndicator(3);
 
-    // Phase label
-    this.add
-      .text(this.centerX, 100, `Find the letter ${this.letter}!`, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '30px',
-        fontStyle: 'bold',
-        color: COLORS.textDark,
-      })
-      .setOrigin(0.5);
+    // Header
+    createBanner(this, this.centerX, 80, 450, `Find the letter ${this.letter}!`, {
+      bgColor: Phaser.Display.Color.HexStringToColor(this.letterConfig.animal.color).color,
+      fontSize: '26px',
+      height: 50,
+    });
 
-    // Generate options (correct + distractors)
+    // Target letter display
+    createChunkyText(this, this.centerX, 160, this.letter, {
+      fontSize: '80px',
+      color: this.letterConfig.animal.color,
+      strokeColor: '#FFFFFF',
+      strokeThickness: 6,
+      depth: 10,
+    });
+
+    // Generate and shuffle options
     const options = this.generateOptions();
     const shuffled = Phaser.Utils.Array.Shuffle([...options]);
 
-    // Show as grid of big tappable letters
-    // Adaptive grid: 3 columns, rows depend on option count
+    // Card grid
     const cols = 3;
-    const cardSize = 160; // 160px well above 64px minimum for kids
-    const gap = 30;
-    const startX = this.centerX - ((cols - 1) * (cardSize + gap)) / 2;
+    const cardSize = 160;
+    const gap = 24;
     const rows = Math.ceil(shuffled.length / cols);
     const totalGridHeight = rows * (cardSize + gap) - gap;
-    const startY = 350 + (DEVICE_CONFIG.height - 350 - 200 - totalGridHeight) / 2; // Center vertically in available space
+    const startX = this.centerX - ((cols - 1) * (cardSize + gap)) / 2;
+    const startY = 250 + (this.sceneHeight - 250 - 100 - totalGridHeight) / 2;
 
     this.matchAttempts = 0;
 
@@ -443,49 +450,19 @@ export class LetterGameScene extends Phaser.Scene {
       const x = startX + col * (cardSize + gap);
       const y = startY + row * (cardSize + gap);
 
-      // Card background
-      const card = this.add.graphics();
-      card.fillStyle(0xffffff, 1);
-      card.fillRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
-      card.lineStyle(3, Phaser.Display.Color.HexStringToColor(COLORS.textMuted).color, 0.3);
-      card.strokeRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
-
-      // Letter text
-      const letterText = this.add
-        .text(x, y, opt, {
-          fontFamily: 'Nunito, Arial, sans-serif',
-          fontSize: '80px',
-          fontStyle: 'bold',
-          color: COLORS.textDark,
-        })
-        .setOrigin(0.5);
-
-      // Hit area
-      const hitArea = this.add
-        .rectangle(x, y, cardSize, cardSize)
-        .setInteractive({ useHandCursor: true })
-        .setAlpha(0.001);
-
-      hitArea.on('pointerdown', () => {
-        if (opt === this.letter || opt === this.letterConfig.lower) {
-          this.onCorrectMatch(card, letterText, x, y, cardSize);
-        } else {
-          this.onWrongMatch(card, letterText, x, y, cardSize);
-        }
-      });
+      this.createMatchCard(x, y, opt, cardSize);
     });
 
-    // Hint for guided mode — subtle glow on correct answers after 5 seconds
+    // Guided hint timer
     if (this.diffConfig.showHints) {
       this._hintTimer = this.time.delayedCall(5000, () => {
-        // Find all correct option cards and pulse them
         this.children.each((child) => {
-          if (child.type === 'Text' && child.style &&
+          if (child.type === 'Text' && child.getData && child.getData('isMatchLetter') &&
               (child.text === this.letter || child.text === this.letterConfig.lower)) {
             this.tweens.add({
               targets: child,
-              scale: 1.15,
-              duration: 600,
+              scale: 1.2,
+              duration: 500,
               yoyo: true,
               repeat: 2,
               ease: 'Sine.easeInOut',
@@ -496,8 +473,48 @@ export class LetterGameScene extends Phaser.Scene {
     }
   }
 
+  createMatchCard(x, y, letter, size) {
+    // Card background with depth
+    const card = drawCard(this, x, y, size, size, {
+      fillColor: 0xFFFFF5,
+      radius: 20,
+      shadowAlpha: 0.2,
+      shadowOffsetY: 5,
+      strokeColor: 0xCCCCCC,
+      strokeWidth: 2,
+      depth: 5,
+    });
+
+    // Letter text
+    const letterText = createChunkyText(this, x, y, letter, {
+      fontSize: '72px',
+      color: '#4A3728',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 4,
+      depth: 10,
+    });
+    letterText.setData('isMatchLetter', true);
+
+    // Hit area (entire card)
+    const hitArea = this.add.rectangle(x, y, size, size)
+      .setInteractive({ useHandCursor: true })
+      .setAlpha(0.001)
+      .setDepth(15);
+
+    hitArea.on('pointerdown', () => {
+      if (hitArea.getData('disabled')) return;
+
+      if (letter === this.letter || letter === this.letterConfig.lower) {
+        hitArea.setData('disabled', true);
+        this.onCorrectMatch(card, letterText, x, y, size);
+      } else {
+        hitArea.setData('disabled', true);
+        this.onWrongMatch(card, letterText, x, y, size, hitArea);
+      }
+    });
+  }
+
   generateOptions() {
-    // Visually similar letters for meaningful distractors (Grade R appropriate)
     const similarLetters = {
       A: ['H', 'V', 'M', 'N', 'W'],
       B: ['D', 'P', 'R', 'E', 'G'],
@@ -506,60 +523,52 @@ export class LetterGameScene extends Phaser.Scene {
       E: ['F', 'B', 'L', 'T', 'H'],
       F: ['E', 'T', 'P', 'L', 'I'],
     };
-
     const pool = similarLetters[this.letter] || 'GHIJKLMNOPQRSTUVWXYZ'.split('');
     const shuffledPool = Phaser.Utils.Array.Shuffle([...pool]);
-    
-    // Pick distractors based on difficulty
-    let numDistractors;
-    if (this.difficulty === 'guided') {
-      numDistractors = 3; // 5 total (2 correct + 3 wrong) — easier
-    } else if (this.difficulty === 'assisted') {
-      numDistractors = 4; // 6 total
-    } else {
-      numDistractors = 4; // 6 total, but visually harder
-    }
-
+    const numDistractors = this.difficulty === 'guided' ? 3 : 4;
     const distractors = shuffledPool.slice(0, numDistractors);
-
-    // Include both upper and lower case of the correct letter
     return [this.letter, this.letterConfig.lower, ...distractors];
   }
 
-  onCorrectMatch(card, letterText, x, y, cardSize) {
+  onCorrectMatch(card, letterText, x, y, size) {
     this.score += 20;
     audioManager.playFeedback('correct');
-    
-    // Green highlight
-    card.clear();
-    card.fillStyle(Phaser.Display.Color.HexStringToColor(COLORS.success).color, 0.2);
-    card.fillRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
-    card.lineStyle(4, Phaser.Display.Color.HexStringToColor(COLORS.success).color);
-    card.strokeRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
 
-    letterText.setColor(COLORS.success);
+    // Green glow
+    const glow = this.add.graphics().setDepth(4);
+    glow.fillStyle(0x2D9B4E, 0.3);
+    glow.fillRoundedRect(x - size / 2 - 6, y - size / 2 - 6, size + 12, size + 12, 24);
 
-    // Bounce
+    letterText.setColor('#2D9B4E');
+
+    // Bounce + sparkle
     this.tweens.add({
       targets: letterText,
-      scale: 1.3,
+      scale: 1.4,
       duration: 200,
       yoyo: true,
     });
 
-    // Success text
-    const successMsg = this.add
-      .text(this.centerX, 800, '🎉 Correct!', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '36px',
-        fontStyle: 'bold',
-        color: COLORS.success,
-      })
-      .setOrigin(0.5)
-      .setScale(0);
+    createBurstEffect(this, x, y, {
+      count: 10,
+      emojis: ['⭐', '✨', '🎉'],
+      spread: 100,
+      duration: 1000,
+    });
 
+    screenFlash(this, this.sceneWidth, this.sceneHeight, 0x2D9B4E, 300);
+
+    // Success message
+    const msg = createChunkyText(this, this.centerX, this.sceneHeight - 120, '🎉 Correct!', {
+      fontSize: '36px',
+      color: '#2D9B4E',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 5,
+      depth: 30,
+    });
+    msg.setScale(0);
     this.tweens.add({
-      targets: successMsg,
+      targets: msg,
       scale: 1,
       duration: 300,
       ease: 'Back.easeOut',
@@ -568,49 +577,58 @@ export class LetterGameScene extends Phaser.Scene {
     this.time.delayedCall(1500, () => this.showResults());
   }
 
-  onWrongMatch(card, letterText, x, y, cardSize) {
+  onWrongMatch(card, letterText, x, y, size, hitArea) {
     this.mistakes += 1;
     this.matchAttempts += 1;
     audioManager.playFeedback('wrong');
 
-    // Red shake + disable this card so it can't be tapped again
-    card.clear();
-    card.fillStyle(Phaser.Display.Color.HexStringToColor(COLORS.error).color, 0.1);
-    card.fillRoundedRect(x - cardSize / 2, y - cardSize / 2, cardSize, cardSize, 16);
-
-    letterText.setAlpha(0.3); // Fade wrong answer
+    // Red flash on card
+    const redFlash = this.add.graphics().setDepth(4);
+    redFlash.fillStyle(0xD94B2B, 0.2);
+    redFlash.fillRoundedRect(x - size / 2, y - size / 2, size, size, 20);
 
     this.tweens.add({
+      targets: redFlash,
+      alpha: 0,
+      duration: 500,
+      onComplete: () => redFlash.destroy(),
+    });
+
+    // Shake
+    this.tweens.add({
       targets: letterText,
-      x: letterText.x + 10,
+      x: letterText.x + 12,
       duration: 50,
       yoyo: true,
       repeat: 3,
+      onComplete: () => {
+        letterText.setAlpha(0.3);
+      },
     });
 
     // Encouraging message
     if (this.diffConfig.audioPrompts) {
       const msgs = ['Try again!', 'Almost!', 'Keep looking!', 'You can do it!'];
       const msg = msgs[this.matchAttempts % msgs.length];
-      
-      const hint = this.add
-        .text(this.centerX, 800, msg, {
-          fontFamily: 'Nunito, Arial, sans-serif',
-          fontSize: '24px',
-          color: COLORS.secondary,
-        })
-        .setOrigin(0.5);
+
+      const hint = createChunkyText(this, this.centerX, this.sceneHeight - 120, msg, {
+        fontSize: '22px',
+        color: '#E8A317',
+        strokeColor: '#FFFFFF',
+        strokeThickness: 3,
+        depth: 30,
+      });
 
       this.tweens.add({
         targets: hint,
         alpha: 0,
-        duration: 1000,
-        delay: 800,
+        duration: 800,
+        delay: 1000,
         onComplete: () => hint.destroy(),
       });
     }
 
-    // After max attempts in non-guided, auto-complete
+    // Max attempts check
     if (this.diffConfig.maxAttempts !== Infinity && this.matchAttempts >= this.diffConfig.maxAttempts) {
       this.time.delayedCall(500, () => this.showResults());
     }
@@ -619,12 +637,15 @@ export class LetterGameScene extends Phaser.Scene {
   // ==================== PHASE 4: RESULTS ====================
   showResults() {
     this.phase = 'results';
-    this.clearPhase();
+    this.children.removeAll(true);
+
+    // Celebration gradient
+    this.setupBackground('#FFE8A0', '#A8D5A2');
 
     const { width, height } = DEVICE_CONFIG;
 
     // Calculate stars
-    let stars = 1; // Completed = 1 star minimum
+    let stars = 1;
     if (this.mistakes === 0) stars = 3;
     else if (this.mistakes <= 2) stars = 2;
 
@@ -632,183 +653,189 @@ export class LetterGameScene extends Phaser.Scene {
     gameStore.getState().completeLevel(this.letter, this.difficulty, this.score, stars);
     gameStore.getState().collectUbuntuValue(this.letterConfig.ubuntuValue.english);
 
-    // "Well done!" header
-    this.add
-      .text(this.centerX, 120, 'Well Done!', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '48px',
-        fontStyle: 'bold',
-        color: COLORS.primary,
-      })
-      .setOrigin(0.5);
+    // === "WELL DONE!" HEADER ===
+    const header = createChunkyText(this, this.centerX, 100, 'Well Done!', {
+      fontSize: '52px',
+      color: '#FFD700',
+      strokeColor: '#4A3728',
+      strokeThickness: 6,
+      shadowOffsetY: 4,
+      depth: 20,
+    });
+    header.setScale(0);
+    this.tweens.add({
+      targets: header,
+      scale: 1,
+      duration: 500,
+      ease: 'Back.easeOut',
+    });
 
-    // Star display with audio
-    const starDisplay = new StarDisplay(this, this.centerX, 220);
+    // === STAR DISPLAY ===
+    const starDisplay = new StarDisplay(this, this.centerX, 200);
     this.time.delayedCall(500, () => {
       starDisplay.award(stars);
       audioManager.playFeedback('complete');
-      // Play star sounds staggered
       for (let i = 0; i < stars; i++) {
         this.time.delayedCall(i * 400, () => audioManager.playFeedback('star'));
       }
     });
 
     // Score
-    this.add
-      .text(this.centerX, 300, `Score: ${this.score}`, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '28px',
-        color: COLORS.textDark,
-      })
-      .setOrigin(0.5);
+    createChunkyText(this, this.centerX, 270, `Score: ${this.score}`, {
+      fontSize: '26px',
+      color: '#4A3728',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 3,
+      depth: 20,
+    });
 
-    // Ubuntu value reveal
-    const ubuntuCard = this.add.graphics();
-    ubuntuCard.fillStyle(Phaser.Display.Color.HexStringToColor(COLORS.primary).color, 0.1);
-    ubuntuCard.fillRoundedRect(this.centerX - 280, 370, 560, 200, 20);
+    // === UBUNTU VALUE CARD ===
+    const ubuntuCard = drawCard(this, this.centerX, 420, 560, 200, {
+      fillColor: 0x2D9B4E,
+      fillAlpha: 0.15,
+      radius: 24,
+      shadowAlpha: 0.1,
+      shadowOffsetY: 4,
+      strokeColor: 0x2D9B4E,
+      strokeWidth: 2,
+      depth: 10,
+    });
 
-    this.add
-      .text(this.centerX, 400, '🌍 Ubuntu Value Earned', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '18px',
-        color: COLORS.textMuted,
-      })
-      .setOrigin(0.5);
+    createChunkyText(this, this.centerX, 350, '🌍 Ubuntu Value Earned!', {
+      fontSize: '18px',
+      color: '#2D9B4E',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 2,
+      depth: 15,
+    });
 
-    this.add
-      .text(this.centerX, 440, this.letterConfig.ubuntuValue.english, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '36px',
-        fontStyle: 'bold',
-        color: COLORS.primary,
-      })
-      .setOrigin(0.5);
+    createChunkyText(this, this.centerX, 400, this.letterConfig.ubuntuValue.english, {
+      fontSize: '36px',
+      color: '#2D9B4E',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 4,
+      depth: 15,
+    });
 
-    this.add
-      .text(this.centerX, 480, `"${this.letterConfig.ubuntuValue.description}"`, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '18px',
-        fontStyle: 'italic',
-        color: COLORS.textDark,
-        wordWrap: { width: 500 },
-        align: 'center',
-      })
-      .setOrigin(0.5);
+    this.add.text(this.centerX, 445, `"${this.letterConfig.ubuntuValue.description}"`, {
+      fontFamily: 'Nunito, Arial, sans-serif',
+      fontSize: '16px',
+      fontStyle: 'italic',
+      color: COLORS.textDark,
+      wordWrap: { width: 480 },
+      align: 'center',
+    }).setOrigin(0.5).setDepth(15);
 
-    this.add
-      .text(this.centerX, 530, `Zulu: ${this.letterConfig.ubuntuValue.zulu}`, {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '16px',
-        color: COLORS.textMuted,
-      })
-      .setOrigin(0.5);
+    createChunkyText(this, this.centerX, 490, `Zulu: ${this.letterConfig.ubuntuValue.zulu}`, {
+      fontSize: '15px',
+      color: '#8B7355',
+      strokeColor: '#FFFFFF',
+      strokeThickness: 2,
+      depth: 15,
+    });
 
-    // Celebration particles
+    // === CELEBRATION ===
     this.createCelebration();
 
-    // Buttons
-    const btnY = 700;
+    // === ACTION BUTTONS ===
+    const btnY = 620;
 
-    // Replay button
-    this.add
-      .text(this.centerX - 120, btnY, '🔄 Replay', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '24px',
-        fontStyle: 'bold',
-        color: COLORS.secondary,
-      })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => {
+    createGameButton(this, this.centerX - 130, btnY, 'Replay', {
+      width: 200,
+      height: 64,
+      bgColor: 0xE8A317,
+      fontSize: '22px',
+      icon: '🔄',
+      depth: 20,
+      onClick: () => {
         this.scene.start('LetterGame', {
           letter: this.letter,
           difficulty: this.difficulty,
         });
-      });
+      },
+    });
 
     // Next letter button
-    const nextLetterIndex = LETTER_ORDER.indexOf(this.letter) + 1;
-    if (nextLetterIndex < LETTER_ORDER.length) {
-      const nextLetter = LETTER_ORDER[nextLetterIndex];
-      this.add
-        .text(this.centerX + 120, btnY, `Next: ${nextLetter} →`, {
-          fontFamily: 'Nunito, Arial, sans-serif',
-          fontSize: '24px',
-          fontStyle: 'bold',
-          color: COLORS.primary,
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-          this.scene.start('DifficultySelect', { letter: nextLetter });
-        });
+    const nextIndex = LETTER_ORDER.indexOf(this.letter) + 1;
+    if (nextIndex < LETTER_ORDER.length) {
+      const nextLetter = LETTER_ORDER[nextIndex];
+      createGameButton(this, this.centerX + 130, btnY, `Next: ${nextLetter}`, {
+        width: 200,
+        height: 64,
+        bgColor: 0x2D9B4E,
+        fontSize: '22px',
+        icon: '→',
+        depth: 20,
+        onClick: () => this.scene.start('DifficultySelect', { letter: nextLetter }),
+      });
     }
 
     // Menu button
-    this.add
-      .text(this.centerX, btnY + 60, 'Back to Menu', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '20px',
-        color: COLORS.textMuted,
-      })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.scene.start('Menu'));
+    createGameButton(this, this.centerX, btnY + 80, 'Back to Menu', {
+      width: 250,
+      height: 56,
+      bgColor: 0x8B7355,
+      fontSize: '20px',
+      depth: 20,
+      onClick: () => this.scene.start('Menu'),
+    });
   }
 
   createCelebration() {
-    // Simple particle-like celebration with text emojis
-    const emojis = ['⭐', '🌟', '✨', '🎉', '🌈'];
-    
-    for (let i = 0; i < 15; i++) {
-      const emoji = Phaser.Utils.Array.GetRandom(emojis);
-      const x = Phaser.Math.Between(50, DEVICE_CONFIG.width - 50);
-      const startY = -50;
+    // Multi-wave burst
+    createBurstEffect(this, this.centerX, 200, {
+      count: 25,
+      emojis: ['⭐', '🌟', '✨', '🎉', '💫', '🌈', '🎊'],
+      spread: 400,
+      duration: 3000,
+    });
 
-      const particle = this.add
-        .text(x, startY, emoji, { fontSize: '32px' })
-        .setOrigin(0.5);
-
-      this.tweens.add({
-        targets: particle,
-        y: Phaser.Math.Between(100, DEVICE_CONFIG.height - 200),
-        x: x + Phaser.Math.Between(-100, 100),
-        angle: Phaser.Math.Between(-180, 180),
-        alpha: 0,
-        duration: Phaser.Math.Between(1500, 3000),
-        delay: i * 100,
-        ease: 'Quad.easeOut',
-        onComplete: () => particle.destroy(),
+    // Second wave delayed
+    this.time.delayedCall(300, () => {
+      createBurstEffect(this, this.centerX, 200, {
+        count: 15,
+        emojis: ['⭐', '✨', '💛'],
+        spread: 250,
+        duration: 2500,
       });
-    }
+    });
+
+    screenFlash(this, this.sceneWidth, this.sceneHeight, 0xFFD700, 400);
   }
 
-  // ==================== UTILITIES ====================
+  // ==================== PHASE INDICATOR ====================
+  createPhaseIndicator(currentPhase) {
+    const phases = ['Intro', 'Trace', 'Match', 'Done'];
+    const dotSpacing = 50;
+    const startX = this.centerX - ((phases.length - 1) * dotSpacing) / 2;
+    const y = this.sceneHeight - 30;
 
-  clearPhase() {
-    // Remove all children except the back button
-    this.children.removeAll(true);
-    
-    // Re-add back button with padded hit area
-    this.backBtn = this.add
-      .text(30, 40, '← Back', {
-        fontFamily: 'Nunito, Arial, sans-serif',
-        fontSize: '22px',
-        color: COLORS.primary,
-        padding: { x: 16, y: 12 },
-      })
-      .setInteractive({ useHandCursor: true, hitArea: new Phaser.Geom.Rectangle(-10, -10, 140, 64), hitAreaCallback: Phaser.Geom.Rectangle.Contains })
-      .on('pointerdown', () => this.scene.start('DifficultySelect', { letter: this.letter }));
+    phases.forEach((label, i) => {
+      const x = startX + i * dotSpacing;
+      const isActive = i + 1 === currentPhase;
+      const isPast = i + 1 < currentPhase;
+
+      const dot = this.add.graphics().setDepth(40);
+      if (isActive) {
+        dot.fillStyle(0x2D9B4E, 1);
+        dot.fillCircle(x, y, 8);
+        // Glow
+        dot.fillStyle(0x2D9B4E, 0.3);
+        dot.fillCircle(x, y, 12);
+      } else if (isPast) {
+        dot.fillStyle(0x2D9B4E, 0.6);
+        dot.fillCircle(x, y, 6);
+      } else {
+        dot.fillStyle(0xCCCCCC, 0.5);
+        dot.fillCircle(x, y, 6);
+      }
+    });
   }
 
+  // ==================== UTILITY ====================
   getAnimalEmoji() {
     const map = {
-      A: '🐜', // Aardvark (closest emoji)
-      B: '🐃', // Buffalo
-      C: '🦎', // Chameleon
-      D: '🪰', // Dragonfly (closest)
-      E: '🐘', // Elephant
-      F: '🦩', // Flamingo
+      A: '🐜', B: '🐃', C: '🦎', D: '🪰', E: '🐘', F: '🦩',
     };
     return map[this.letter] || '🐾';
   }
