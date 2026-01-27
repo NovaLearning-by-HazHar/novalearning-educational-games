@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NovaLearning — Game Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800;900&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #FB923C;
+      --primary-dark: #EA580C;
+      --primary-deep: #9A3412;
+      --green: #4ADE80;
+      --green-dark: #16A34A;
+      --blue: #38BDF8;
+      --blue-dark: #0284C7;
+      --gold: #FACC15;
+      --gold-dark: #CA8A04;
+      --coral: #FB7185;
+      --cream: #FEF7EC;
+      --sand: #F5EBE0;
+      --text: #2D1B0E;
+      --text-mid: #5C4033;
+      --text-light: #8B7355;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+      background: #2D1B0E;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* ============== PHONE FRAME ============== */
+    .phone-frame {
+      width: 100%;
+      max-width: 400px;
+      height: 100vh;
+      max-height: 800px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      border-radius: 0;
+    }
+
+    @media (min-width: 500px) {
+      body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+      .phone-frame { border-radius: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 3px #444; }
+    }
+
+    /* ============== SCREENS ============== */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      opacity: 0;
+      transform: translateX(40px);
+      pointer-events: none;
+    }
+
+    .screen.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: all;
+    }
+
+    /* ============== BACKGROUNDS ============== */
+    .bg-safari {
+      background: linear-gradient(170deg, #FFF7ED 0%, #FFDDB0 40%, #FFB870 100%);
+    }
+
+    .bg-sky {
+      background: linear-gradient(170deg, #E0F4FF 0%, #A5D8FF 50%, #74C0FC 100%);
+    }
+
+    .bg-jungle {
+      background: linear-gradient(170deg, #E8F5E0 0%, #A8E6A0 50%, #6DD660 100%);
+    }
+
+    .bg-celebration {
+      background: linear-gradient(170deg, #FFF1E6 0%, #FFD5A8 30%, #FFB870 60%, #FF9F50 100%);
+    }
+
+    /* Ambient blobs */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      animation: blobFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes blobFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(15px, -20px) scale(1.1); }
+      66% { transform: translate(-10px, 15px) scale(0.95); }
+    }
+
+    /* Floating particles */
+    .particle {
+      position: absolute;
+      animation: particleFloat 6s ease-in-out infinite;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    @keyframes particleFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(10deg); }
+    }
+
+    /* ============== HEADER / BANNER ============== */
+    .banner {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 60px;
+      margin: 16px 24px 0;
+    }
+
+    .banner-body {
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+      padding: 10px 48px;
+      border-radius: 16px;
+      position: relative;
+      box-shadow: 0 5px 0 var(--primary-deep), 0 8px 20px rgba(45,27,14,0.3);
+    }
+
+    .banner-body::before {
+      content: '';
+      position: absolute;
+      top: 3px; left: 8px; right: 8px;
+      height: 35%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+      border-radius: 12px 12px 0 0;
+    }
+
+    /* Ribbon tails */
+    .banner-tail {
+      position: absolute;
+      top: 8px;
+      width: 20px;
+      height: 36px;
+      background: var(--primary);
+      opacity: 0.7;
+    }
+    .banner-tail.left { left: -8px; clip-path: polygon(100% 0, 100% 100%, 0 50%); }
+    .banner-tail.right { right: -8px; clip-path: polygon(0 0, 0 100%, 100% 50%); }
+
+    .banner-text {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 26px;
+      color: white;
+      text-shadow: 2px 3px 0 var(--primary-deep);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ============== 3D BUTTONS ============== */
+    .btn3d {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 36px;
+      border: none;
+      border-radius: 22px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: white;
+      text-shadow: 1px 2px 0 rgba(0,0,0,0.2);
+      transition: transform 0.08s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn3d::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 45%);
+      pointer-events: none;
+    }
+
+    .btn3d:active { transform: translateY(3px); }
+    .btn3d:active::after { height: 2px; }
+
+    .btn3d::after {
+      content: '';
+      position: absolute;
+      left: 4px; right: 4px; bottom: -5px;
+      height: 5px;
+      border-radius: 0 0 22px 22px;
+      pointer-events: none;
+    }
+
+    .btn-orange {
+      background: linear-gradient(180deg, #FB923C 0%, #EA580C 100%);
+      box-shadow: 0 5px 0 #7C2D12, 0 8px 16px rgba(45,27,14,0.3);
+    }
+    .btn-orange:active { box-shadow: 0 2px 0 #7C2D12, 0 3px 8px rgba(45,27,14,0.2); }
+    .btn-orange::after { background: #7C2D12; }
+
+    .btn-green {
+      background: linear-gradient(180deg, #4ADE80 0%, #16A34A 100%);
+      box-shadow: 0 5px 0 #166534, 0 8px 16px rgba(45,27,14,0.3);
+    }
+    .btn-green:active { box-shadow: 0 2px 0 #166534; }
+    .btn-green::after { background: #166534; }
+
+    .btn-blue {
+      background: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%);
+      box-shadow: 0 5px 0 #075985, 0 8px 16px rgba(45,27,14,0.3);
+    }
+    .btn-blue:active { box-shadow: 0 2px 0 #075985; }
+    .btn-blue::after { background: #075985; }
+
+    .btn-small { font-size: 18px; padding: 12px 28px; border-radius: 18px; }
+
+    /* ============== LETTER CARDS ============== */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding: 0 20px;
+    }
+
+    .letter-card {
+      position: relative;
+      background: var(--cream);
+      border-radius: 22px;
+      padding: 0;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.12s ease;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .letter-card::after {
+      content: '';
+      position: absolute;
+      left: 4px; right: 4px; bottom: -5px;
+      height: 5px;
+      border-radius: 0 0 22px 22px;
+      pointer-events: none;
+    }
+
+    .letter-card { box-shadow: 0 5px 0 rgba(200,150,100,0.4), 0 8px 20px rgba(45,27,14,0.12); }
+    .letter-card:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(200,150,100,0.4); }
+
+    .card-accent {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .card-accent::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+    }
+
+    .card-letter {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 30px;
+      color: white;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-letter-small {
+      font-family: 'Nunito', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.8);
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-body { padding: 10px 8px 14px; }
+
+    .card-animal-frame {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      position: relative;
+      border: 4px solid var(--primary);
+      background: var(--cream);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card-animal-name {
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .card-value {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      font-style: italic;
+    }
+
+    .card-stars {
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      margin-top: 6px;
+    }
+
+    .mini-star {
+      width: 14px;
+      height: 14px;
+    }
+
+    .mini-star svg { width: 100%; height: 100%; }
+    .mini-star.earned svg { fill: var(--gold); filter: drop-shadow(0 0 3px rgba(250,204,21,0.5)); }
+    .mini-star.empty svg { fill: #ddd; }
+
+    /* ============== ANIMAL HERO ============== */
+    .animal-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 16px 0;
+    }
+
+    .animal-circle-lg {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 8px solid var(--primary);
+      box-shadow: 0 6px 0 var(--primary-deep), 0 10px 30px rgba(45,27,14,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .animal-circle-lg::before {
+      content: '';
+      position: absolute;
+      top: -10px; left: -10px;
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      filter: blur(10px);
+    }
+
+    .animal-pill {
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 8px 28px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 16px;
+      margin-top: -14px;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 3px 0 var(--primary-deep), 0 5px 12px rgba(45,27,14,0.2);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+    }
+
+    .animal-zulu {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* ============== HERO LETTER ============== */
+    .letter-hero {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 140px;
+      text-align: center;
+      line-height: 1;
+      position: relative;
+      -webkit-text-stroke: 3px white;
+      text-shadow: 4px 6px 0 rgba(0,0,0,0.15);
+      animation: letterPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes letterPop {
+      0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    /* ============== STAR SHAPES ============== */
+    .star-row {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .star-shape {
+      width: 56px;
+      height: 56px;
+      position: relative;
+    }
+
+    .star-shape svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.15));
+    }
+
+    .star-shape.earned svg {
+      fill: var(--gold);
+      filter: drop-shadow(0 0 16px rgba(250,204,21,0.6)) drop-shadow(0 3px 4px rgba(0,0,0,0.15));
+    }
+
+    .star-shape.earned::before {
+      content: '';
+      position: absolute;
+      top: 10px; left: 14px;
+      width: 10px; height: 10px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 50%;
+    }
+
+    .star-shape.empty svg {
+      fill: #E5E7EB;
+      stroke: #B0B0B0;
+      stroke-width: 1;
+    }
+
+    .star-shape.earned {
+      animation: starBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes starBounce {
+      0% { transform: scale(0); }
+      60% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    /* ============== CELEBRATION ============== */
+    .celeb-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 48px;
+      text-align: center;
+      color: var(--primary);
+      text-shadow: 3px 4px 0 var(--primary-deep);
+      -webkit-text-stroke: 1px var(--primary-deep);
+      animation: letterPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .celeb-panel {
+      background: var(--cream);
+      border: 6px solid var(--primary);
+      border-radius: 28px;
+      padding: 24px;
+      margin: 0 20px;
+      text-align: center;
+      box-shadow: 0 6px 0 var(--primary-deep), 0 12px 40px rgba(45,27,14,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .celeb-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+    }
+
+    .celeb-score {
+      font-family: 'Nunito', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--text);
+      margin: 12px 0 4px;
+    }
+
+    .celeb-value {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 24px;
+      color: var(--green-dark);
+      margin: 16px 0 4px;
+    }
+
+    .celeb-desc {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 14px;
+      color: var(--text-mid);
+      font-style: italic;
+    }
+
+    .celeb-zulu {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    /* ============== MATCH CARDS ============== */
+    .match-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 0 20px;
+    }
+
+    .match-card {
+      aspect-ratio: 1;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--cream);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      position: relative;
+      border: 3px solid #E8D5C0;
+      box-shadow: 0 4px 0 rgba(180,150,120,0.3), 0 6px 16px rgba(45,27,14,0.1);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .match-card::before {
+      content: '';
+      position: absolute;
+      top: 3px; left: 6px; right: 6px;
+      height: 30%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+      border-radius: 14px 14px 0 0;
+    }
+
+    .match-card:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(180,150,120,0.3); }
+
+    .match-letter {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 48px;
+      color: var(--text);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.06);
+      position: relative;
+      z-index: 1;
+    }
+
+    .match-card.correct {
+      background: linear-gradient(180deg, #BBF7D0 0%, #86EFAC 100%);
+      border-color: var(--green-dark);
+      box-shadow: 0 0 20px rgba(74,222,128,0.5);
+      animation: correctPop 0.3s ease;
+    }
+
+    .match-card.correct .match-letter { color: var(--green-dark); }
+
+    .match-card.wrong {
+      background: #FEE2E2;
+      border-color: var(--coral);
+      animation: wrongShake 0.3s ease;
+    }
+
+    .match-card.wrong .match-letter { color: var(--coral); opacity: 0.4; }
+
+    @keyframes correctPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    /* ============== PROGRESS DOTS ============== */
+    .phase-dots {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .phase-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      transition: all 0.3s ease;
+    }
+
+    .phase-dot.active {
+      background: var(--primary);
+      width: 28px;
+      border-radius: 5px;
+      box-shadow: 0 0 8px rgba(251,146,60,0.5);
+    }
+
+    .phase-dot.done { background: var(--green); }
+
+    /* ============== CONFETTI ============== */
+    .confetti-piece {
+      position: absolute;
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    /* ============== NAV ============== */
+    .nav-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      padding: 10px 8px;
+      z-index: 100;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 8px 4px;
+      border: none;
+      background: transparent;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-light);
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(251,146,60,0.3);
+    }
+
+    .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+
+    /* ============== UTILITIES ============== */
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .flex-col { display: flex; flex-direction: column; }
+    .gap-8 { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .gap-16 { gap: 16px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mb-12 { margin-bottom: 12px; }
+    .px-20 { padding-left: 20px; padding-right: 20px; }
+    .text-center { text-align: center; }
+    .grow { flex: 1; }
+    .scroll-y { overflow-y: auto; flex: 1; }
+
+    .sub-text {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 14px;
+      color: var(--text-light);
+      text-align: center;
+    }
+
+    .instruction-text {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 22px;
+      color: var(--text);
+      text-align: center;
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <!-- ============== SCREEN 1: MENU ============== -->
+    <div class="screen bg-safari active" id="screen-menu">
+      <!-- Ambient -->
+      <div class="blob" style="width:200px;height:200px;background:rgba(253,186,116,0.35);top:5%;left:-10%"></div>
+      <div class="blob" style="width:160px;height:160px;background:rgba(251,146,60,0.2);bottom:20%;right:-15%;animation-delay:-3s"></div>
+      <div class="particle" style="font-size:22px;top:12%;left:15%">🌿</div>
+      <div class="particle" style="font-size:18px;top:25%;right:12%;animation-delay:-2s">✨</div>
+      <div class="particle" style="font-size:20px;top:60%;left:8%;animation-delay:-4s">🍃</div>
+      <div class="particle" style="font-size:16px;bottom:25%;right:18%;animation-delay:-1s">🦋</div>
+
+      <div class="banner">
+        <div class="banner-body">
+          <div class="banner-tail left"></div>
+          <div class="banner-tail right"></div>
+          <div class="banner-text">🦁 NovaLearning</div>
+        </div>
+      </div>
+
+      <p class="sub-text mt-12">🌍 Choose Your Letter!</p>
+
+      <div class="scroll-y mt-12" style="padding-bottom:70px">
+        <div class="card-grid">
+          <!-- Card A -->
+          <div class="letter-card" onclick="showScreen('screen-intro')">
+            <div class="card-accent" style="background:linear-gradient(180deg,#D4A76A,#B08850)">
+              <span class="card-letter">A</span>
+              <span class="card-letter-small">a</span>
+            </div>
+            <div class="card-body">
+              <div class="card-animal-frame" style="border-color:#C4A87A">🐜</div>
+              <div class="card-animal-name">Aardvark</div>
+              <div class="card-value">Appreciation</div>
+              <div class="card-stars">
+                <div class="mini-star earned"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="mini-star earned"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+          <!-- Card B -->
+          <div class="letter-card" onclick="showScreen('screen-intro')">
+            <div class="card-accent" style="background:linear-gradient(180deg,#A0802A,#7A6010)">
+              <span class="card-letter">B</span>
+              <span class="card-letter-small">b</span>
+            </div>
+            <div class="card-body">
+              <div class="card-animal-frame" style="border-color:#8B6914">🐒</div>
+              <div class="card-animal-name">Baboon</div>
+              <div class="card-value">Bravery</div>
+              <div class="card-stars">
+                <div class="mini-star earned"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+          <!-- Card C -->
+          <div class="letter-card">
+            <div class="card-accent" style="background:linear-gradient(180deg,#5A8A4D,#3A6A30)">
+              <span class="card-letter">C</span>
+              <span class="card-letter-small">c</span>
+            </div>
+            <div class="card-body">
+              <div class="card-animal-frame" style="border-color:#4A7A3D">🐊</div>
+              <div class="card-animal-name">Crocodile</div>
+              <div class="card-value">Compassion</div>
+              <div class="card-stars">
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+          <!-- Card D -->
+          <div class="letter-card">
+            <div class="card-accent" style="background:linear-gradient(180deg,#B06A3D,#8A4A20)">
+              <span class="card-letter">D</span>
+              <span class="card-letter-small">d</span>
+            </div>
+            <div class="card-body">
+              <div class="card-animal-frame" style="border-color:#A0522D">🦌</div>
+              <div class="card-animal-name">Duiker</div>
+              <div class="card-value">Dignity</div>
+              <div class="card-stars">
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="mini-star empty"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-bar">
+        <button class="nav-btn active"><span class="nav-icon">📚</span>Letters</button>
+        <button class="nav-btn" onclick="showScreen('screen-match')"><span class="nav-icon">🎮</span>Play</button>
+        <button class="nav-btn" onclick="showScreen('screen-celeb')"><span class="nav-icon">⭐</span>Stars</button>
+        <button class="nav-btn"><span class="nav-icon">🌍</span>Ubuntu</button>
+      </div>
+    </div>
+
+    <!-- ============== SCREEN 2: INTRO ============== -->
+    <div class="screen bg-safari" id="screen-intro">
+      <div class="blob" style="width:240px;height:240px;background:rgba(196,168,122,0.25);top:15%;left:-20%"></div>
+      <div class="blob" style="width:180px;height:180px;background:rgba(253,186,116,0.2);bottom:25%;right:-10%;animation-delay:-2s"></div>
+      <div class="particle" style="font-size:20px;top:8%;right:15%">✨</div>
+      <div class="particle" style="font-size:18px;top:45%;left:5%;animation-delay:-3s">🌿</div>
+
+      <div class="phase-dots mt-16">
+        <div class="phase-dot active"></div>
+        <div class="phase-dot"></div>
+        <div class="phase-dot"></div>
+        <div class="phase-dot"></div>
+      </div>
+
+      <div class="grow flex-col" style="align-items:center;justify-content:center;gap:4px;padding:0 24px">
+        <div class="letter-hero" style="color:#C4A87A">A</div>
+
+        <div class="animal-hero">
+          <div class="animal-circle-lg">🐜</div>
+          <div class="animal-pill">Aardvark</div>
+          <div class="animal-zulu">iSambane</div>
+        </div>
+
+        <p class="instruction-text mt-12">A is for Aardvark!</p>
+        <p class="sub-text">🔊 "/a/ as in aardvark"</p>
+      </div>
+
+      <div class="flex-center mb-12" style="padding-bottom:20px">
+        <button class="btn3d btn-orange" onclick="showScreen('screen-match')">▶ Let's Go!</button>
+      </div>
+    </div>
+
+    <!-- ============== SCREEN 3: MATCH GAME ============== -->
+    <div class="screen bg-sky" id="screen-match">
+      <div class="blob" style="width:200px;height:200px;background:rgba(186,230,253,0.4);top:10%;right:-15%"></div>
+      <div class="blob" style="width:160px;height:160px;background:rgba(56,189,248,0.15);bottom:30%;left:-10%;animation-delay:-4s"></div>
+      <div class="particle" style="font-size:18px;top:5%;left:10%">☁️</div>
+      <div class="particle" style="font-size:22px;top:15%;right:8%;animation-delay:-2s">✨</div>
+
+      <div class="phase-dots mt-16">
+        <div class="phase-dot done"></div>
+        <div class="phase-dot done"></div>
+        <div class="phase-dot active"></div>
+        <div class="phase-dot"></div>
+      </div>
+
+      <div class="banner mt-12">
+        <div class="banner-body" style="background:linear-gradient(180deg,#C4A87A,#A08050);box-shadow:0 5px 0 #6A5030,0 8px 20px rgba(45,27,14,0.3)">
+          <div class="banner-text" style="font-size:22px;text-shadow:2px 3px 0 #6A5030">Find the letter A!</div>
+        </div>
+      </div>
+
+      <div class="flex-center mt-16">
+        <div class="letter-hero" style="color:#C4A87A;font-size:80px;animation:none">A</div>
+      </div>
+
+      <div class="grow flex-col" style="justify-content:center">
+        <div class="match-grid" id="matchGrid">
+          <div class="match-card" onclick="matchClick(this,'H')"><span class="match-letter">H</span></div>
+          <div class="match-card" onclick="matchClick(this,'A')"><span class="match-letter">A</span></div>
+          <div class="match-card" onclick="matchClick(this,'V')"><span class="match-letter">V</span></div>
+          <div class="match-card" onclick="matchClick(this,'a')"><span class="match-letter">a</span></div>
+          <div class="match-card" onclick="matchClick(this,'M')"><span class="match-letter">M</span></div>
+          <div class="match-card" onclick="matchClick(this,'N')"><span class="match-letter">N</span></div>
+        </div>
+      </div>
+
+      <div style="height:40px"></div>
+    </div>
+
+    <!-- ============== SCREEN 4: CELEBRATION ============== -->
+    <div class="screen bg-celebration" id="screen-celeb">
+      <div class="blob" style="width:200px;height:200px;background:rgba(250,204,21,0.3);top:5%;left:-10%"></div>
+      <div class="blob" style="width:150px;height:150px;background:rgba(74,222,128,0.2);bottom:30%;right:-10%;animation-delay:-2s"></div>
+      <div class="blob" style="width:120px;height:120px;background:rgba(56,189,248,0.15);top:50%;left:60%;animation-delay:-5s"></div>
+      <div id="confettiContainer"></div>
+
+      <div class="grow flex-col" style="justify-content:center;gap:16px;padding:0 8px">
+        <div class="celeb-title">🎉 Well Done! 🎉</div>
+
+        <div class="star-row">
+          <div class="star-shape earned" style="animation-delay:0.1s"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+          <div class="star-shape earned" style="animation-delay:0.4s"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+          <div class="star-shape earned" style="animation-delay:0.7s"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        </div>
+
+        <div class="celeb-panel">
+          <div class="celeb-score">Score: 100</div>
+          <div class="celeb-value">🌍 Appreciation</div>
+          <div class="celeb-desc">"Seeing the good in others and saying thank you."</div>
+          <div class="celeb-zulu">Zulu: Ukwazisa</div>
+
+          <div class="flex-center gap-12" style="flex-wrap:wrap">
+            <button class="btn3d btn-blue btn-small" onclick="showScreen('screen-match')">🔄 Replay</button>
+            <button class="btn3d btn-green btn-small" onclick="showScreen('screen-menu')">→ Next</button>
+          </div>
+        </div>
+
+        <div class="flex-center">
+          <button class="btn3d btn-orange btn-small" onclick="showScreen('screen-menu')" style="opacity:0.8;font-size:15px">Back to Menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Screen navigation
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.transform = 'translateX(-40px)';
+      });
+      setTimeout(() => {
+        const target = document.getElementById(id);
+        target.style.transform = 'translateX(40px)';
+        void target.offsetWidth; // force reflow
+        target.classList.add('active');
+
+        if (id === 'screen-celeb') spawnConfetti();
+      }, 100);
+    }
+
+    // Match game
+    function matchClick(el, letter) {
+      if (el.classList.contains('correct') || el.classList.contains('wrong')) return;
+
+      if (letter === 'A' || letter === 'a') {
+        el.classList.add('correct');
+        setTimeout(() => showScreen('screen-celeb'), 1200);
+      } else {
+        el.classList.add('wrong');
+      }
+    }
+
+    // Confetti
+    function spawnConfetti() {
+      const container = document.getElementById('confettiContainer');
+      container.innerHTML = '';
+      const colors = ['#FB923C','#4ADE80','#38BDF8','#FACC15','#FB7185','#A78BFA'];
+
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = 6 + Math.random() * 8;
+        const isCircle = Math.random() > 0.5;
+
+        Object.assign(piece.style, {
+          width: isCircle ? size + 'px' : size * 0.6 + 'px',
+          height: isCircle ? size + 'px' : size * 1.5 + 'px',
+          borderRadius: isCircle ? '50%' : '2px',
+          background: color,
+          left: Math.random() * 100 + '%',
+          top: '-20px',
+          animation: `confettiFall ${2 + Math.random() * 2}s ease-out ${Math.random() * 0.6}s forwards`,
+        });
+
+        container.appendChild(piece);
+        setTimeout(() => piece.remove(), 4000);
+      }
+    }
+
+    // Auto-play confetti on load for celebration screen demo
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes confettiFall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(700px) rotate(${360 + Math.random() * 360}deg); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
