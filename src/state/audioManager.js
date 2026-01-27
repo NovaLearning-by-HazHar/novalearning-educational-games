@@ -1,10 +1,12 @@
 import { Howl, Howler } from 'howler';
 import { gameStore } from './gameStore.js';
+import { AUDIO_KEYS } from '../config/audio.js';
 
 /**
  * Audio Manager — Howler.js wrapper
  * Manages all game audio: SFX, music, letter sounds, voice
  * Respects user sound/music preferences from game store
+ * Gracefully handles missing audio files (logs warning, continues)
  */
 
 class AudioManager {
@@ -12,13 +14,14 @@ class AudioManager {
     this.sounds = {};
     this.music = null;
     this.musicKey = null;
+    this._failedKeys = new Set(); // Track failed loads to avoid re-attempts
   }
 
   /**
    * Preload a sound effect
    */
   load(key, src, options = {}) {
-    if (this.sounds[key]) return;
+    if (this.sounds[key] || this._failedKeys.has(key)) return;
 
     this.sounds[key] = new Howl({
       src: Array.isArray(src) ? src : [src],
@@ -26,6 +29,23 @@ class AudioManager {
       loop: options.loop || false,
       preload: true,
       html5: options.html5 || false,
+      onloaderror: (_id, err) => {
+        console.warn(`[AudioManager] Failed to load "${key}" — file may not exist yet. (${err})`);
+        delete this.sounds[key];
+        this._failedKeys.add(key);
+      },
+    });
+  }
+
+  /**
+   * Preload audio from the registry (call from Boot scene)
+   * Only loads keys that have files. Missing files fail silently.
+   */
+  preloadFromRegistry(keys) {
+    const toLoad = keys || Object.keys(AUDIO_KEYS);
+    toLoad.forEach((key) => {
+      const src = AUDIO_KEYS[key];
+      if (src) this.load(key, src);
     });
   }
 

@@ -4,6 +4,7 @@ import { DEVICE_CONFIG } from '../../../config/device.js';
 import { getLetterConfig, LETTER_ORDER } from '../../../config/letters.js';
 import { getDifficulty } from '../../../config/difficulty.js';
 import { gameStore } from '../../../state/gameStore.js';
+import { audioManager } from '../../../state/audioManager.js';
 import { StarDisplay } from '../../../shared/ui/StarDisplay.js';
 
 /**
@@ -38,14 +39,15 @@ export class LetterGameScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(COLORS.bgWarm);
 
-    // Back button
+    // Back button with padded hit area (64px min for kids)
     this.backBtn = this.add
       .text(30, 40, '← Back', {
         fontFamily: 'Nunito, Arial, sans-serif',
         fontSize: '22px',
         color: COLORS.primary,
+        padding: { x: 16, y: 12 },
       })
-      .setInteractive({ useHandCursor: true })
+      .setInteractive({ useHandCursor: true, hitArea: new Phaser.Geom.Rectangle(-10, -10, 140, 64), hitAreaCallback: Phaser.Geom.Rectangle.Contains })
       .on('pointerdown', () => this.scene.start('DifficultySelect', { letter: this.letter }));
 
     // Start with intro phase
@@ -75,6 +77,10 @@ export class LetterGameScene extends Phaser.Scene {
       scale: 1,
       duration: 600,
       ease: 'Back.easeOut',
+      onComplete: () => {
+        // Play letter pronunciation when it lands
+        audioManager.playLetterSound(this.letter);
+      },
     });
 
     // Lowercase
@@ -310,6 +316,7 @@ export class LetterGameScene extends Phaser.Scene {
   onTraceComplete() {
     // Celebrate the trace
     this.score += 10;
+    audioManager.playFeedback('correct');
     
     // Remove only tracing input listeners (not all listeners)
     this.input.off('pointerdown', this._onTraceDown);
@@ -427,6 +434,7 @@ export class LetterGameScene extends Phaser.Scene {
 
   onCorrectMatch(card, letterText, x, y, cardSize) {
     this.score += 20;
+    audioManager.playFeedback('correct');
     
     // Green highlight
     card.clear();
@@ -469,6 +477,7 @@ export class LetterGameScene extends Phaser.Scene {
   onWrongMatch(card, letterText, x, y, cardSize) {
     this.mistakes += 1;
     this.matchAttempts += 1;
+    audioManager.playFeedback('wrong');
 
     // Red shake
     card.clear();
@@ -537,9 +546,16 @@ export class LetterGameScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Star display
+    // Star display with audio
     const starDisplay = new StarDisplay(this, this.centerX, 220);
-    this.time.delayedCall(500, () => starDisplay.award(stars));
+    this.time.delayedCall(500, () => {
+      starDisplay.award(stars);
+      audioManager.playFeedback('complete');
+      // Play star sounds staggered
+      for (let i = 0; i < stars; i++) {
+        this.time.delayedCall(i * 400, () => audioManager.playFeedback('star'));
+      }
+    });
 
     // Score
     this.add
@@ -677,14 +693,15 @@ export class LetterGameScene extends Phaser.Scene {
     // Remove all children except the back button
     this.children.removeAll(true);
     
-    // Re-add back button
+    // Re-add back button with padded hit area
     this.backBtn = this.add
       .text(30, 40, '← Back', {
         fontFamily: 'Nunito, Arial, sans-serif',
         fontSize: '22px',
         color: COLORS.primary,
+        padding: { x: 16, y: 12 },
       })
-      .setInteractive({ useHandCursor: true })
+      .setInteractive({ useHandCursor: true, hitArea: new Phaser.Geom.Rectangle(-10, -10, 140, 64), hitAreaCallback: Phaser.Geom.Rectangle.Contains })
       .on('pointerdown', () => this.scene.start('DifficultySelect', { letter: this.letter }));
   }
 

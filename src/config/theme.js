@@ -50,7 +50,8 @@ export const SIZES = {
   buttonWidth: 300,
   buttonHeight: 80,
   buttonRadius: 20,
-  starSize: 48,
+  starSize: 64,              // 64px min for Grade R kids (was 48)
+  minTouchTarget: 64,        // Google recommends 48, Grade R needs 64+
   padding: 24,
   paddingSmall: 12,
 };

@@ -26,14 +26,15 @@ export class DifficultySelectScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(COLORS.bgWarm);
 
-    // Back button
+    // Back button with padded hit area (64px min for kids)
     this.add
       .text(30, 40, '← Back', {
         fontFamily: 'Nunito, Arial, sans-serif',
         fontSize: '22px',
         color: COLORS.primary,
+        padding: { x: 16, y: 12 },
       })
-      .setInteractive({ useHandCursor: true })
+      .setInteractive({ useHandCursor: true, hitArea: new Phaser.Geom.Rectangle(-10, -10, 140, 64), hitAreaCallback: Phaser.Geom.Rectangle.Contains })
       .on('pointerdown', () => this.scene.start('Menu'));
 
     // Letter display

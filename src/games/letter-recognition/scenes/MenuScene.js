@@ -173,13 +173,17 @@ export class MenuScene extends Phaser.Scene {
   createSettingsButton(x, y) {
     const state = gameStore.getState();
     
-    // Sound toggle
+    // Sound toggle — 64px hit area for kid fingers
     const soundBtn = this.add
       .text(x - 60, y, state.soundEnabled ? '🔊' : '🔇', {
         fontSize: '36px',
       })
       .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true });
+      .setInteractive({
+        useHandCursor: true,
+        hitArea: new Phaser.Geom.Rectangle(-32, -32, 64, 64),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      });
 
     soundBtn.on('pointerdown', () => {
       gameStore.getState().toggleSound();
@@ -187,13 +191,17 @@ export class MenuScene extends Phaser.Scene {
       soundBtn.setText(newState.soundEnabled ? '🔊' : '🔇');
     });
 
-    // Music toggle
+    // Music toggle — 64px hit area
     const musicBtn = this.add
       .text(x + 60, y, state.musicEnabled ? '🎵' : '🎵', {
         fontSize: '36px',
       })
       .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
+      .setInteractive({
+        useHandCursor: true,
+        hitArea: new Phaser.Geom.Rectangle(-32, -32, 64, 64),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      })
       .setAlpha(state.musicEnabled ? 1 : 0.4);
 
     musicBtn.on('pointerdown', () => {

@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { COLORS } from '../config/theme.js';
 import { DEVICE_CONFIG } from '../config/device.js';
+import { audioManager } from '../state/audioManager.js';
+import { getAllAudioKeys } from '../config/audio.js';
 
 /**
  * Boot Scene — Shared preloader for all games
@@ -90,12 +92,9 @@ export class BootScene extends Phaser.Scene {
   }
 
   loadSharedAssets() {
-    // Shared UI sounds (will use placeholders until real audio is provided)
-    // this.load.audio('feedback-correct', 'assets/audio/correct.mp3');
-    // this.load.audio('feedback-wrong', 'assets/audio/wrong.mp3');
-    // this.load.audio('feedback-star', 'assets/audio/star.mp3');
-    // this.load.audio('ui-click', 'assets/audio/click.mp3');
-    // this.load.audio('ui-whoosh', 'assets/audio/whoosh.mp3');
+    // Preload all audio from registry via Howler (not Phaser loader)
+    // Missing files fail silently — audio hooks are wired, files can be added later
+    audioManager.preloadFromRegistry(getAllAudioKeys());
   }
 
   loadGameAssets() {
