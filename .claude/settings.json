@@ -33,5 +33,28 @@
       "Bash(curl * | *)",
       "Bash(wget * | *)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '--- Recent commits ---' && git log --oneline -5 2>/dev/null && echo '--- Working tree ---' && git status --short 2>/dev/null | head -15"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx eslint --fix \"$CC_TOOL_INPUT_file_path\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
   }
 }
