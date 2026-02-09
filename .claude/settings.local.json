@@ -29,8 +29,7 @@
       "Bash(pnpm:*)",
       "Bash(corepack enable:*)",
       "Bash(corepack prepare:*)",
-      "Bash(gh api:*)",
-      "Bash(python:*)"
+      "Bash(gh api:*)"
     ]
   }
 }
