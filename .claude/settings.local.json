@@ -23,7 +23,14 @@
       "Bash(git commit:*)",
       "Bash(gh repo view:*)",
       "Bash(gh auth:*)",
-      "Bash(git ls-remote:*)"
+      "Bash(git ls-remote:*)",
+      "Bash(git clone:*)",
+      "Bash(node:*)",
+      "Bash(pnpm:*)",
+      "Bash(corepack enable:*)",
+      "Bash(corepack prepare:*)",
+      "Bash(gh api:*)",
+      "Bash(python:*)"
     ]
   }
 }
