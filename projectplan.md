@@ -1,7 +1,7 @@
 # NovaLearning Games — Project Plan
 
-## Current Phase: Phase 3 (Infrastructure) — IN PROGRESS
-## Status: Phase 3a (hooks + schema) COMPLETE, Phase 3b (deploy + testing) pending
+## Current Phase: Phase 3 (Infrastructure) — COMPLETE
+## Status: Phase 3b (UI + deploy config) COMPLETE. Supabase project + Vercel deploy pending (manual steps).
 ## Last Updated: 2026-02-09
 
 ---
@@ -129,17 +129,37 @@
 - [x] Created PROGRESS.md for Document & Clear session pattern
 - [x] Updated projectplan.md with Phase 2 commit + tooling notes
 
-## Phase 3: Infrastructure
+## Phase 3: Infrastructure ✅
 
-- [ ] Supabase project setup (auth, database, storage)
-- [ ] Database schema (users, progress, games)
-- [ ] Auth flow (parent email/password)
-- [ ] Progress sync (Zustand → Supabase)
-- [ ] Vercel deployment with Cape Town edge
-- [ ] QR code generation for workbook pages
-- [ ] Offline caching verification (full game playable offline)
-- [ ] Signed JWT for premium QR content
+### Phase 3a: Hooks + Schema (commit b1493bb)
+- [x] Event bus (typed pub-sub for decoupled game events)
+- [x] Auth hook (useSupabaseAuth — state machine, null-safe)
+- [x] Session tracking hook (useGameSession — ref-based, zero re-renders)
+- [x] Progress sync hook (useProgressSync — debounced, offline-resilient)
+- [x] Extended progressStore with session metrics (duration, phases, deviceTier)
+- [x] Extended types (AuthStatus, SyncStatus, GameSession, ProgressRow)
+- [x] Supabase helpers (upsertProgress, getChildProgress — null-safe)
+- [x] Database schema (profiles, children, progress tables with RLS + POPIA)
+
+### Phase 3b: UI + Deployment Config
+- [x] Parent login page (/parent/login — sign in/signup, null-safe fallback)
+- [x] Parent dashboard (/parent/dashboard — child management + local progress)
+- [x] QR code reference page (/parent/qr-codes — for workbook print layout)
+- [x] QR code utility (lib/qrCodes.ts — Google Charts API URL generation)
+- [x] ProgressSyncProvider in app layout (auto-sync when authenticated)
+- [x] Home page parent portal link
+- [x] Vercel config (vercel.json — Cape Town region, security headers, SW rules)
+- [x] Fixed overflow for scrollable parent pages
+
+### Remaining Manual Steps
+- [ ] Create Supabase project on supabase.com (Africa South region)
+- [ ] Run supabase/migrations/001_initial_schema.sql in SQL Editor
+- [ ] Add .env.local with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+- [ ] Connect Git repo to Vercel and deploy
+- [ ] Test auth flow end-to-end with real Supabase credentials
+- [ ] Offline caching verification (airplane mode after first load)
 - [ ] Galaxy A03 real device testing (or BrowserStack emulation)
+- [ ] Signed JWT for premium QR content (deferred to Phase 5)
 
 ## Phase 4: Second Game + Workbook
 
@@ -210,6 +230,18 @@
 | Home First Load JS | 96.3KB | 500KB | OK |
 | Game First Load JS | 327KB | 500KB | OK (65%) |
 | Bundle increase | +16KB | — | anime.js + game components |
+| TypeScript errors | 0 | 0 | OK |
+| ESLint warnings | 0 | 0 | OK |
+
+### Phase 3
+| Metric | Value | Budget | Status |
+|--------|-------|--------|--------|
+| Home First Load JS | 96.3KB | 500KB | OK (unchanged) |
+| Game First Load JS | 329KB | 500KB | OK (66%) |
+| Parent Dashboard JS | 152KB | — | OK |
+| Parent Login JS | 150KB | — | OK |
+| QR Codes page JS | 98.1KB | — | OK |
+| Static pages | 9 | — | +3 new parent pages |
 | TypeScript errors | 0 | 0 | OK |
 | ESLint warnings | 0 | 0 | OK |
 

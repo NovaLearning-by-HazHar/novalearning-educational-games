@@ -24,6 +24,16 @@ export default function Home() {
           </div>
         </Link>
       </div>
+
+      {/* Parent portal link */}
+      <div className="mt-8">
+        <Link
+          href="/parent/dashboard"
+          className="text-sm text-nova-earth/50 hover:text-nova-earth/70 transition-colors"
+        >
+          Parent Portal
+        </Link>
+      </div>
     </main>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { ProgressSyncProvider } from '@/components/ProgressSyncProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -23,8 +24,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-body antialiased bg-nova-sand text-nova-earth overflow-hidden">
-        {children}
+      <body className="font-body antialiased bg-nova-sand text-nova-earth">
+        <ProgressSyncProvider>{children}</ProgressSyncProvider>
       </body>
     </html>
   );

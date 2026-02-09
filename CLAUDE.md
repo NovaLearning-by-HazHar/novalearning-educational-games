@@ -12,20 +12,27 @@ South African EdTech: 50-page workbook (R150-R350) + QR-linked browser 3D games 
 - **Phase 0** COMPLETE (commit 9485f54) — scaffold, types, stores, agents
 - **Phase 1** COMPLETE (commit 3e14344) — engine, device detect, audio, touch, perf
 - **Phase 2** COMPLETE (commit df5cc88) — "Count to 5 with Sipho" game (14 files)
-- **Phase 3** NEXT — Supabase, Vercel deploy, QR codes, offline verify
-- **Build:** Home 96.3KB | Game 327KB (65% of 500KB budget) | 0 errors
+- **Phase 3** COMPLETE — auth UI, parent dashboard, QR codes, Vercel config, progress sync
+- **Phase 4** NEXT — Second game (Trace Letter A with Thandi) + workbook pages
+- **Build:** Home 96.3KB | Game 329KB (66%) | Parent 152KB | 0 errors | 9 pages
 - **Tracking:** `projectplan.md` has full phase checklists + decisions log
 
 ### Key Files
 ```
 src/app/games/count-to-five/    # 14 files: page, orchestrator, 8 components, 2 hooks, 2 lib
+src/app/parent/login/page.tsx   # Parent auth (sign in/signup, null-safe Supabase)
+src/app/parent/dashboard/page.tsx # Child management + local progress viewer
+src/app/parent/qr-codes/page.tsx  # Workbook QR code reference for print
 src/components/Scene.tsx         # R3F canvas (Galaxy A03 config, WebGL 1.0)
+src/components/ProgressSyncProvider.tsx # Auto-sync wrapper (inert without auth)
 src/stores/gameStore.ts          # Zustand: EXPLORE->DISCOVER->PRACTICE->CELEBRATE
-src/stores/progressStore.ts      # Zustand persist: completed games (localStorage)
-src/lib/audio.ts                 # Howler.js AudioManager (4 categories, mobile unlock)
-src/lib/deviceDetect.ts          # 3-tier GPU sniffing (low/medium/high)
-src/lib/assetLoader.ts           # Cache-first, sequential, budget enforcement
-src/lib/supabase.ts              # Null-safe client stub (Phase 3 extends this)
+src/stores/progressStore.ts      # Zustand persist: completed games + session metrics
+src/lib/supabase.ts              # Null-safe client + upsertProgress/getChildProgress
+src/lib/eventBus.ts              # Typed pub-sub singleton for game events
+src/lib/qrCodes.ts               # Workbook page-to-game URL + QR image generation
+src/lib/useSupabaseAuth.ts       # Auth state machine (null-safe when no Supabase)
+src/lib/useGameSession.ts        # Ref-based session tracking, emits via eventBus
+src/lib/useProgressSync.ts       # Debounced Supabase sync, offline-resilient
 ```
 
 ---
@@ -160,14 +167,19 @@ Managed by `gameStore.ts`: `advancePhase()`, `targetInteractions`, auto-celebrat
 
 ---
 
-## PHASE 3: INFRASTRUCTURE (NEXT)
-- [ ] Supabase setup (auth, database, storage) — free tier, POPIA compliant
-- [ ] Database schema (profiles, progress, games) with RLS
-- [ ] Auth flow (parent email/password)
-- [ ] Progress sync (Zustand persist -> Supabase, offline-first)
-- [ ] Vercel deployment (Cape Town edge)
-- [ ] QR code generation for workbook pages
-- [ ] Offline caching verification
-- [ ] Signed JWT for premium QR content
+## PHASE 4: SECOND GAME + WORKBOOK (NEXT)
+- [ ] Second game: Trace Letter A with Thandi (Language)
+  - Reuse SimpleCharacter, GameShell, gameStore phase machine
+  - New touch-tracing mechanic (finger follows letter path)
+  - Thandi as guide character (Creative storyteller, Visual learner)
+- [ ] Workbook page 15: Counting activity + QR code (count-to-five)
+- [ ] Workbook page layout template for Canva
+- [ ] Extend to 6 characters (add Pieter, Fatima, Amahle to SimpleCharacter)
+
+### Manual Steps (before Phase 4)
+- [ ] Create Supabase project (supabase.com → Africa South)
+- [ ] Run `supabase/migrations/001_initial_schema.sql` in SQL Editor
+- [ ] Add `.env.local` with NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY
+- [ ] Connect repo to Vercel and deploy
 
 **Constraints:** Static export = no API routes. Supabase client-side SDK only. Games MUST work without backend.
