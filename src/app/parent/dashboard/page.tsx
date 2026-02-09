@@ -6,10 +6,12 @@ import { useSupabaseAuth } from '@/lib/useSupabaseAuth';
 import { useProgressStore } from '@/stores/progressStore';
 import { supabase } from '@/lib/supabase';
 
-interface Child {
+interface StudentItem {
   id: string;
   display_name: string;
-  age_years: number | null;
+  age: number | null;
+  grade: string;
+  avatar_emoji: string;
 }
 
 /** Game registry for display names */
@@ -20,7 +22,7 @@ const GAME_NAMES: Record<string, string> = {
 export default function ParentDashboardPage() {
   const { status, user, signOut } = useSupabaseAuth();
   const localProgress = useProgressStore((s) => s.completedGames);
-  const [children, setChildren] = useState<Child[]>([]);
+  const [children, setChildren] = useState<StudentItem[]>([]);
   const [newChildName, setNewChildName] = useState('');
   const [newChildAge, setNewChildAge] = useState(5);
   const [showAddChild, setShowAddChild] = useState(false);
@@ -28,8 +30,8 @@ export default function ParentDashboardPage() {
   const fetchChildren = useCallback(async () => {
     if (!supabase || !user) return;
     const { data } = await supabase
-      .from('children')
-      .select('id, display_name, age_years')
+      .from('students')
+      .select('id, display_name, age, grade, avatar_emoji')
       .order('created_at', { ascending: true });
     if (data) setChildren(data);
   }, [user]);
@@ -42,10 +44,12 @@ export default function ParentDashboardPage() {
     e.preventDefault();
     if (!supabase || !user || !newChildName.trim()) return;
 
-    await supabase.from('children').insert({
+    await supabase.from('students').insert({
       parent_id: user.id,
       display_name: newChildName.trim(),
-      age_years: newChildAge,
+      age: newChildAge,
+      grade: 'R',
+      avatar_emoji: '\ud83e\udd81',
     });
 
     setNewChildName('');
@@ -150,12 +154,13 @@ export default function ParentDashboardPage() {
           {children.map((child) => (
             <div
               key={child.id}
-              className="bg-white rounded-xl p-4 mb-2 border border-nova-earth/10"
+              className="bg-white rounded-xl p-4 mb-2 border border-nova-earth/10 flex items-center gap-3"
             >
+              <span className="text-2xl">{child.avatar_emoji}</span>
               <p className="font-display text-nova-earth">
                 {child.display_name}
-                {child.age_years && (
-                  <span className="text-xs text-nova-earth/50 ml-2">Age {child.age_years}</span>
+                {child.age && (
+                  <span className="text-xs text-nova-earth/50 ml-2">Age {child.age} &middot; Grade {child.grade}</span>
                 )}
               </p>
             </div>

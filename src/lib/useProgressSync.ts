@@ -3,8 +3,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useProgressStore } from '@/stores/progressStore';
 import { useSupabaseAuth } from '@/lib/useSupabaseAuth';
-import { upsertProgress } from '@/lib/supabase';
-import type { SyncStatus, ProgressRow } from '@/types/game';
+import {
+  createGameSession,
+  completeGameSession,
+  upsertStudentProgress,
+} from '@/lib/supabase';
+import type { SyncStatus } from '@/types/game';
+
+/** Skill category lookup for known games. */
+const GAME_SKILL_MAP: Record<string, string> = {
+  'count-to-five': 'numeracy',
+  'trace-letter-a': 'literacy',
+};
 
 /**
  * Progress sync hook (Pattern 1: Request Lifecycle + Pattern 6: Reconnect).
@@ -12,13 +22,18 @@ import type { SyncStatus, ProgressRow } from '@/types/game';
  * Adapts useMCPConnection's sendRequest() lifecycle and reconnect() into
  * a debounced, offline-resilient Zustand-to-Supabase sync.
  *
+ * Flow per unsynced completion:
+ * 1. Create game_sessions row (via games.slug lookup)
+ * 2. Complete the session with score/duration
+ * 3. Upsert student_progress aggregate for the skill category
+ *
  * Behavior:
  * - Fully inert when unauthenticated or supabase unavailable (zero overhead)
  * - Debounces 2s after new completions before syncing
  * - Listens for browser 'online' event to flush on reconnect
  * - Silent failure — local store is source of truth
  */
-export function useProgressSync(childId?: string) {
+export function useProgressSync(studentId?: string) {
   const { status: authStatus } = useSupabaseAuth();
   const completedGames = useProgressStore((s) => s.completedGames);
   const lastSynced = useProgressStore((s) => s.lastSynced);
@@ -29,7 +44,7 @@ export function useProgressSync(childId?: string) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /** Can we sync right now? */
-  const canSync = authStatus === 'authenticated' && !!childId;
+  const canSync = authStatus === 'authenticated' && !!studentId;
 
   /** Execute sync of unsynced completions to Supabase */
   const sync = useCallback(async () => {
@@ -44,24 +59,37 @@ export function useProgressSync(childId?: string) {
     setSyncStatus('syncing');
 
     try {
-      const rows: ProgressRow[] = unsynced.map((g) => ({
-        child_id: childId!,
-        game_id: g.gameId,
-        completed_at: g.completedAt,
-        interactions: g.interactions,
-        duration_seconds: g.durationSeconds ?? null,
-        phases_visited: g.phasesVisited ?? [],
-        device_tier: g.deviceTier ?? null,
-      }));
+      for (const g of unsynced) {
+        const skillCategory = GAME_SKILL_MAP[g.gameId] ?? 'numeracy';
 
-      const result = await upsertProgress(rows);
+        // 1. Create game session (looks up game by slug)
+        const session = await createGameSession(
+          studentId!,
+          g.gameId,
+          g.deviceTier ? { tier: g.deviceTier } : undefined
+        );
 
-      if (result?.error) {
-        console.warn('Progress sync error:', result.error.message);
-        setSyncStatus('error');
-        // Auto-recover to idle after 30s
-        setTimeout(() => setSyncStatus('idle'), 30000);
-        return;
+        if (session) {
+          // 2. Complete the session with results
+          await completeGameSession(session.id, {
+            score: g.interactions,
+            maxScore: g.interactions, // perfect score for counting game
+            durationSeconds: g.durationSeconds ?? 0,
+            completed: true,
+            attempts: 1,
+            performanceData: {
+              phasesVisited: g.phasesVisited ?? [],
+              deviceTier: g.deviceTier ?? null,
+            },
+          });
+        }
+
+        // 3. Upsert aggregate student progress
+        await upsertStudentProgress(studentId!, skillCategory, {
+          totalGamesPlayed: completedGames.filter((c) => c.gameId === g.gameId).length,
+          totalTimeSeconds: g.durationSeconds ?? 0,
+          masteryPercentage: 100, // completed = full mastery for now
+        });
       }
 
       setLastSynced(new Date().toISOString());
@@ -71,7 +99,7 @@ export function useProgressSync(childId?: string) {
       setSyncStatus('error');
       setTimeout(() => setSyncStatus('idle'), 30000);
     }
-  }, [canSync, childId, getUnsynced, setLastSynced]);
+  }, [canSync, studentId, getUnsynced, setLastSynced, completedGames]);
 
   // Debounced sync when completedGames changes
   useEffect(() => {

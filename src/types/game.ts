@@ -53,14 +53,40 @@ export interface GameSession {
   deviceTier: DeviceTier;
 }
 
-/** Supabase row shape for progress table */
-export interface ProgressRow {
+/** Student (child) linked to a parent in Supabase */
+export interface Student {
+  id: string;
+  parent_id: string;
+  display_name: string;
+  age: number;
+  grade: string;
+  avatar_emoji: string;
+}
+
+/** Supabase row shape for game_sessions table */
+export interface GameSessionRow {
   id?: string;
-  child_id: string;
+  student_id: string;
   game_id: string;
-  completed_at: string;
-  interactions: number;
-  duration_seconds: number | null;
-  phases_visited: string[];
-  device_tier: string | null;
+  started_at?: string;
+  completed_at?: string;
+  score: number;
+  max_score: number;
+  duration_seconds: number;
+  attempts: number;
+  completed: boolean;
+  performance_data: Record<string, unknown>;
+  device_info: Record<string, unknown>;
+}
+
+/** Supabase row shape for student_progress table (aggregate per skill) */
+export interface StudentProgressRow {
+  id?: string;
+  student_id: string;
+  skill_category: string;
+  current_level: number;
+  total_games_played: number;
+  total_time_seconds: number;
+  mastery_percentage: number;
+  last_played_at: string;
 }
