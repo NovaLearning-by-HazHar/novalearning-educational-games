@@ -2,52 +2,52 @@
 
 ## Session
 - Date: 2026-02-09
-- Phase: Phase 3b — Infrastructure UI + Deployment Config
-- Token spend: Check /cost
+- Phase: Phase 3 Fix + Phase 4 Prep
 
-## Completed This Session
-- [x] Verified Phase 3a already committed (b1493bb) — hooks, event bus, types, migration
-- [x] Built parent auth UI (/parent/login) — sign in/signup with null-safe Supabase fallback
-- [x] Built parent dashboard (/parent/dashboard) — child management + local progress view
-- [x] Built QR codes page (/parent/qr-codes) — workbook page-to-game URL mapping
-- [x] Created QR code utility (src/lib/qrCodes.ts) — Google Charts API URL generator
-- [x] Created ProgressSyncProvider component — auto-sync wrapper for app layout
-- [x] Integrated progress sync into app layout (wraps all pages)
-- [x] Updated home page with Parent Portal link
-- [x] Created vercel.json — Cape Town region, security headers, SW caching
-- [x] Fixed overflow-hidden (was on body, now only on GameShell) for scrollable parent pages
-
-## Files Modified
-| File | Action | Summary |
-|------|--------|---------|
-| src/app/parent/login/page.tsx | New | Parent auth: sign in/signup, null-safe when no Supabase |
-| src/app/parent/dashboard/page.tsx | New | Child management + local progress viewer |
-| src/app/parent/qr-codes/page.tsx | New | Workbook QR code reference for print layout |
-| src/lib/qrCodes.ts | New | QR code URL generation (Google Charts API) |
-| src/components/ProgressSyncProvider.tsx | New | Auto-sync wrapper, inert without auth |
-| src/app/layout.tsx | Updated | Added ProgressSyncProvider, removed overflow-hidden |
-| src/app/page.tsx | Updated | Added Parent Portal link |
-| src/app/globals.css | Updated | Removed overflow: hidden from html/body |
-| vercel.json | New | Cape Town region, security headers, SW cache rules |
+## Phase 3 — COMPLETE
+- [x] Schema aligned with deployed Supabase (students/student_progress/games/game_sessions)
+- [x] New Supabase helpers: createGameSession, completeGameSession, upsertStudentProgress
+- [x] Progress sync adapted for game_sessions + student_progress flow
+- [x] Dashboard updated: children -> students, age_years -> age, added grade/avatar_emoji
+- [x] Migration SQL rewritten to match live schema exactly
+- [x] .env.local created with Supabase credentials
+- [x] ErrorBoundary component added (Ubuntu-friendly: lion emoji + "Let's try again!")
+- [x] Game page wrapped in ErrorBoundary
+- [x] Loading skeleton already exists in GameShell (globe emoji + "Loading...")
+- [x] Phase Gate 3 -> 4: PASSED
 
 ## Build State
 - TSC: PASS (0 errors)
 - Lint: PASS (0 warnings)
 - Build: PASS (9 static pages)
 - Bundle: Home=96.3KB | Game=329KB (66%) | Parent=152KB | QR=98KB
+- grep "from('children')|from('progress')|child_id" src/ = ZERO results
 
-## Next Session Should
-1. Create Supabase project on supabase.com (Africa South region)
-2. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local
-3. Run supabase/migrations/001_initial_schema.sql in SQL Editor
-4. Connect Git repo to Vercel and deploy
-5. Test full flow: auth -> add child -> play game -> see progress sync
-6. Test offline caching (airplane mode after first load)
-7. Phase 4: Second game (Trace Letter A with Thandi)
+## Deployment
+- [ ] Run `npx vercel login` then `npx vercel --prod` to deploy
+- [ ] Set env vars: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_APP_NAME
+- [ ] Verify: home page, game page (3D), parent login at deployed URL
 
-## Notes / Gotchas
-- All parent pages work WITHOUT Supabase (graceful null fallback)
-- Games continue to work fully offline (Zustand persist is source of truth)
-- QR codes use Google Charts API — replace with self-hosted for production
-- vercel.json uses "cpt1" (Cape Town) for edge deployment
-- Parent dashboard shows local progress even when not authenticated
+## Files Modified This Session
+| File | Action | Summary |
+|------|--------|---------|
+| src/types/game.ts | Updated | ProgressRow -> GameSessionRow, StudentProgressRow, Student |
+| src/lib/supabase.ts | Updated | New helpers for game_sessions + student_progress |
+| src/lib/useProgressSync.ts | Updated | Full adaptation to game_sessions + student_progress sync |
+| src/app/parent/dashboard/page.tsx | Updated | children -> students, age_years -> age, grade, avatar |
+| src/components/ProgressSyncProvider.tsx | Updated | childId prop -> studentId prop |
+| supabase/migrations/001_initial_schema.sql | Rewritten | Matches live schema exactly |
+| src/components/ErrorBoundary.tsx | New | Ubuntu-friendly error boundary |
+| src/app/games/count-to-five/page.tsx | Updated | Wrapped in ErrorBoundary |
+| PROGRESS.md | Updated | Phase 3 gate PASSED |
+
+## Phase 4 — NEXT
+- [ ] Second game: Trace Letter A with Thandi (Language/Literacy)
+- [ ] Workbook page 15: Counting activity + QR code
+- [ ] Workbook page layout template
+- [ ] Extend SimpleCharacter to 6 characters
+
+## Manual Steps Before Phase 4
+- [ ] Deploy to Vercel (npx vercel login + npx vercel --prod)
+- [ ] Verify end-to-end auth + progress flow at deployed URL
+- [ ] Enable "Allow anonymous sign-ins" in Supabase dashboard if needed

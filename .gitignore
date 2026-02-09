@@ -44,3 +44,7 @@ next-env.d.ts
 # NovaLearning
 *.glb.bak
 *.gltf.bak
+
+
+#Ignore cursor AI rules
+.cursor\rules\codacy.mdc

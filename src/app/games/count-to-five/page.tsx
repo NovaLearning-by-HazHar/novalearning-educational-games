@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import GameShell from '@/components/GameShell';
 import Scene from '@/components/Scene';
 import { useGameStore } from '@/stores/gameStore';
@@ -85,52 +86,56 @@ export default function CountToFivePage() {
 
   if (phase === 'celebrate') {
     return (
-      <GameShell title="Count to 5 with Sipho">
-        <div className="relative w-full h-full">
-          <Scene
-            cameraPosition={[0, 1.5, 5]}
-            cameraFov={50}
-            backgroundColor="#FFF8E1"
-          >
-            <CountingCelebration />
-          </Scene>
-
-          {/* Celebration HTML overlay */}
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-12 pointer-events-none">
-            <h2 className="text-2xl md:text-3xl font-display text-nova-earth text-center mb-4">
-              We counted to five together!
-            </h2>
-            <button
-              onClick={handlePlayAgain}
-              className="pointer-events-auto px-8 py-3 bg-nova-sun text-nova-earth font-display text-xl rounded-full shadow-lg active:scale-95 transition-transform"
+      <ErrorBoundary>
+        <GameShell title="Count to 5 with Sipho">
+          <div className="relative w-full h-full">
+            <Scene
+              cameraPosition={[0, 1.5, 5]}
+              cameraFov={50}
+              backgroundColor="#FFF8E1"
             >
-              Play Again
-            </button>
+              <CountingCelebration />
+            </Scene>
+
+            {/* Celebration HTML overlay */}
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-12 pointer-events-none">
+              <h2 className="text-2xl md:text-3xl font-display text-nova-earth text-center mb-4">
+                We counted to five together!
+              </h2>
+              <button
+                onClick={handlePlayAgain}
+                className="pointer-events-auto px-8 py-3 bg-nova-sun text-nova-earth font-display text-xl rounded-full shadow-lg active:scale-95 transition-transform"
+              >
+                Play Again
+              </button>
+            </div>
           </div>
-        </div>
-      </GameShell>
+        </GameShell>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <GameShell title="Count to 5 with Sipho">
-      <div className="relative w-full h-full">
-        <Scene
-          cameraPosition={[0, 2, 6]}
-          cameraFov={45}
-          backgroundColor="#87CEEB"
-        >
-          <CountToFiveGame />
-        </Scene>
+    <ErrorBoundary>
+      <GameShell title="Count to 5 with Sipho">
+        <div className="relative w-full h-full">
+          <Scene
+            cameraPosition={[0, 2, 6]}
+            cameraFov={45}
+            backgroundColor="#87CEEB"
+          >
+            <CountToFiveGame />
+          </Scene>
 
-        {/* Progress overlay */}
-        <ProgressOverlay
-          pickedCount={pickedCount}
-          total={5}
-          showHint={showSiphoHint}
-          visible={phase !== 'explore'}
-        />
-      </div>
-    </GameShell>
+          {/* Progress overlay */}
+          <ProgressOverlay
+            pickedCount={pickedCount}
+            total={5}
+            showHint={showSiphoHint}
+            visible={phase !== 'explore'}
+          />
+        </div>
+      </GameShell>
+    </ErrorBoundary>
   );
 }
