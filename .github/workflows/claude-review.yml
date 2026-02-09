@@ -1,0 +1,60 @@
+name: Claude PR Review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          direct_prompt: |
+            Review this PR for the NovaLearning project. Apply these constraints:
+
+            TECHNICAL CONSTRAINTS:
+            - Target device: Samsung Galaxy A03 (Mali-G52 GPU, 3GB RAM)
+            - WebGL 1.0 only (no WebGL 2.0 features)
+            - Max 5,000 triangles per model, 20,000 per scene
+            - Textures: 512x512 max
+            - Bundle < 500KB per route, < 1MB hard limit
+            - R3F v8 / React 18 pinned (NOT v9/React 19)
+            - anime.js v4 API (named exports, not default)
+            - Static export (no API routes)
+            - Supabase client-side SDK only
+
+            CONTENT CONSTRAINTS:
+            - Grade R (ages 5-6) appropriate content only
+            - Ubuntu philosophy: community over competition
+            - No fail states, no punitive mechanics, no scores/leaderboards
+            - Touch targets minimum 48px
+            - No AR features (web-based 3D only)
+            - No content requiring reading ability
+
+            FLAG AS CRITICAL:
+            - Bundle size increases > 50KB
+            - New dependencies not in version pins
+            - WebGL 2.0 usage (compute shaders, transform feedback)
+            - Competition mechanics (winner, score, leaderboard)
+            - Failure states (Game Over, Wrong!, lives, timer pressure)
+            - Assets > 50KB or textures > 512x512
+            - AR, A-Frame, WebXR references
+            - Firebase or non-Supabase backend
+
+            Format: structured review with severity (critical/warning/info).
+          claude_args: "--max-turns 5"

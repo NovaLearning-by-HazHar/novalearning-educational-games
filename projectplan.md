@@ -1,7 +1,7 @@
 # NovaLearning Games — Project Plan
 
-## Current Phase: Phase 3 (Infrastructure) — COMPLETE
-## Status: Phase 3b (UI + deploy config) COMPLETE. Supabase project + Vercel deploy pending (manual steps).
+## Current Phase: Phase 4 (Second Game + Workbook) — COMPLETE
+## Status: Phase 4 COMPLETE. Trace Letter A game + workbook pages generated.
 ## Last Updated: 2026-02-09
 
 ---
@@ -161,26 +161,67 @@
 - [ ] Galaxy A03 real device testing (or BrowserStack emulation)
 - [ ] Signed JWT for premium QR content (deferred to Phase 5)
 
-## Phase 4: Second Game + Workbook
+## Phase 4: Second Game + Workbook DONE
 
-- [ ] Second game: Trace Letter A with Thandi (Language)
-  - Reuse SimpleCharacter, GameShell, gameStore phase machine
-  - New touch-tracing mechanic (finger follows letter path)
+- [x] Second game: Trace Letter A with Thandi (Language)
+  - Reuses SimpleCharacter, GameShell, gameStore phase machine
+  - Touch-tracing mechanic: 3-stroke letter A on easel board
   - Thandi as guide character (Creative storyteller, Visual learner)
-- [ ] Workbook page 1: Counting activity + QR code
-- [ ] Workbook page 2: Letter tracing activity + QR code
-- [ ] Parent dashboard stub (Supabase + simple React UI)
-- [ ] Extend to 6 characters (add Pieter, Fatima, Amahle to SimpleCharacter)
+  - TracingInteraction: pointer raycaster plane path checkpoint matching
+  - LetterPath: CatmullRomCurve3 tube geometry, per-stroke progress fill
+  - WritingEnvironment: sky gradient, easel board, bushes, flowers
+  - TracingCelebration: 3 characters + floating letter A + confetti
+  - useTracingState: Zustand store with per-stroke progress tracking
+  - Audio: tracing tones, checkpoint dings, stroke chime, letter A sound
+  - 11 new files mirroring count-to-five structure
+- [x] Workbook page 15: Counting activity + QR code (pdfkit)
+- [x] Workbook page 22: Letter tracing activity + QR code (pdfkit)
+- [x] Extend to 6 characters (Pieter, Fatima, Amahle color configs added)
+- [x] QR code mapping updated (page 22 to trace-letter-a)
+- [x] Home page updated with second game link
+- [x] Workbook generator script: npm run workbook outputs to out/ directory
 
-## Phase 5: Workbook Pipeline
+## Phase 5: Workbook Production Pipeline
 
-- [ ] Canva MCP page generation (batch 10 pages/day for rate limits)
-- [ ] QR code generation linking to deployed game URLs
-- [ ] Print-ready PDF compilation (CMYK, bleed, crop marks)
-- [ ] CAPS curriculum coverage verification across all 50 pages
-- [ ] Source 3 Cape Town printers (get quotes)
+### Phase 5a: Design System Setup (Canva Pro)
+- [ ] Create Canva Pro workspace with NovaLearning brand kit
+  - CMYK color palette (SA flag colors + brand green/gold)
+  - Font set: KG Primary Dots (tracing), Sassoon Primary (body), Arial Rounded (headings)
+  - Rainbow Nation character illustrations (6 kids, consistent style)
+  - SA animal illustrations (10 animals per design guide)
+  - Ndebele border patterns (5 variations)
+  - Activity icons (scissors, pencil, crayon, eye, hand)
+- [ ] Build 5 master Canva templates (Activity, Coloring, Writing Practice, Matching/Connect, Sequencing)
+  - Each includes: name field, page number, logo, activity icon, QR zone (20x20mm bottom-right), reward star, Ubuntu moment
+
+### Phase 5b: Page Design (in Canva)
+- [ ] Design 50 pages across CAPS Term 1 curriculum
+  - Batch 10 pages/week (~5 week timeline)
+  - Teacher review checkpoint at pages 10, 25, 50
+- [ ] Export all pages as 300 DPI PNG from Canva
+  - Note: Expect ~500MB+ total (50 x A4 @ 300 DPI). Store in `assets/workbook-pages/` with naming convention `page-XX-{type}.png`
+
+### Phase 5c: Print Pipeline (pdfkit + Ghostscript)
+- [ ] Enhance `scripts/generate-workbook.ts`:
+  - Accept directory of Canva PNG exports as input
+  - **Stream pages into PDF one at a time** (do NOT load all 500MB+ of PNGs into memory)
+  - Insert QR codes from `src/lib/qrCodes.ts` (all 50 page mappings)
+  - Page numbering (bottom-center, 14pt)
+  - NovaLearning logo (bottom-left, 15mm)
+  - 3mm bleed + crop marks
+  - Combined 50-page PDF output
+- [ ] RGB->CMYK conversion step (CRITICAL -- Canva exports RGB only)
+  - Option A: Ghostscript with FOGRA39 ICC profile: `gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sColorConversionStrategy=CMYK -dProcessColorModel=/DeviceCMYK -sOutputICCProfile=FOGRA39.icc -o output-cmyk.pdf input-rgb.pdf`
+  - Option B: Sharp library for per-image conversion before PDF assembly
+  - Validate: spot-check converted colors against design guide CMYK values
+- [ ] PDF/X-1a compliance check
+- [ ] Parallelise: Start 5c pipeline dev in weeks 1-2 of 5b so compilation is ready when exports land
+
+### Phase 5d: Print Production
+- [ ] Source 3 Cape Town printers (get quotes for 10-book pilot)
+- [ ] Test print: verify colors, margins, QR readability at A4
+  - Specifically verify CMYK conversion didn't shift brand colors
 - [ ] 10-book pilot print run
-- [ ] Teacher review of pilot books (CAPS alignment feedback)
 
 ## Phase 6: School Pilots & Launch
 
@@ -213,6 +254,13 @@
 | 2026-02-09 | CLAUDE.md terminal optimization | 657→174 lines saves ~11K tokens/msg (~$8-17/session on Opus) |
 | 2026-02-09 | Document & Clear over /compact | PROGRESS.md + /clear + resume preserves full context without corruption |
 | 2026-02-09 | Sequential Phase 3 (no multi-agent) | Tasks have dependencies; multi-agent adds 3-4x cost with no parallelism |
+|| 2026-02-09 | pdfkit for workbook generation | Dev-time PDF, not runtime; reproducible, no Canva dependency |
+|| 2026-02-09 | CatmullRomCurve3 + TubeGeometry for letter paths | Smooth curves for tracing, easy checkpoint detection |
+|| 2026-02-09 | 3-stroke letter A | Matches standard handwriting instruction; segment-based progress |
+|| 2026-02-09 | Reuse SimpleCharacter across games | Same component, different color props; no code duplication |
+|| 2026-02-09 | ALL_CHARACTER_COLORS (6) alongside MVP (3) | Backward compatible; games choose which set to use |
+|| 2026-02-09 | Canva Pro + pdfkit hybrid for workbook | Canva Enterprise API costs unjustified at MVP; Canva Pro for visual design, pdfkit for print compilation. Polotno as fallback. |
+|| 2026-02-09 | Full workbook production deferred to Phase 5 | Phase 4 pdfkit pages validated QR mapping + layout. 50-page production is a design task, not a dev task. |
 
 ## Build Metrics
 
@@ -244,6 +292,17 @@
 | Static pages | 9 | — | +3 new parent pages |
 | TypeScript errors | 0 | 0 | OK |
 | ESLint warnings | 0 | 0 | OK |
+
+### Phase 4
+| Metric | Value | Budget | Status |
+|--------|-------|--------|--------|
+| Home First Load JS | 96.3KB | 500KB | OK (unchanged) |
+| Count Game JS | 331KB | 500KB | OK (66%) |
+| Trace Game JS | 331KB | 500KB | OK (66%) |
+| Static pages | 10 | - | +1 new game page |
+| TypeScript errors | 0 | 0 | OK |
+| ESLint warnings | 0 | 0 | OK |
+| Workbook PDFs | 3 files | - | page-15, page-22, combined |
 
 ## Files Changed (Phase 1)
 
@@ -279,6 +338,31 @@
 | src/app/games/count-to-five/components/CountingCelebration.tsx | New | 3 MVP characters + instanced confetti celebration |
 | src/app/games/count-to-five/CountToFiveGame.tsx | Rewritten | Orchestrator composing all sub-components |
 | src/app/games/count-to-five/page.tsx | Rewritten | Full assembly with audio, phase routing, Play Again |
+
+## Files Changed (Phase 4)
+
+| File | Action | Description |
+|------|--------|-------------|
+| src/app/games/trace-letter-a/page.tsx | New | Full page assembly with phase routing, celebration |
+| src/app/games/trace-letter-a/TraceLetterAGame.tsx | New | Orchestrator composing all tracing sub-components |
+| src/app/games/trace-letter-a/lib/constants.ts | New | Letter A path data, Thandi position, colors, timing |
+| src/app/games/trace-letter-a/lib/audioGenerator.ts | New | Web Audio API synthesis (tracing, checkpoint, letter sound) |
+| src/app/games/trace-letter-a/hooks/useTracingState.ts | New | Zustand store: per-stroke progress, isTracing, completion |
+| src/app/games/trace-letter-a/hooks/useAudioSetup.ts | New | Generate + load 11 audio blobs on mount |
+| src/app/games/trace-letter-a/components/ThandiGuide.tsx | New | Thandi character wrapper with phase-aware behavior |
+| src/app/games/trace-letter-a/components/WritingEnvironment.tsx | New | Ground, sky, easel board, bushes, flowers |
+| src/app/games/trace-letter-a/components/LetterPath.tsx | New | CatmullRomCurve3 tube geometry with progress fill |
+| src/app/games/trace-letter-a/components/TracingInteraction.tsx | New | Pointer raycasting to path checkpoint matching |
+| src/app/games/trace-letter-a/components/TracingProgressOverlay.tsx | New | HTML overlay: stroke indicators + progress bar |
+| src/app/games/trace-letter-a/components/TracingCelebration.tsx | New | 3 chars + floating letter A + confetti |
+| src/app/games/count-to-five/lib/constants.ts | Enhanced | Added ALL_CHARACTER_COLORS (6 chars) + ALL_CHARACTERS |
+| src/app/page.tsx | Enhanced | Added Trace Letter A game link |
+| src/lib/qrCodes.ts | Enhanced | Added page 22 QR mapping for trace-letter-a |
+| scripts/generate-workbook.ts | New | pdfkit workbook generator (page 15 + 22 + combined) |
+| scripts/workbook-templates/counting-page.ts | New | Page 15: counting activity layout |
+| scripts/workbook-templates/tracing-page.ts | New | Page 22: letter tracing activity layout |
+| scripts/workbook-templates/shared/page-layout.ts | New | Shared layout: A4 dims, brand colors, Ndebele border, QR helper |
+| package.json | Enhanced | Added workbook script, tsx + pdfkit dev deps |
 
 ## Blockers
 

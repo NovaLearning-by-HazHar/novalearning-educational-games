@@ -23,6 +23,19 @@ export default function Home() {
             <p className="text-xs text-nova-earth/60">Numeracy</p>
           </div>
         </Link>
+
+        <Link
+          href="/games/trace-letter-a"
+          className="flex items-center gap-4 p-4 rounded-2xl bg-blue-100 hover:bg-blue-200 transition-colors"
+        >
+          <span className="text-3xl" aria-hidden="true">✏️</span>
+          <div>
+            <p className="font-display text-lg text-nova-earth">
+              Trace Letter A with Thandi
+            </p>
+            <p className="text-xs text-nova-earth/60">Language</p>
+          </div>
+        </Link>
       </div>
 
       {/* Parent portal link */}

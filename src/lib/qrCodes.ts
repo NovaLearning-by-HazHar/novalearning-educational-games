@@ -18,8 +18,7 @@ const QR_SIZE = 300;
 /** Workbook page → game mapping */
 export const WORKBOOK_PAGES: Record<number, { gameId: string; title: string }> = {
   15: { gameId: 'count-to-five', title: 'Count to 5 with Sipho' },
-  // Future pages:
-  // 22: { gameId: 'trace-letter-a', title: 'Trace Letter A with Thandi' },
+  22: { gameId: 'trace-letter-a', title: 'Trace Letter A with Thandi' },
 };
 
 /** Get the game URL for a workbook page */

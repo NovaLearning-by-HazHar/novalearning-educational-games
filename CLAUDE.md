@@ -13,26 +13,30 @@ South African EdTech: 50-page workbook (R150-R350) + QR-linked browser 3D games 
 - **Phase 1** COMPLETE (commit 3e14344) — engine, device detect, audio, touch, perf
 - **Phase 2** COMPLETE (commit df5cc88) — "Count to 5 with Sipho" game (14 files)
 - **Phase 3** COMPLETE — auth UI, parent dashboard, QR codes, Vercel config, progress sync
-- **Phase 4** NEXT — Second game (Trace Letter A with Thandi) + workbook pages
-- **Build:** Home 96.3KB | Game 329KB (66%) | Parent 152KB | 0 errors | 9 pages
+- **Phase 4** COMPLETE — Trace Letter A with Thandi + pdfkit workbook proof-of-concept (2 pages)
+- **Phase 5** NEXT — Workbook production (Canva Pro design + pdfkit print compilation)
+- **Build:** Home 96.3KB | Count 331KB (66%) | Trace 331KB (66%) | Parent 152KB | 0 errors | 10 pages
 - **Tracking:** `projectplan.md` has full phase checklists + decisions log
 
 ### Key Files
 ```
-src/app/games/count-to-five/    # 14 files: page, orchestrator, 8 components, 2 hooks, 2 lib
-src/app/parent/login/page.tsx   # Parent auth (sign in/signup, null-safe Supabase)
+src/app/games/count-to-five/     # 14 files: page, orchestrator, 8 components, 2 hooks, 2 lib
+src/app/games/trace-letter-a/    # 12 files: page, orchestrator, 6 components, 2 hooks, 2 lib
+src/app/parent/login/page.tsx    # Parent auth (sign in/signup, null-safe Supabase)
 src/app/parent/dashboard/page.tsx # Child management + local progress viewer
 src/app/parent/qr-codes/page.tsx  # Workbook QR code reference for print
-src/components/Scene.tsx         # R3F canvas (Galaxy A03 config, WebGL 1.0)
+src/components/Scene.tsx          # R3F canvas (Galaxy A03 config, WebGL 1.0)
 src/components/ProgressSyncProvider.tsx # Auto-sync wrapper (inert without auth)
-src/stores/gameStore.ts          # Zustand: EXPLORE->DISCOVER->PRACTICE->CELEBRATE
-src/stores/progressStore.ts      # Zustand persist: completed games + session metrics
-src/lib/supabase.ts              # Null-safe client + upsertProgress/getChildProgress
-src/lib/eventBus.ts              # Typed pub-sub singleton for game events
-src/lib/qrCodes.ts               # Workbook page-to-game URL + QR image generation
-src/lib/useSupabaseAuth.ts       # Auth state machine (null-safe when no Supabase)
-src/lib/useGameSession.ts        # Ref-based session tracking, emits via eventBus
-src/lib/useProgressSync.ts       # Debounced Supabase sync, offline-resilient
+src/stores/gameStore.ts           # Zustand: EXPLORE->DISCOVER->PRACTICE->CELEBRATE
+src/stores/progressStore.ts       # Zustand persist: completed games + session metrics
+src/lib/supabase.ts               # Null-safe client + upsertProgress/getChildProgress
+src/lib/eventBus.ts               # Typed pub-sub singleton for game events
+src/lib/qrCodes.ts                # Workbook page-to-game URL + QR image generation
+src/lib/useSupabaseAuth.ts        # Auth state machine (null-safe when no Supabase)
+src/lib/useGameSession.ts         # Ref-based session tracking, emits via eventBus
+src/lib/useProgressSync.ts        # Debounced Supabase sync, offline-resilient
+scripts/generate-workbook.ts      # pdfkit workbook generator (proof-of-concept, Phase 4)
+scripts/workbook-templates/       # Page templates + shared layout for workbook PDFs
 ```
 
 ---
@@ -167,19 +171,23 @@ Managed by `gameStore.ts`: `advancePhase()`, `targetInteractions`, auto-celebrat
 
 ---
 
-## PHASE 4: SECOND GAME + WORKBOOK (NEXT)
-- [ ] Second game: Trace Letter A with Thandi (Language)
-  - Reuse SimpleCharacter, GameShell, gameStore phase machine
-  - New touch-tracing mechanic (finger follows letter path)
-  - Thandi as guide character (Creative storyteller, Visual learner)
-- [ ] Workbook page 15: Counting activity + QR code (count-to-five)
-- [ ] Workbook page layout template for Canva
-- [ ] Extend to 6 characters (add Pieter, Fatima, Amahle to SimpleCharacter)
+## PHASE 5: WORKBOOK PRODUCTION PIPELINE (NEXT)
+Approach: **Canva Pro** (visual design, $13/mo) + **pdfkit** (print compilation).
+Reference: SA_Workbook_Design_Guide.pdf (5 template types, print specs, cultural elements).
 
-### Manual Steps (before Phase 4)
-- [ ] Create Supabase project (supabase.com → Africa South)
-- [ ] Run `supabase/migrations/001_initial_schema.sql` in SQL Editor
-- [ ] Add `.env.local` with NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY
-- [ ] Connect repo to Vercel and deploy
+- [ ] 5a: Canva Pro brand kit + 5 master templates (Activity, Coloring, Writing, Matching, Sequencing)
+- [ ] 5b: Design 50 pages in Canva (CAPS Term 1), export 300 DPI PNG
+- [ ] 5c: Enhance generate-workbook.ts — accept PNGs, insert QR codes, CMYK, bleed, crop marks
+- [ ] 5d: Source printers, test print, 10-book pilot
+
+### Canva SDK Notes (evaluated, NOT using Enterprise API)
+- Canva Connect API autofill requires Enterprise subscription — rejected for MVP
+- Canva Print Partnerships API has CMYK/bleed/crop marks — useful later if scale justifies
+- Polotno Studio (forked repo) available as self-hosted fallback if Canva dependency becomes an issue
+
+### Manual Steps (before Phase 5)
+- [ ] Deploy to Vercel (npx vercel login + npx vercel --prod)
+- [ ] Verify both games at deployed URL
+- [ ] Subscribe to Canva Pro ($12.99/mo)
 
 **Constraints:** Static export = no API routes. Supabase client-side SDK only. Games MUST work without backend.

@@ -66,8 +66,19 @@ export const MVP_CHARACTER_COLORS: Record<string, CharacterColors> = {
   lerato: { body: '#2E7D32', accent: '#66BB6A', skin: '#8D6E63' },
 };
 
+/** All 6 Rainbow Nation character colors */
+export const ALL_CHARACTER_COLORS: Record<string, CharacterColors> = {
+  ...MVP_CHARACTER_COLORS,
+  pieter: { body: '#F57F17', accent: '#FFCA28', skin: '#FFCCBC' },
+  fatima: { body: '#6A1B9A', accent: '#AB47BC', skin: '#D7CCC8' },
+  amahle: { body: '#D84315', accent: '#FF8A65', skin: '#8D6E63' },
+};
+
 /** Single source of truth for which characters appear in MVP */
 export const MVP_CHARACTERS = ['sipho', 'thandi', 'lerato'] as const;
+
+/** All 6 characters for full celebration scenes */
+export const ALL_CHARACTERS = ['sipho', 'thandi', 'lerato', 'pieter', 'fatima', 'amahle'] as const;
 
 /** Celebration character positions (3-character arc) */
 export const CELEBRATION_POSITIONS: [number, number, number][] = [
