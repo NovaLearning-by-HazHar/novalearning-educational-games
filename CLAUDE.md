@@ -14,9 +14,10 @@ South African EdTech: 50-page workbook (R150-R350) + QR-linked browser 3D games 
 - **Phase 2** COMPLETE (commit df5cc88) — "Count to 5 with Sipho" game (14 files)
 - **Phase 3** COMPLETE — auth UI, parent dashboard, QR codes, Vercel config, progress sync
 - **Phase 4** COMPLETE — Trace Letter A with Thandi + pdfkit workbook proof-of-concept (2 pages)
-- **Phase 5** NEXT — Workbook production (Canva Pro design + pdfkit print compilation)
+- **Phase 5** IN PROGRESS — Workbook production (content map created, Canva design next)
 - **Build:** Home 96.3KB | Count 331KB (66%) | Trace 331KB (66%) | Parent 152KB | 0 errors | 10 pages
 - **Tracking:** `projectplan.md` has full phase checklists + decisions log
+- **Content:** `docs/workbook-content-map.md` has 50-page outline for Phase 5b Canva design
 
 ### Key Files
 ```
@@ -37,6 +38,7 @@ src/lib/useGameSession.ts         # Ref-based session tracking, emits via eventB
 src/lib/useProgressSync.ts        # Debounced Supabase sync, offline-resilient
 scripts/generate-workbook.ts      # pdfkit workbook generator (proof-of-concept, Phase 4)
 scripts/workbook-templates/       # Page templates + shared layout for workbook PDFs
+docs/workbook-content-map.md     # 50-page content outline (template types, SA animals, articulation levels)
 ```
 
 ---
@@ -171,14 +173,31 @@ Managed by `gameStore.ts`: `advancePhase()`, `targetInteractions`, auto-celebrat
 
 ---
 
-## PHASE 5: WORKBOOK PRODUCTION PIPELINE (NEXT)
-Approach: **Canva Pro** (visual design, $13/mo) + **pdfkit** (print compilation).
+## PHASE 5: WORKBOOK PRODUCTION PIPELINE (IN PROGRESS)
+Approach: **Canva Pro** (visual design, $13/mo) + **pdfkit** (print compilation) + **Ghostscript** (RGB->CMYK).
+Content guide: `docs/workbook-content-map.md` (50-page outline with template types, SA animals, cultural values, articulation levels).
 Reference: SA_Workbook_Design_Guide.pdf (5 template types, print specs, cultural elements).
 
+### Articulation Hierarchy (8 levels across 50 pages)
+L1 Discrimination → L2 Isolation → L3 Syllables → L4 Words → L5 Sentences → L6 Stories → L7 Conversation → L8 Generalization
+
+### 50-Page Structure
+- **Pages 1-6:** Rainbow Nation Foundation (welcome, sports pride, patterns, Ubuntu, QR instructions)
+- **Pages 7-32:** Literacy A-Z (SA animal + cultural value per letter)
+- **Pages 33-42:** Rainbow Numeracy (numbers 1-10 with sporting/cultural context)
+- **Pages 43-50:** Ubuntu Life Skills (principles, heritage, environment, community, pledge)
+- **QR codes:** Pages 15 and 22 ONLY (2 MVP games)
+
+### Production Specs
+- **Physical:** A4 portrait, 150gsm paper, perfect bound, laminated cover, 52 total (50 + 2 covers)
+- **Print:** 300 DPI, CMYK (Ghostscript FOGRA39 ICC), PDF/X-1a
+- **Price:** R180 selling, ~R40 production cost, R140 margin (78%), break-even at 303 books
+
+### Phase Checklist
 - [ ] 5a: Canva Pro brand kit + 5 master templates (Activity, Coloring, Writing, Matching, Sequencing)
-- [ ] 5b: Design 50 pages in Canva (CAPS Term 1), export 300 DPI PNG
-- [ ] 5c: Enhance generate-workbook.ts — accept PNGs, insert QR codes, CMYK, bleed, crop marks
-- [ ] 5d: Source printers, test print, 10-book pilot
+- [ ] 5b: Design 50 pages per `docs/workbook-content-map.md` (~5 weeks, 10 pages/week)
+- [ ] 5c: Enhance generate-workbook.ts — stream PNGs, insert QR codes (pp 15+22), bleed, crop marks + Ghostscript RGB->CMYK
+- [ ] 5d: Source printers, test print (verify CMYK), 10-book pilot
 
 ### Canva SDK Notes (evaluated, NOT using Enterprise API)
 - Canva Connect API autofill requires Enterprise subscription — rejected for MVP

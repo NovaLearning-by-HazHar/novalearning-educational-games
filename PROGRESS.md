@@ -2,7 +2,7 @@
 
 ## Session
 - Date: 2026-02-09
-- Phase: Phase 4 (Second Game + Workbook)
+- Phase: Phase 5 (Workbook Production Pipeline)
 
 ## Phase 3 -- COMPLETE
 - [x] Schema aligned with deployed Supabase (students/student_progress/games/game_sessions)
@@ -71,24 +71,58 @@
 | src/lib/qrCodes.ts | Added page 22 QR mapping |
 | package.json | Added workbook script + tsx/pdfkit dev deps |
 
-## Phase 5 -- NEXT (Workbook Production Pipeline)
-Approach: Canva Pro (visual design) + pdfkit (print compilation). See SA_Workbook_Design_Guide.pdf for full specs.
+## Spec Reconciliation -- COMPLETE
+- [x] Rainbow Nation Edition spec reconciled with existing codebase
+  - Stripped: AR references, Phaser.js, React Native, 25-game scope
+  - Kept: 50-page content outline, articulation hierarchy, production specs, financial model, market strategy
+  - Confirmed: 2 games for MVP (Count to 5 + Trace Letter A), R3F stack, PWA only, NO AR
+- [x] Created `docs/workbook-content-map.md` — 50-page content outline
+  - Section 1 (pp 1-6): Rainbow Nation Foundation
+  - Section 2 (pp 7-32): Literacy A-Z with SA animals + cultural values
+  - Section 3 (pp 33-42): Rainbow Numeracy (1-10 with sporting/cultural context)
+  - Section 4 (pp 43-50): Ubuntu Life Skills
+  - Template distribution: ACT ×19, WRT ×18, COL ×9, MAT ×4, SEQ ×2
+  - QR codes: pages 15 and 22 ONLY (2 MVP games)
+- [x] Updated `projectplan.md` with:
+  - Articulation hierarchy (8-level pedagogical framework)
+  - Enriched Phase 5b with content map reference and section breakdown
+  - Production specs (150gsm, perfect bound, laminated cover)
+  - Financial model (R180 price, R40 cost, 303 break-even)
+  - Expanded Phase 6 market entry strategy (pilots, B2C, provincial expansion)
+  - 8 new decisions log entries (spec reconciliation rejections + adoptions)
+
+## Phase 5 -- IN PROGRESS (Workbook Production Pipeline)
+**Status:** Content map created. Ready for Canva Pro design.
+
+**Architecture Decision:** Canva Pro + pdfkit hybrid
+- Canva Pro ($12.99/mo) for visual design of 50 pages
+- Content guide: `docs/workbook-content-map.md` (page-by-page outline)
+- Existing pdfkit pipeline for print compilation (QR codes, bleed, crop marks)
+- Ghostscript post-process for RGB->CMYK conversion (FOGRA39 ICC profile -> PDF/X-1a)
+- Polotno Studio (already forked) as fallback if Canva dependency becomes problematic
 
 ### 5a: Design System Setup
-- [ ] Canva Pro workspace + brand kit (CMYK palette, fonts, character set)
+- [ ] Canva Pro workspace + brand kit (CMYK palette, fonts, character illustrations)
 - [ ] 5 master templates (Activity, Coloring, Writing, Matching, Sequencing)
 - [ ] Universal page elements (name field, page #, logo, QR zone, reward, Ubuntu moment)
 
 ### 5b: Page Design (in Canva)
-- [ ] Design 50 pages (CAPS Term 1), export as 300 DPI PNG
+- [ ] Design 50 pages per `docs/workbook-content-map.md` (~5 weeks at 10 pages/week)
 - [ ] Teacher review checkpoints at pages 10, 25, 50
+- [ ] Export as 300 DPI PNG
 
-### 5c: Print Pipeline (pdfkit)
-- [ ] Enhance generate-workbook.ts: accept Canva PNGs, insert QR codes, CMYK, bleed, crop marks
-- [ ] Combined 50-page PDF output
+### 5c: Print Pipeline (pdfkit + Ghostscript)
+- [ ] Enhance generate-workbook.ts: stream Canva PNGs, insert QR codes (pp 15+22 only), bleed, crop marks
+- [ ] RGB->CMYK conversion via Ghostscript with FOGRA39 ICC profile
+- [ ] PDF/X-1a compliance validation
+- [ ] Start 5c dev during weeks 1-2 of 5b (parallel track)
 
 ### 5d: Print Production
-- [ ] Source 3 Cape Town printers, test print, 10-book pilot
+- [ ] 150gsm paper, perfect bound, laminated cover, 52 pages (50 + 2 covers)
+- [ ] Source 3 Cape Town printers, test print (verify CMYK), 10-book pilot
+
+**Critical Path:** 5b page design (~5 weeks). 5c pipeline dev should run in parallel during weeks 1-2.
+**Dependencies from Phase 4:** QR-to-game mapping validated, Ndebele border patterns validated, page-layout.ts scaffold in place
 
 ## Manual Steps
 - [ ] Deploy to Vercel (npx vercel login + npx vercel --prod)

@@ -1,7 +1,7 @@
 # NovaLearning Games — Project Plan
 
-## Current Phase: Phase 4 (Second Game + Workbook) — COMPLETE
-## Status: Phase 4 COMPLETE. Trace Letter A game + workbook pages generated.
+## Current Phase: Phase 5 (Workbook Production Pipeline) — IN PROGRESS
+## Status: Phase 4 COMPLETE. Spec reconciled. Content map created. Ready for Canva design.
 ## Last Updated: 2026-02-09
 
 ---
@@ -183,12 +183,26 @@
 
 ## Phase 5: Workbook Production Pipeline
 
+### Pedagogical Framework: Articulation Hierarchy
+8-level progressive development applied across all 50 pages:
+
+| Level | Name | Description | Pages |
+|-------|------|-------------|-------|
+| L1 | Discrimination | Visual/audio pattern recognition | 1-6, 33-34 |
+| L2 | Isolation | Individual sounds/elements | 7-12 |
+| L3 | Syllables | Sound pattern building | 13-18, 35-37 |
+| L4 | Words | Complete vocabulary development | 19-24, 38-42 |
+| L5 | Sentences | Structured communication | 25-32 |
+| L6 | Stories | Narrative development | 43-46 |
+| L7 | Conversation | Interactive dialogue | 47-48 |
+| L8 | Generalization | Cross-context application | 49-50 |
+
 ### Phase 5a: Design System Setup (Canva Pro)
 - [ ] Create Canva Pro workspace with NovaLearning brand kit
   - CMYK color palette (SA flag colors + brand green/gold)
   - Font set: KG Primary Dots (tracing), Sassoon Primary (body), Arial Rounded (headings)
   - Rainbow Nation character illustrations (6 kids, consistent style)
-  - SA animal illustrations (10 animals per design guide)
+  - SA animal illustrations (26 animals — one per A-Z letter, see `docs/workbook-content-map.md`)
   - Ndebele border patterns (5 variations)
   - Activity icons (scissors, pencil, crayon, eye, hand)
 - [ ] Build 5 master Canva templates (Activity, Coloring, Writing Practice, Matching/Connect, Sequencing)
@@ -196,16 +210,23 @@
 
 ### Phase 5b: Page Design (in Canva)
 - [ ] Design 50 pages across CAPS Term 1 curriculum
+  - **Content map:** `docs/workbook-content-map.md` (page-by-page outline with template types, cultural elements, articulation levels)
+  - **Section 1 (pp 1-6):** Rainbow Nation Foundation — welcome, sports pride, patterns, Ubuntu, QR instructions
+  - **Section 2 (pp 7-32):** Literacy A-Z — SA animal per letter + cultural value + Ubuntu moment
+  - **Section 3 (pp 33-42):** Rainbow Numeracy — numbers 1-10 with sporting/cultural context
+  - **Section 4 (pp 43-50):** Ubuntu Life Skills — principles, heritage, environment, community, pledge
+  - Template distribution: ACT ×19, WRT ×18, COL ×9, MAT ×4, SEQ ×2
   - Batch 10 pages/week (~5 week timeline)
   - Teacher review checkpoint at pages 10, 25, 50
 - [ ] Export all pages as 300 DPI PNG from Canva
   - Note: Expect ~500MB+ total (50 x A4 @ 300 DPI). Store in `assets/workbook-pages/` with naming convention `page-XX-{type}.png`
+- [ ] QR code placement: pages 15 and 22 ONLY (2 MVP games). Other pages have no QR codes.
 
 ### Phase 5c: Print Pipeline (pdfkit + Ghostscript)
 - [ ] Enhance `scripts/generate-workbook.ts`:
   - Accept directory of Canva PNG exports as input
   - **Stream pages into PDF one at a time** (do NOT load all 500MB+ of PNGs into memory)
-  - Insert QR codes from `src/lib/qrCodes.ts` (all 50 page mappings)
+  - Insert QR codes from `src/lib/qrCodes.ts` (pages 15 and 22 only — 2 MVP games)
   - Page numbering (bottom-center, 14pt)
   - NovaLearning logo (bottom-left, 15mm)
   - 3mm bleed + crop marks
@@ -218,20 +239,72 @@
 - [ ] Parallelise: Start 5c pipeline dev in weeks 1-2 of 5b so compilation is ready when exports land
 
 ### Phase 5d: Print Production
+- [ ] Physical specs: A4 portrait, **150gsm paper**, **perfect bound**, **laminated cover**, 52 total (50 content + 2 covers)
 - [ ] Source 3 Cape Town printers (get quotes for 10-book pilot)
+  - Quote should include: 150gsm uncoated interior, laminated 300gsm cover, perfect binding
+  - Expected cost: ~R32-40/book at 1,000 units
 - [ ] Test print: verify colors, margins, QR readability at A4
   - Specifically verify CMYK conversion didn't shift brand colors
+  - Verify QR codes on pages 15 and 22 scan correctly to deployed URLs
 - [ ] 10-book pilot print run
 
-## Phase 6: School Pilots & Launch
+## Phase 6: School Pilots & Market Launch
 
-- [ ] Onboard 2 pilot schools (target 50 students each)
+### Phase 6a: Pilot Program (Months 4-5)
+- [ ] Onboard 2-5 pilot schools in Gauteng/Western Cape (target 50 students each)
+  - Focus on private schools initially (less price sensitivity)
+  - Offer free trial first month to reduce rejection risk
 - [ ] Teacher training session (how workbook + QR games work together)
 - [ ] Collect teacher testimonials (target 5)
 - [ ] Collect parent testimonials (target 10)
-- [ ] Premium school pitch deck (Bishops, Roedean, Herschel)
+- [ ] Monitor pilot usage via Supabase analytics (QR scan rates, game completion, session duration)
+
+### Phase 6b: B2C Sales Launch (Months 5-6)
 - [ ] 1,000-book print run (based on pilot feedback)
-- [ ] Monitor pilot usage via Supabase analytics
+- [ ] Premium school pitch deck (Bishops, Roedean, Herschel)
+- [ ] B2C channels: CNA, Exclusive Books, Takealot
+- [ ] Social media marketing (parent testimonials, school endorsements)
+
+### Phase 6c: Scale & Expansion (Months 7-12)
+- [ ] Afrikaans version (+R15K translation costs, Western Cape priority)
+- [ ] Target KZN and Eastern Cape markets
+- [ ] B2B partnerships with provincial education departments
+- [ ] Scale to 2,000+ annual unit sales
+
+---
+
+## Financial Model
+
+### Unit Economics
+| Metric | Value |
+|--------|-------|
+| Selling price | R180 per book |
+| Production cost | ~R40 per book (print + binding + packaging) |
+| Gross margin | R140 per book (78%) |
+| Break-even | 303 books |
+
+### Revenue Scenarios (Year 1)
+| Scenario | Units | Revenue | Profit |
+|----------|-------|---------|--------|
+| Conservative | 500 | R90K | R50K |
+| Moderate | 1,000 | R180K | R100K |
+| Success | 2,000 | R360K | R240K |
+
+### Development Investment
+| Item | Cost |
+|------|------|
+| Claude Pro (4 months) | R680 |
+| Cursor Pro (4 months) | R1,480 |
+| Domain (novalearning.co.za) | R180/year |
+| Vercel hosting | Free tier |
+| Supabase backend | Free tier |
+| Canva Pro (3 months) | R390 |
+| **Total tech** | **~R2,730** |
+| Printing (1,000 books) | R32,000 |
+| Binding + finishing | R5,000 |
+| Distribution prep | R3,000 |
+| **Total production** | **~R40,000** |
+| **Grand total** | **~R42,730** |
 
 ---
 
@@ -254,13 +327,21 @@
 | 2026-02-09 | CLAUDE.md terminal optimization | 657→174 lines saves ~11K tokens/msg (~$8-17/session on Opus) |
 | 2026-02-09 | Document & Clear over /compact | PROGRESS.md + /clear + resume preserves full context without corruption |
 | 2026-02-09 | Sequential Phase 3 (no multi-agent) | Tasks have dependencies; multi-agent adds 3-4x cost with no parallelism |
-|| 2026-02-09 | pdfkit for workbook generation | Dev-time PDF, not runtime; reproducible, no Canva dependency |
-|| 2026-02-09 | CatmullRomCurve3 + TubeGeometry for letter paths | Smooth curves for tracing, easy checkpoint detection |
-|| 2026-02-09 | 3-stroke letter A | Matches standard handwriting instruction; segment-based progress |
-|| 2026-02-09 | Reuse SimpleCharacter across games | Same component, different color props; no code duplication |
-|| 2026-02-09 | ALL_CHARACTER_COLORS (6) alongside MVP (3) | Backward compatible; games choose which set to use |
-|| 2026-02-09 | Canva Pro + pdfkit hybrid for workbook | Canva Enterprise API costs unjustified at MVP; Canva Pro for visual design, pdfkit for print compilation. Polotno as fallback. |
-|| 2026-02-09 | Full workbook production deferred to Phase 5 | Phase 4 pdfkit pages validated QR mapping + layout. 50-page production is a design task, not a dev task. |
+| 2026-02-09 | pdfkit for workbook generation | Dev-time PDF, not runtime; reproducible, no Canva dependency |
+| 2026-02-09 | CatmullRomCurve3 + TubeGeometry for letter paths | Smooth curves for tracing, easy checkpoint detection |
+| 2026-02-09 | 3-stroke letter A | Matches standard handwriting instruction; segment-based progress |
+| 2026-02-09 | Reuse SimpleCharacter across games | Same component, different color props; no code duplication |
+| 2026-02-09 | ALL_CHARACTER_COLORS (6) alongside MVP (3) | Backward compatible; games choose which set to use |
+| 2026-02-09 | Canva Pro + pdfkit hybrid for workbook | Canva Enterprise API costs unjustified at MVP; Canva Pro for visual design, pdfkit for print compilation. Polotno as fallback. |
+| 2026-02-09 | Full workbook production deferred to Phase 5 | Phase 4 pdfkit pages validated QR mapping + layout. 50-page production is a design task, not a dev task. |
+| 2026-02-09 | RGB->CMYK via Ghostscript post-process | Canva Pro exports RGB only. pdfkit cannot output CMYK. Ghostscript with FOGRA39 ICC profile converts to PDF/X-1a CMYK for print. Sharp as alternative for per-image conversion. |
+| 2026-02-09 | Spec reconciliation: strip AR references | Rainbow Nation spec included "AR-Enhanced" title and AR game categories. AR is a LOCKED NO decision. All AR references stripped. |
+| 2026-02-09 | Spec reconciliation: reject Phaser.js | Spec proposed Phaser.js for games. R3F (React Three Fiber) is locked. 2 games already built with R3F. |
+| 2026-02-09 | Spec reconciliation: reject React Native | Spec long-term vision included React Native. PWA-only is locked. Native apps rejected. |
+| 2026-02-09 | Spec reconciliation: 2 games for MVP | Spec proposed 25 QR-linked games. Keeping 2 (Count to 5, Trace Letter A). QR codes only on pages 15 and 22. |
+| 2026-02-09 | 50-page content map created | `docs/workbook-content-map.md` — page-by-page outline with template types, SA animals, cultural values, articulation levels, Ubuntu moments. Drives Phase 5b Canva design. |
+| 2026-02-09 | R180 selling price, R40 production cost | 78% gross margin. Break-even at 303 books. Within CLAUDE.md R150-R350 range. |
+| 2026-02-09 | 150gsm paper, perfect bound, laminated cover | Physical production specs for workbook. 52 total pages (50 content + 2 covers). |
 
 ## Build Metrics
 
