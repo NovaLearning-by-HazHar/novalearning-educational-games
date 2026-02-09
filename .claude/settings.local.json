@@ -9,7 +9,10 @@
       "Bash(npm install:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nPhase 0: Initialize NovaLearning Games project scaffold\n\n- Next.js 14 with TypeScript, Tailwind CSS, App Router \\(SSG export\\)\n- React Three Fiber v8.18.0 + Three.js 0.160.1 \\(React 18 compatible\\)\n- Zustand stores \\(game state + persistent progress\\)\n- Howler.js audio manager, device detection, asset loader with budgets\n- R3F Scene component with Galaxy A03 renderer settings \\(WebGL 1.0\\)\n- GameShell wrapper, CelebrationScene \\(Ubuntu celebration\\)\n- Count to Five game page stub with placeholder mesh\n- PWA manifest \\(en-ZA, portrait, education category\\)\n- next-pwa for service worker generation\n- 10 Claude Code agent definitions \\(.claude/agents/\\)\n- Project plan with Phase 0-4 milestones\n\nBuild output: 298KB game page, 96KB home page \\(within 500KB budget\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(ls:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nPhase 1: Engine Foundation complete\n\n- R3F scene with Galaxy A03 renderer settings and WebGL 1.0 fallback\n- 3-tier device detection with GPU sniffing and score-based classification\n- Progressive asset loader with cache-first strategy and budget enforcement\n- Game state machine \\(Explore → Discover → Practice → Celebrate\\)\n- Audio system with 4 categories, mobile unlock, HTML5 streaming\n- Touch input with raycasting, 48px targets, double-tap prevention\n- Performance profiling hook \\(FPS, memory, draw calls, triangles\\)\n- Count-to-Five engine demo with tappable mangoes and full state flow\n- GameShell with mute toggle and loading overlay\n- Workbox service worker for offline-first caching\n\nBuild: Home 96.3KB, Game 311KB \\(62% of 500KB budget\\), 0 errors\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
