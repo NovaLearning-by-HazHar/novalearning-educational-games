@@ -1,7 +1,7 @@
 # NovaLearning Games — Project Plan
 
-## Current Phase: Phase 3 (Infrastructure) — next up
-## Status: Phase 2 COMPLETE (uncommitted), ready for Phase 3
+## Current Phase: Phase 3 (Infrastructure) — IN PROGRESS
+## Status: Phase 3a (hooks + schema) COMPLETE, Phase 3b (deploy + testing) pending
 ## Last Updated: 2026-02-09
 
 ---
@@ -120,6 +120,15 @@
   - Game: 327KB First Load JS (65% of 500KB budget)
   - 0 TypeScript errors, 0 ESLint warnings
 
+## Phase 2.5: Terminal Tooling Setup ✅
+
+- [x] Committed Phase 2 (df5cc88 — 17 files, 1484 insertions)
+- [x] Optimized CLAUDE.md (657→174 lines, saves ~11K tokens/message)
+- [x] Created slash commands: /project:verify, /project:catchup, /project:phase3
+- [x] Added hooks to .claude/settings.json (SessionStart git context, PostToolUse eslint fix)
+- [x] Created PROGRESS.md for Document & Clear session pattern
+- [x] Updated projectplan.md with Phase 2 commit + tooling notes
+
 ## Phase 3: Infrastructure
 
 - [ ] Supabase project setup (auth, database, storage)
@@ -181,6 +190,9 @@
 | 2026-02-09 | 3 MVP characters (Sipho, Thandi, Lerato) | Validate pipeline with 3, extend to 6 in Phase 3+ |
 | 2026-02-09 | Procedural geometry only (Phase 2) | No GLTF downloads — all characters/objects built from primitives |
 | 2026-02-09 | Web Audio API tone generation | Zero audio file downloads — OfflineAudioContext generates WAV blobs in memory |
+| 2026-02-09 | CLAUDE.md terminal optimization | 657→174 lines saves ~11K tokens/msg (~$8-17/session on Opus) |
+| 2026-02-09 | Document & Clear over /compact | PROGRESS.md + /clear + resume preserves full context without corruption |
+| 2026-02-09 | Sequential Phase 3 (no multi-agent) | Tasks have dependencies; multi-agent adds 3-4x cost with no parallelism |
 
 ## Build Metrics
 

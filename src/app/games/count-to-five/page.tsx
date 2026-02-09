@@ -4,7 +4,9 @@ import { useEffect, useCallback } from 'react';
 import GameShell from '@/components/GameShell';
 import Scene from '@/components/Scene';
 import { useGameStore } from '@/stores/gameStore';
+import { useProgressStore } from '@/stores/progressStore';
 import { audioManager } from '@/lib/audio';
+import { useGameSession } from '@/lib/useGameSession';
 import CountToFiveGame from './CountToFiveGame';
 import CountingCelebration from './components/CountingCelebration';
 import ProgressOverlay from './components/ProgressOverlay';
@@ -30,6 +32,10 @@ export default function CountToFivePage() {
   const showSiphoHint = useCountingState((s) => s.showSiphoHint);
   const resetCounting = useCountingState((s) => s.resetCounting);
 
+  // Phase 3: Session tracking (Pattern 5)
+  const { trackPhase, endSession, resetSession } = useGameSession('count-to-five');
+  const addCompletion = useProgressStore((s) => s.addCompletion);
+
   // Initialize game state on mount
   useEffect(() => {
     reset();
@@ -46,23 +52,36 @@ export default function CountToFivePage() {
     }
   }, [audioReady, setLoaded]);
 
-  // Play celebration melody when entering celebrate phase
+  // Track phase changes for session analytics
+  useEffect(() => {
+    trackPhase(phase);
+  }, [phase, trackPhase]);
+
+  // Play celebration melody and record session on celebrate
   useEffect(() => {
     if (phase === 'celebrate') {
       audioManager.play('celebrate-melody');
+      // Record completed session to progressStore
+      const session = endSession(5);
+      addCompletion('count-to-five', 5, {
+        durationSeconds: session.durationSeconds,
+        phasesVisited: session.phasesVisited,
+        deviceTier: session.deviceTier,
+      });
     }
-  }, [phase]);
+  }, [phase, endSession, addCompletion]);
 
   // Play Again handler
   const handlePlayAgain = useCallback(() => {
     reset();
     resetCounting();
+    resetSession(); // Start a new session for analytics
     setActiveCharacter('sipho');
     setTargetInteractions(5);
     setLoaded(true);
     // Restart ambient
     audioManager.play('ambient-wind');
-  }, [reset, resetCounting, setActiveCharacter, setTargetInteractions, setLoaded]);
+  }, [reset, resetCounting, resetSession, setActiveCharacter, setTargetInteractions, setLoaded]);
 
   if (phase === 'celebrate') {
     return (
