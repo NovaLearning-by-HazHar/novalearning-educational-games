@@ -29,7 +29,10 @@
       "Bash(pnpm:*)",
       "Bash(corepack enable:*)",
       "Bash(corepack prepare:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(git push:*)",
+      "Bash(wc:*)",
+      "Bash(npm ls:*)"
     ]
   }
 }

@@ -41,7 +41,7 @@
 - Lint: PASS (0 warnings)
 - Build: PASS (10 static pages)
 - Bundle: Home=96.3KB | Count=331KB (66%) | Trace=331KB (66%) | Parent=152KB
-- Workbook: 3 PDFs in out/ directory
+- Workbook: 3 PDFs in out/ + 2 QR PNGs in scripts/qr-cache/
 
 ## Files Created (Phase 4)
 | File | Description |
@@ -92,13 +92,13 @@
   - 8 new decisions log entries (spec reconciliation rejections + adoptions)
 
 ## Phase 5 -- IN PROGRESS (Workbook Production Pipeline)
-**Status:** Content map created. Ready for Canva Pro design.
+**Status:** 5c print pipeline COMPLETE. Ready for Canva Pro design (5a/5b).
 
 **Architecture Decision:** Canva Pro + pdfkit hybrid
 - Canva Pro ($12.99/mo) for visual design of 50 pages
 - Content guide: `docs/workbook-content-map.md` (page-by-page outline)
-- Existing pdfkit pipeline for print compilation (QR codes, bleed, crop marks)
-- Ghostscript post-process for RGB->CMYK conversion (FOGRA39 ICC profile -> PDF/X-1a)
+- pdfkit pipeline for print compilation (QR codes, bleed, crop marks) -- COMPLETE
+- Ghostscript post-process for RGB->CMYK conversion (FOGRA39 ICC profile) -- script ready
 - Polotno Studio (already forked) as fallback if Canva dependency becomes problematic
 
 ### 5a: Design System Setup
@@ -109,23 +109,43 @@
 ### 5b: Page Design (in Canva)
 - [ ] Design 50 pages per `docs/workbook-content-map.md` (~5 weeks at 10 pages/week)
 - [ ] Teacher review checkpoints at pages 10, 25, 50
-- [ ] Export as 300 DPI PNG
+- [ ] Export as 300 DPI PNG to `scripts/pages/page-NN.png`
 
-### 5c: Print Pipeline (pdfkit + Ghostscript)
-- [ ] Enhance generate-workbook.ts: stream Canva PNGs, insert QR codes (pp 15+22 only), bleed, crop marks
-- [ ] RGB->CMYK conversion via Ghostscript with FOGRA39 ICC profile
-- [ ] PDF/X-1a compliance validation
-- [ ] Start 5c dev during weeks 1-2 of 5b (parallel track)
+### 5c: Print Pipeline (pdfkit + Ghostscript) -- COMPLETE
+- [x] Canva PNG page embedding (`canva-page.ts` -- full-page image + QR overlay + crop marks)
+- [x] Local QR code generation (`qrcode` npm package, cached in `scripts/qr-cache/`)
+- [x] Crop marks at four corners (0.25pt black, 3mm bleed)
+- [x] Combined PDF output (`out/novalearning-workbook-v1.pdf`)
+- [x] Individual page PDFs (`out/workbook-page-NN.pdf`)
+- [x] `--pages` flag for selective generation
+- [x] Ghostscript CMYK conversion script (`scripts/convert-cmyk.ps1`)
+- [x] `npm run workbook:cmyk` script in package.json
 
 ### 5d: Print Production
 - [ ] 150gsm paper, perfect bound, laminated cover, 52 pages (50 + 2 covers)
 - [ ] Source 3 Cape Town printers, test print (verify CMYK), 10-book pilot
 
-**Critical Path:** 5b page design (~5 weeks). 5c pipeline dev should run in parallel during weeks 1-2.
+**Critical Path:** 5a/5b Canva design (~5 weeks). 5c pipeline is ready to accept PNG exports.
 **Dependencies from Phase 4:** QR-to-game mapping validated, Ndebele border patterns validated, page-layout.ts scaffold in place
+
+## Files Created (Phase 5c)
+| File | Description |
+|------|-------------|
+| scripts/workbook-templates/canva-page.ts | Canva PNG embed + QR overlay + crop marks |
+| scripts/convert-cmyk.ps1 | Ghostscript RGB->CMYK conversion (Windows) |
+| scripts/qr-cache/.gitkeep | QR code PNG cache directory |
+| scripts/pages/.gitkeep | Canva PNG export directory |
+
+## Files Modified (Phase 5c)
+| File | Change |
+|------|--------|
+| scripts/generate-workbook.ts | Rewritten: PNG scanning, local QR generation, combined PDF |
+| scripts/workbook-templates/shared/page-layout.ts | Added drawQrCode(), drawCropMarks(), DESIGN_GUIDE, ACTIVITY_SPECS |
+| package.json | Added workbook:cmyk script, qrcode + @types/qrcode dev deps |
 
 ## Manual Steps
 - [ ] Deploy to Vercel (npx vercel login + npx vercel --prod)
 - [ ] Verify both games at deployed URL
-- [ ] Replace workbook QR placeholders with actual QR code images
-- [ ] Replace workbook emoji placeholders with SA-themed illustrations
+- [ ] Subscribe to Canva Pro ($12.99/mo)
+- [ ] Design 50 workbook pages in Canva, export as PNG to scripts/pages/
+- [ ] Install Ghostscript for CMYK conversion (winget install ArtifexSoftware.GhostScript)

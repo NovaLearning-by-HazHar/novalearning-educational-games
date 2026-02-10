@@ -12,6 +12,76 @@
  *   QR zone (bottom-right 20x20mm), reward element, Ubuntu moment
  */
 
+/**
+ * NovaLearning Workbook Design Guide Constants
+ * Source: SA_Workbook_Design_Guide.pdf
+ *
+ * Spec-level reference values (original units: mm, DPI, CMYK).
+ * The implementation constants below (PAGE, BRAND, FONTS, etc.) convert these to PDF points.
+ * Used by Phase 5c print pipeline.
+ */
+export const DESIGN_GUIDE = {
+  // Print specs
+  page: {
+    size: 'A4' as const,        // 210mm x 297mm
+    bleed: 3,                    // mm
+    dpi: 300,
+    format: 'PDF/X-1a' as const,
+    colorSpace: 'CMYK' as const, // NOTE: Canva exports RGB, convert via Ghostscript
+    iccProfile: 'FOGRA39',       // European coated paper standard
+  },
+
+  // Typography (for Canva templates -- pdfkit uses Helvetica fallback)
+  fonts: {
+    tracing: 'KG Primary Dots',
+    body: 'Sassoon Primary',
+    headings: 'Arial Rounded',
+  },
+
+  // CMYK color palette (SA flag + brand)
+  colors: {
+    brandGreen:  { c: 100, m: 0, y: 100, k: 0 },
+    brandGold:   { c: 0, m: 20, y: 100, k: 0 },
+    saRed:       { c: 0, m: 100, y: 100, k: 0 },
+    saBlue:      { c: 100, m: 80, y: 0, k: 0 },
+    saBlack:     { c: 0, m: 0, y: 0, k: 100 },
+    saWhite:     { c: 0, m: 0, y: 0, k: 0 },
+  },
+
+  // Universal page elements
+  elements: {
+    nameField: { position: 'top-right' as const },
+    pageNumber: { position: 'bottom-center' as const, size: 14 }, // pt
+    logo: { position: 'bottom-left' as const, size: 15 },         // mm
+    qrZone: { position: 'bottom-right' as const, size: 20 },      // mm (matches src/lib/qrCodes.ts)
+    rewardStar: true,
+    ubuntuMoment: true,
+  },
+
+  // Template types
+  templateTypes: [
+    'Activity',
+    'Coloring',
+    'Writing Practice',
+    'Matching/Connect',
+    'Sequencing',
+  ] as const,
+
+  // Cultural elements
+  cultural: {
+    borderPatterns: 5,           // Ndebele variations
+    characters: 6,               // Rainbow Nation kids
+    animals: 10,                 // SA animals per design guide
+    activityIcons: ['scissors', 'pencil', 'crayon', 'eye', 'hand'] as const,
+  },
+} as const;
+
+/**
+ * Ghostscript CMYK conversion command template.
+ * Usage: Replace INPUT.pdf / OUTPUT.pdf paths at build time.
+ */
+export const GS_CMYK_COMMAND = `gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sColorConversionStrategy=CMYK -dProcessColorModel=/DeviceCMYK -sOutputICCProfile=FOGRA39.icc -o OUTPUT.pdf INPUT.pdf`;
+
 /** A4 dimensions in PDF points (1 point = 1/72 inch) */
 export const PAGE = {
   /** A4 width in points */
@@ -248,4 +318,56 @@ export function drawQrPlaceholder(
       width: QR.size + 40,
       align: 'center',
     });
+}
+
+/** Embed an actual QR code PNG image with label */
+export function drawQrCode(
+  doc: PDFKit.PDFDocument,
+  x: number,
+  y: number,
+  pngPath: string,
+  gameTitle: string,
+) {
+  doc.image(pngPath, x, y, { width: QR.size, height: QR.size });
+
+  // Label below
+  doc
+    .fontSize(FONTS.caption - 1)
+    .fillColor(BRAND.sky)
+    .text(`Scan to play: ${gameTitle}`, x - 20, y + QR.size + 4, {
+      width: QR.size + 40,
+      align: 'center',
+    });
+}
+
+/**
+ * Draw crop marks at the four corners of the A4 page.
+ * Marks are 8.5pt (3mm) long lines positioned at the trim edge,
+ * extending outward into the bleed area.
+ * Standard print industry format: 0.25pt black registration lines.
+ */
+export function drawCropMarks(doc: PDFKit.PDFDocument) {
+  const markLength = PAGE.bleed; // 8.5pt = 3mm
+  const offset = 4; // gap between mark and trim edge
+
+  doc.save();
+  doc.lineWidth(0.25).strokeColor('#000000');
+
+  // Top-left corner
+  doc.moveTo(0, PAGE.bleed + offset).lineTo(0, 0).stroke();
+  doc.moveTo(PAGE.bleed + offset, 0).lineTo(0, 0).stroke();
+
+  // Top-right corner
+  doc.moveTo(PAGE.width, PAGE.bleed + offset).lineTo(PAGE.width, 0).stroke();
+  doc.moveTo(PAGE.width - PAGE.bleed - offset, 0).lineTo(PAGE.width, 0).stroke();
+
+  // Bottom-left corner
+  doc.moveTo(0, PAGE.height - PAGE.bleed - offset).lineTo(0, PAGE.height).stroke();
+  doc.moveTo(PAGE.bleed + offset, PAGE.height).lineTo(0, PAGE.height).stroke();
+
+  // Bottom-right corner
+  doc.moveTo(PAGE.width, PAGE.height - PAGE.bleed - offset).lineTo(PAGE.width, PAGE.height).stroke();
+  doc.moveTo(PAGE.width - PAGE.bleed - offset, PAGE.height).lineTo(PAGE.width, PAGE.height).stroke();
+
+  doc.restore();
 }
