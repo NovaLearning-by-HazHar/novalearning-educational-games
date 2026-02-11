@@ -36,6 +36,19 @@ export default function Home() {
             <p className="text-xs text-nova-earth/60">Language</p>
           </div>
         </Link>
+
+        <Link
+          href="/games/counting-animals"
+          className="flex items-center gap-4 p-4 rounded-2xl bg-green-100 hover:bg-green-200 transition-colors"
+        >
+          <span className="text-3xl" aria-hidden="true">🐘</span>
+          <div>
+            <p className="font-display text-lg text-nova-earth">
+              Counting Animals
+            </p>
+            <p className="text-xs text-nova-earth/60">Numeracy</p>
+          </div>
+        </Link>
       </div>
 
       {/* Parent portal link */}
