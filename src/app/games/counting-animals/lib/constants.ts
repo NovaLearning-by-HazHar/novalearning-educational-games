@@ -7,16 +7,31 @@ export interface SAAnimal {
 }
 
 export const SA_ANIMALS: SAAnimal[] = [
+  { name: 'Aardvark', image: '/assets/animals/aardvark.webp', emoji: '🐽', color: '#C4A882' },
+  { name: 'Baboon', image: '/assets/animals/baboon.webp', emoji: '🐒', color: '#8B7355' },
+  { name: 'Cheetah', image: '/assets/animals/cheetah.webp', emoji: '🐆', color: '#DAA520' },
+  { name: 'Dung Beetle', image: '/assets/animals/dung-beetle.webp', emoji: '🪲', color: '#2F4F4F' },
   { name: 'Elephant', image: '/assets/animals/elephant.webp', emoji: '🐘', color: '#8B8589' },
-  { name: 'Lion', image: '/assets/animals/lion.webp', emoji: '🦁', color: '#C4873A' },
-  { name: 'Zebra', image: '/assets/animals/zebra.webp', emoji: '🦓', color: '#2D2D2D' },
+  { name: 'Flamingo', image: '/assets/animals/flamingo.webp', emoji: '🦩', color: '#FF69B4' },
   { name: 'Giraffe', image: '/assets/animals/giraffe.webp', emoji: '🦒', color: '#D4A543' },
   { name: 'Hippo', image: '/assets/animals/hippo.webp', emoji: '🦛', color: '#7B6B8D' },
+  { name: 'Impala', image: '/assets/animals/impala.webp', emoji: '🦌', color: '#A0522D' },
+  { name: 'Jackal', image: '/assets/animals/jackal.webp', emoji: '🐺', color: '#B8860B' },
+  { name: 'Kudu', image: '/assets/animals/kudu.webp', emoji: '🦌', color: '#6B4423' },
+  { name: 'Lion', image: '/assets/animals/lion.webp', emoji: '🦁', color: '#C4873A' },
+  { name: 'Meerkat', image: '/assets/animals/meerkat.webp', emoji: '🦡', color: '#C2B280' },
+  { name: 'Nyala', image: '/assets/animals/nyala.webp', emoji: '🦌', color: '#5C4033' },
+  { name: 'Ostrich', image: '/assets/animals/ostrich.webp', emoji: '🐦', color: '#2C2C2C' },
+  { name: 'Pangolin', image: '/assets/animals/pangolin.webp', emoji: '🦎', color: '#8B6914' },
+  { name: 'Quagga', image: '/assets/animals/quagga.webp', emoji: '🦓', color: '#8B6C5C' },
   { name: 'Rhino', image: '/assets/animals/rhino.webp', emoji: '🦏', color: '#7A7A7A' },
-  { name: 'Flamingo', image: '/assets/animals/flamingo.webp', emoji: '🦩', color: '#FF69B4' },
-  { name: 'Parrot', image: '/assets/animals/parrot.webp', emoji: '🦜', color: '#2ECC71' },
-  { name: 'Turtle', image: '/assets/animals/turtle.webp', emoji: '🐢', color: '#4A7A4A' },
-  { name: 'Butterfly', image: '/assets/animals/butterfly.webp', emoji: '🦋', color: '#9B59B6' },
+  { name: 'Springbok', image: '/assets/animals/springbok.webp', emoji: '🦌', color: '#C19A6B' },
+  { name: 'Tortoise', image: '/assets/animals/tortoise.webp', emoji: '🐢', color: '#4A7A4A' },
+  { name: 'Vulture', image: '/assets/animals/vulture.webp', emoji: '🦅', color: '#4A4A4A' },
+  { name: 'Warthog', image: '/assets/animals/warthog.webp', emoji: '🐗', color: '#6B4226' },
+  { name: 'X-ray Fish', image: '/assets/animals/x-ray-fish.webp', emoji: '🐟', color: '#87CEEB' },
+  { name: 'Yellow Mongoose', image: '/assets/animals/yellow-mongoose.webp', emoji: '🦡', color: '#DAA520' },
+  { name: 'Zebra', image: '/assets/animals/zebra.webp', emoji: '🦓', color: '#2D2D2D' },
 ];
 
 /** Encouragement messages (Ubuntu: positive reinforcement only) */
