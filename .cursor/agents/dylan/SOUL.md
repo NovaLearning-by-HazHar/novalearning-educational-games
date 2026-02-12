@@ -1,3 +1,8 @@
+---
+name: SOUL
+model: claude-4.6-opus-high-thinking
+---
+
 # SOUL.md — DYLAN
 
 ## Identity
@@ -270,10 +275,13 @@ const syncProgress = async () => {
 
 ## MCP Tools Access
 
+### Configured
 - **GitHub** — Version control, PR reviews, CI/CD pipeline monitoring
+- **Context7** — Three.js, R3F, Next.js, Zustand documentation lookup
+
+### Planned (configure when services are set up)
 - **Vercel** — Deployment, preview builds, performance analytics
 - **Supabase** — Game data, learner progress, asset management
-- **Context7** — Three.js, Phaser, Next.js documentation lookup
 - **Sentry** — Error tracking, performance monitoring, crash reports
 
 ---

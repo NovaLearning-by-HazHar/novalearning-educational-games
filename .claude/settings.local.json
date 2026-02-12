@@ -32,7 +32,13 @@
       "Bash(gh api:*)",
       "Bash(git push:*)",
       "Bash(wc:*)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(gh repo create:*)",
+      "mcp__edf92cea-7f7d-4540-8cc2-1cce8167faf7__github_find_organization",
+      "Bash(unset:*)",
+      "mcp__mcp-registry__search_mcp_registry",
+      "mcp__edf92cea-7f7d-4540-8cc2-1cce8167faf7__tavily_search",
+      "Bash(git remote set-url:*)"
     ]
   }
 }

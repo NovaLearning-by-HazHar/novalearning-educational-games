@@ -1,3 +1,8 @@
+---
+name: SOUL
+model: claude-4.6-opus-high-thinking
+---
+
 # SOUL.md — SKINNY
 
 ## Identity
@@ -264,11 +269,14 @@ test('meets performance budget', async ({ page }) => {
 
 ## MCP Tools Access
 
+### Configured
 - **GitHub** — Test automation, CI/CD monitoring, bug tracking via Issues
+- **Context7** — Playwright, Jest, Next.js documentation lookup
+
+### Planned (configure when services are set up)
 - **Sentry** — Production error monitoring, crash reports, performance tracking
 - **Vercel** — Deployment verification, preview build testing
 - **Supabase** — Test data management, CAPS mapping database
-- **Context7** — Playwright, Jest documentation lookup
 
 ---
 

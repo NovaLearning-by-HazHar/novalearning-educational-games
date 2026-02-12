@@ -61,10 +61,12 @@ export default function TraceLetterAPage() {
     trackPhase(phase);
   }, [phase, trackPhase]);
 
-  // Play celebration melody and record session
+  // Play celebration melody + encouragement and record session
   useEffect(() => {
     if (phase === 'celebrate') {
       audioManager.play('celebrate-melody');
+      // Play a random SA-accented encouragement voice clip after a short delay
+      setTimeout(() => audioManager.playRandomEncouragement(), 800);
       const session = endSession(TOTAL_STROKES);
       addCompletion('trace-letter-a', TOTAL_STROKES, {
         durationSeconds: session.durationSeconds,

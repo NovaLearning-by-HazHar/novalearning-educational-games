@@ -2,29 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import { audioManager } from '@/lib/audio';
-import type { AudioCategory } from '@/lib/audio';
+import { useSharedAudio } from '@/lib/useSharedAudio';
 import {
-  generateMarimbaTone,
-  generateAardvarkSound,
-  generateBaboonSound,
-  generateCheetahSound,
-  generateDungBeetleSound,
-  generateElephantSound,
-  generateFlamingoSound,
-  generateDiscoverChime,
+  generateAnimalTone,
+  generateLetterAnnounce,
   generateMatchCorrect,
-  generateMatchTryAgain,
+  generateMatchWrong,
   generateCelebrationMelody,
-  generateAmbientSavanna,
+  generateSavannaAmbient,
 } from '../lib/audioGenerator';
 
 /**
- * Generates all Letter Explorer audio as Web Audio blobs on mount.
- * Loads them into the shared AudioManager via blob URLs.
- * Returns ready=true when all audio is loaded (or on failure — game still works).
+ * Loads shared pipeline audio (encouragement, instructions, UI sounds)
+ * and generates game-specific synth audio (animal tones, letter chimes, etc.)
+ * Returns ready=true when both are loaded (or if generation fails).
  */
 export function useAudioSetup(): { ready: boolean } {
-  const [ready, setReady] = useState(false);
+  const { ready: sharedReady } = useSharedAudio();
+  const [synthReady, setSynthReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,57 +27,67 @@ export function useAudioSetup(): { ready: boolean } {
     async function setup() {
       try {
         if (typeof OfflineAudioContext === 'undefined') {
-          setReady(true);
+          setSynthReady(true);
           return;
         }
 
-        // Generate all audio blobs in parallel
+        // Generate all game-specific audio blobs in parallel
         const [
-          marimbaA, marimbaB, marimbaC, marimbaD, marimbaE, marimbaF,
-          animalAardvark, animalBaboon, animalCheetah,
-          animalDungBeetle, animalElephant, animalFlamingo,
-          discoverChime, matchCorrect, matchTryAgain,
-          celebrateMelody, ambientSavanna,
+          animalTone0,
+          animalTone1,
+          animalTone2,
+          animalTone3,
+          animalTone4,
+          animalTone5,
+          letterAnnounce0,
+          letterAnnounce1,
+          letterAnnounce2,
+          letterAnnounce3,
+          letterAnnounce4,
+          letterAnnounce5,
+          matchCorrect,
+          matchWrong,
+          celebrateMelody,
+          savannaAmbient,
         ] = await Promise.all([
-          generateMarimbaTone('A'),
-          generateMarimbaTone('B'),
-          generateMarimbaTone('C'),
-          generateMarimbaTone('D'),
-          generateMarimbaTone('E'),
-          generateMarimbaTone('F'),
-          generateAardvarkSound(),
-          generateBaboonSound(),
-          generateCheetahSound(),
-          generateDungBeetleSound(),
-          generateElephantSound(),
-          generateFlamingoSound(),
-          generateDiscoverChime(),
+          generateAnimalTone(0),
+          generateAnimalTone(1),
+          generateAnimalTone(2),
+          generateAnimalTone(3),
+          generateAnimalTone(4),
+          generateAnimalTone(5),
+          generateLetterAnnounce(0),
+          generateLetterAnnounce(1),
+          generateLetterAnnounce(2),
+          generateLetterAnnounce(3),
+          generateLetterAnnounce(4),
+          generateLetterAnnounce(5),
           generateMatchCorrect(),
-          generateMatchTryAgain(),
+          generateMatchWrong(),
           generateCelebrationMelody(),
-          generateAmbientSavanna(),
+          generateSavannaAmbient(),
         ]);
 
         if (cancelled) return;
 
-        const blobs: [string, Blob, AudioCategory][] = [
-          ['marimba-A', marimbaA, 'sfx'],
-          ['marimba-B', marimbaB, 'sfx'],
-          ['marimba-C', marimbaC, 'sfx'],
-          ['marimba-D', marimbaD, 'sfx'],
-          ['marimba-E', marimbaE, 'sfx'],
-          ['marimba-F', marimbaF, 'sfx'],
-          ['animal-aardvark', animalAardvark, 'voice'],
-          ['animal-baboon', animalBaboon, 'voice'],
-          ['animal-cheetah', animalCheetah, 'voice'],
-          ['animal-dungBeetle', animalDungBeetle, 'voice'],
-          ['animal-elephant', animalElephant, 'voice'],
-          ['animal-flamingo', animalFlamingo, 'voice'],
-          ['discover-chime', discoverChime, 'sfx'],
+        // Load into AudioManager as blob URLs
+        const blobs: [string, Blob, 'sfx' | 'music' | 'voice' | 'ambient'][] = [
+          ['animal-tone-0', animalTone0, 'sfx'],
+          ['animal-tone-1', animalTone1, 'sfx'],
+          ['animal-tone-2', animalTone2, 'sfx'],
+          ['animal-tone-3', animalTone3, 'sfx'],
+          ['animal-tone-4', animalTone4, 'sfx'],
+          ['animal-tone-5', animalTone5, 'sfx'],
+          ['letter-announce-0', letterAnnounce0, 'voice'],
+          ['letter-announce-1', letterAnnounce1, 'voice'],
+          ['letter-announce-2', letterAnnounce2, 'voice'],
+          ['letter-announce-3', letterAnnounce3, 'voice'],
+          ['letter-announce-4', letterAnnounce4, 'voice'],
+          ['letter-announce-5', letterAnnounce5, 'voice'],
           ['match-correct', matchCorrect, 'sfx'],
-          ['match-try-again', matchTryAgain, 'sfx'],
+          ['match-wrong', matchWrong, 'sfx'],
           ['celebrate-melody', celebrateMelody, 'music'],
-          ['ambient-savanna', ambientSavanna, 'ambient'],
+          ['ambient-savanna', savannaAmbient, 'ambient'],
         ];
 
         for (const [id, blob, category] of blobs) {
@@ -90,16 +95,23 @@ export function useAudioSetup(): { ready: boolean } {
           audioManager.load(id, url, category);
         }
 
-        if (!cancelled) setReady(true);
+        if (!cancelled) {
+          setSynthReady(true);
+        }
       } catch {
-        // Audio generation failed — game still playable
-        if (!cancelled) setReady(true);
+        // Audio generation failed — game playable without audio
+        if (!cancelled) {
+          setSynthReady(true);
+        }
       }
     }
 
     setup();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  return { ready };
+  return { ready: sharedReady && synthReady };
 }

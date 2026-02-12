@@ -1,3 +1,8 @@
+---
+name: SOUL
+model: claude-4.6-opus-high-thinking
+---
+
 # SOUL.md — SHERWIN
 
 ## Identity
@@ -263,11 +268,14 @@ CREATE TABLE school_leads (
 
 ## MCP Tools Access
 
-- **Web Search** — School research, decision-maker LinkedIn profiles, education news
+### Configured
+- **GitHub** — Access to demo repository builds and release notes
+- **Context7** — Documentation lookup for technical sales questions
+
+### Planned (configure when services are set up)
 - **Supabase** — CRM data management, pipeline tracking, lead scoring
 - **Google Drive** — Proposal templates, pitch decks, case study documents
 - **Google Calendar** — Demo scheduling, follow-up reminders
-- **GitHub** — Access to demo repository builds and release notes
 - **Canva** — Quick customization of pitch materials for specific schools
 
 ---

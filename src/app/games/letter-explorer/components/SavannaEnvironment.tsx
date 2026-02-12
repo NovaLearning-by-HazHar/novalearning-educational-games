@@ -4,119 +4,124 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { SAVANNA_COLORS } from '../lib/constants';
 
-/** Single acacia tree (~100 tris) */
-function AcaciaTree({ position }: { position: [number, number, number] }) {
+/**
+ * Low-poly African savanna environment.
+ * Ground plane, vertex-color sky gradient, 3 acacia tree silhouettes, scattered grass tufts.
+ * ~500 triangles total. No shadows. WebGL 1.0 safe.
+ */
+export default function SavannaEnvironment() {
   return (
-    <group position={position}>
+    <>
+      <Ground />
+      <SkyGradient />
+      <AcaciaTree position={[-5, 0, -4]} scale={1.0} />
+      <AcaciaTree position={[5.5, 0, -5]} scale={0.85} />
+      <AcaciaTree position={[0, 0, -7]} scale={1.15} />
+      <GrassTufts />
+    </>
+  );
+}
+
+function Ground() {
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
+      <planeGeometry args={[30, 30]} />
+      <meshBasicMaterial color={SAVANNA_COLORS.ground} />
+    </mesh>
+  );
+}
+
+/** Vertical backdrop plane with vertex-color gradient sky */
+function SkyGradient() {
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+
+    const positions = new Float32Array([
+      -20, -2, -18,
+       20, -2, -18,
+      -20, 14, -18,
+       20, 14, -18,
+    ]);
+
+    const topColor = new THREE.Color(SAVANNA_COLORS.skyTop);
+    const bottomColor = new THREE.Color(SAVANNA_COLORS.skyBottom);
+
+    const colors = new Float32Array([
+      bottomColor.r, bottomColor.g, bottomColor.b,
+      bottomColor.r, bottomColor.g, bottomColor.b,
+      topColor.r, topColor.g, topColor.b,
+      topColor.r, topColor.g, topColor.b,
+    ]);
+
+    geo.setIndex([0, 1, 2, 2, 1, 3]);
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    return geo;
+  }, []);
+
+  return (
+    <mesh geometry={geometry}>
+      <meshBasicMaterial vertexColors side={THREE.DoubleSide} />
+    </mesh>
+  );
+}
+
+/** Flat-top acacia tree silhouette: cylinder trunk + flattened sphere canopy */
+function AcaciaTree({
+  position,
+  scale = 1,
+}: {
+  position: [number, number, number];
+  scale?: number;
+}) {
+  return (
+    <group position={position} scale={scale}>
       {/* Trunk */}
       <mesh position={[0, 1.2, 0]}>
-        <cylinderGeometry args={[0.08, 0.15, 2.4, 6]} />
+        <cylinderGeometry args={[0.08, 0.12, 2.4, 6]} />
         <meshLambertMaterial color={SAVANNA_COLORS.treeTrunk} />
       </mesh>
-      {/* Canopy — flat-top disc shape */}
-      <mesh position={[0, 2.6, 0]} scale={[1, 0.25, 1]}>
-        <sphereGeometry args={[1.2, 8, 4]} />
+
+      {/* Canopy — flat-topped ellipsoid */}
+      <mesh position={[0, 2.8, 0]} scale={[2.0, 0.5, 1.5]}>
+        <sphereGeometry args={[0.6, 8, 6]} />
         <meshLambertMaterial color={SAVANNA_COLORS.treeCanopy} />
       </mesh>
-      {/* Lighter top patch */}
-      <mesh position={[0.2, 2.75, 0.1]} scale={[1, 0.2, 1]}>
-        <sphereGeometry args={[0.7, 6, 4]} />
+
+      {/* Canopy highlight layer */}
+      <mesh position={[0.2, 2.9, 0.1]} scale={[1.4, 0.35, 1.1]}>
+        <sphereGeometry args={[0.5, 8, 6]} />
         <meshLambertMaterial color={SAVANNA_COLORS.treeCanopyLight} />
       </mesh>
     </group>
   );
 }
 
-/** Grass tuft (~8 tris) */
-function GrassTuft({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[-0.06, 0.12, 0]} rotation={[0, 0, 0.15]}>
-        <coneGeometry args={[0.04, 0.25, 3]} />
-        <meshLambertMaterial color={SAVANNA_COLORS.grass} />
-      </mesh>
-      <mesh position={[0.06, 0.14, 0]} rotation={[0, 0, -0.1]}>
-        <coneGeometry args={[0.04, 0.28, 3]} />
-        <meshLambertMaterial color={SAVANNA_COLORS.grassDark} />
-      </mesh>
-      <mesh position={[0, 0.1, 0.05]} rotation={[0.1, 0, 0]}>
-        <coneGeometry args={[0.03, 0.22, 3]} />
-        <meshLambertMaterial color={SAVANNA_COLORS.grass} />
-      </mesh>
-    </group>
+/** Scattered grass tufts — thin cones on the ground plane */
+function GrassTufts() {
+  const tufts = useMemo(
+    () => [
+      { pos: [-2.5, 0, 3] as [number, number, number], h: 0.3 },
+      { pos: [3.5, 0, 2.5] as [number, number, number], h: 0.25 },
+      { pos: [-4, 0, 1] as [number, number, number], h: 0.35 },
+      { pos: [1.0, 0, 3.5] as [number, number, number], h: 0.2 },
+      { pos: [-1, 0, -1] as [number, number, number], h: 0.28 },
+      { pos: [4.0, 0, -1.5] as [number, number, number], h: 0.22 },
+      { pos: [-3.5, 0, -3] as [number, number, number], h: 0.3 },
+      { pos: [2.5, 0, -2.5] as [number, number, number], h: 0.26 },
+    ],
+    [],
   );
-}
-
-/**
- * Low-poly savanna background for Letter Explorer.
- * Ground plane, sky gradient, acacia trees, grass tufts, distant hills.
- * ~500 triangles total. All static — no animations.
- */
-export default function SavannaEnvironment() {
-  // Sky gradient via vertex colors on a plane
-  const skyGeo = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(60, 30, 1, 1);
-    const colors = new Float32Array([
-      // bottom-left (warm gold)
-      ...new THREE.Color(SAVANNA_COLORS.skyBottom).toArray(),
-      // bottom-right
-      ...new THREE.Color(SAVANNA_COLORS.skyBottom).toArray(),
-      // top-left (sky blue)
-      ...new THREE.Color(SAVANNA_COLORS.skyTop).toArray(),
-      // top-right
-      ...new THREE.Color(SAVANNA_COLORS.skyTop).toArray(),
-    ]);
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    return geo;
-  }, []);
 
   return (
     <group>
-      {/* Sky backdrop */}
-      <mesh geometry={skyGeo} position={[0, 10, -20]}>
-        <meshBasicMaterial vertexColors side={THREE.DoubleSide} />
-      </mesh>
-
-      {/* Ground plane */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-        <planeGeometry args={[40, 30]} />
-        <meshLambertMaterial color={SAVANNA_COLORS.ground} />
-      </mesh>
-
-      {/* Ground accent (darker patch in center) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <circleGeometry args={[8, 12]} />
-        <meshLambertMaterial color={SAVANNA_COLORS.groundDark} />
-      </mesh>
-
-      {/* Acacia trees — scattered around the edges */}
-      <AcaciaTree position={[-6, 0, -5]} />
-      <AcaciaTree position={[5.5, 0, -6]} />
-      <AcaciaTree position={[7, 0, 2]} />
-
-      {/* Distant hills */}
-      <mesh position={[-10, 0.5, -12]} scale={[3, 0.8, 2]}>
-        <sphereGeometry args={[1, 6, 4, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshLambertMaterial color="#B8A070" />
-      </mesh>
-      <mesh position={[8, 0.3, -14]} scale={[4, 0.6, 2.5]}>
-        <sphereGeometry args={[1, 6, 4, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshLambertMaterial color="#C0A878" />
-      </mesh>
-      <mesh position={[0, 0.4, -16]} scale={[5, 0.7, 3]}>
-        <sphereGeometry args={[1, 6, 4, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshLambertMaterial color="#B5A068" />
-      </mesh>
-
-      {/* Grass tufts scattered around */}
-      <GrassTuft position={[-2, 0, 3]} />
-      <GrassTuft position={[3.5, 0, 1]} />
-      <GrassTuft position={[-5, 0, 0.5]} />
-      <GrassTuft position={[1, 0, -1]} />
-      <GrassTuft position={[-1, 0, -4]} />
-      <GrassTuft position={[4, 0, -3.5]} />
-      <GrassTuft position={[-3, 0, 2.5]} />
-      <GrassTuft position={[2, 0, 4]} />
+      {tufts.map((t, i) => (
+        <mesh key={i} position={[t.pos[0], t.h / 2, t.pos[2]]}>
+          <coneGeometry args={[0.08, t.h, 4]} />
+          <meshBasicMaterial color={i % 2 === 0 ? SAVANNA_COLORS.grass : SAVANNA_COLORS.grassDark} />
+        </mesh>
+      ))}
     </group>
   );
 }

@@ -1,3 +1,8 @@
+---
+name: SOUL
+model: claude-4.6-opus-high-thinking
+---
+
 # SOUL.md — EMILE
 
 ## Identity
@@ -232,11 +237,15 @@ CREATE TABLE support_tickets (
 
 ## MCP Tools Access
 
+### Configured
+- **GitHub** — Issue tracking, partnership documentation, deployment status
+- **Context7** — Supabase, Next.js documentation lookup
+
+### Planned (configure when services are set up)
 - **Supabase** — Partnership data, engagement metrics, support tickets, health scores
 - **Google Calendar** — Onboarding schedules, renewal timelines, teacher training sessions
 - **Google Drive** — Onboarding materials, training decks, success story templates
 - **Canva** — School-specific certificates, engagement reports, parent communication materials
-- **Web Search** — School news monitoring, education policy updates, competitor activity
 
 ---
 

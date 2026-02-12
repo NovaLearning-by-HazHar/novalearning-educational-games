@@ -47,8 +47,6 @@ export default function LetterExplorerPage() {
 
   // Explorer-specific state
   const explorerPhase = useExplorerState((s) => s.phase);
-  const currentSpotlight = useExplorerState((s) => s.currentSpotlight);
-  const dismissSpotlight = useExplorerState((s) => s.dismissSpotlight);
   const resetExplorer = useExplorerState((s) => s.resetExplorer);
 
   // Audio
@@ -82,11 +80,13 @@ export default function LetterExplorerPage() {
     }
   }, [explorerPhase, setGamePhase, trackPhase]);
 
-  // On celebrate: play melody, record session + completion
+  // On celebrate: play melody + encouragement, record session + completion
   useEffect(() => {
     if (explorerPhase === 'celebrate') {
       audioManager.stopCategory('ambient');
       audioManager.play('celebrate-melody');
+      // Play a random SA-accented encouragement voice clip after a short delay
+      setTimeout(() => audioManager.playRandomEncouragement(), 800);
 
       const session = endSession(ANIMALS.length);
       addCompletion('letter-explorer', ANIMALS.length, {
@@ -152,8 +152,8 @@ export default function LetterExplorerPage() {
         <div className="relative w-full h-full">
           {/* 3D scene — visible during explore and as dimmed backdrop during matching */}
           <Scene
-            cameraPosition={[0, 10, 20]}
-            cameraFov={45}
+            cameraPosition={[0, 3, 10]}
+            cameraFov={50}
             backgroundColor="#87CEEB"
           >
             <LetterExplorerGame />
@@ -163,19 +163,19 @@ export default function LetterExplorerPage() {
           {isExplore && <ExplorerOverlay />}
 
           {/* Spotlight popup — when an animal is just discovered */}
-          {explorerPhase === 'spotlight' && currentSpotlight && (
-            <SpotlightPopup
-              animalId={currentSpotlight}
-              onDismiss={dismissSpotlight}
-            />
-          )}
+          {explorerPhase === 'spotlight' && <SpotlightPopup />}
 
-          {/* Matching mini-game — full-screen overlay */}
+          {/* Matching mini-game — separate 3D scene as overlay */}
           {isMatching && (
-            <>
-              <div className="absolute inset-0 bg-black/60 z-40 pointer-events-none" />
-              <MatchingMiniGame />
-            </>
+            <div className="absolute inset-0 z-40">
+              <Scene
+                cameraPosition={[0, 1, 6]}
+                cameraFov={45}
+                backgroundColor="#FFF8E1"
+              >
+                <MatchingMiniGame />
+              </Scene>
+            </div>
           )}
         </div>
       </GameShell>

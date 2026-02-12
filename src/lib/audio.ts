@@ -1,4 +1,5 @@
 import { Howl, Howler } from 'howler';
+import type { AudioLanguage, AudioMap, AudioMapEntry } from '@/types/audioMap';
 
 type SoundId = string;
 
@@ -10,15 +11,31 @@ interface SoundEntry {
   category: AudioCategory;
 }
 
+/** Base path for serving audio files from public/audio/ */
+const AUDIO_BASE_PATH = '/audio/';
+
+/**
+ * Infer the audio category from a pipeline audio ID prefix.
+ * - enc_*, inst_*, phon_* -> voice
+ * - ui_* -> sfx
+ * - narr_* -> voice
+ */
+function categoryFromId(id: string): AudioCategory {
+  if (id.startsWith('ui_')) return 'sfx';
+  if (id.startsWith('enc_') || id.startsWith('inst_') || id.startsWith('phon_') || id.startsWith('narr_')) return 'voice';
+  return 'sfx';
+}
+
 /**
  * Audio manager wrapping Howler.js.
  * Handles marimba melodies, nature sounds, character voices, and community cheers.
+ * Supports language switching for pipeline-generated multilingual audio.
  * All audio files must be < 50KB each.
  *
  * Categories:
  * - music: Background marimba melodies
  * - sfx: Interaction sounds (tap, collect, celebrate)
- * - voice: Character voice lines ("One!", "Two!", etc.)
+ * - voice: Character voice lines, encouragement, instructions, phonics
  * - ambient: Nature sounds (birds, wind, water)
  */
 class AudioManager {
@@ -31,6 +48,43 @@ class AudioManager {
     ambient: 0.3,
   };
   private _unlocked = false;
+  private _language: AudioLanguage = 'en-ZA';
+  private _audioMap: AudioMap | null = null;
+
+  /** Current language for multilingual audio */
+  get language(): AudioLanguage {
+    return this._language;
+  }
+
+  /**
+   * Set the active language. Clears and reloads language-specific sounds
+   * from the audio map if one has been loaded.
+   */
+  setLanguage(language: AudioLanguage): void {
+    if (this._language === language) return;
+    this._language = language;
+
+    // Unload language-specific sounds (not UI sounds or blob-based game sounds)
+    const toRemove: string[] = [];
+    this.sounds.forEach((entry, id) => {
+      // Only remove pipeline voice sounds that are language-specific
+      if (
+        id.startsWith('enc_') ||
+        id.startsWith('inst_') ||
+        id.startsWith('phon_') ||
+        id.startsWith('narr_')
+      ) {
+        entry.howl.unload();
+        toRemove.push(id);
+      }
+    });
+    toRemove.forEach((id) => this.sounds.delete(id));
+
+    // Reload from audio map if available
+    if (this._audioMap) {
+      this.loadFromMap(this._audioMap);
+    }
+  }
 
   /** Preload an audio file with category */
   load(id: SoundId, src: string, category: AudioCategory = 'sfx'): void {
@@ -42,6 +96,35 @@ class AudioManager {
       html5: category === 'ambient' || category === 'music', // streaming for long audio
     });
     this.sounds.set(id, { howl, category });
+  }
+
+  /**
+   * Bulk-load audio from the pipeline audio map.
+   * For each entry, picks the current language variant (or "all" for UI sounds).
+   * Stores the map for language-switch reloading.
+   */
+  loadFromMap(audioMap: AudioMap): void {
+    this._audioMap = audioMap;
+
+    for (const [audioId, entry] of Object.entries(audioMap)) {
+      // Skip if already loaded
+      if (this.sounds.has(audioId)) continue;
+
+      const fileEntry = this.resolveMapEntry(entry);
+      if (!fileEntry) continue;
+
+      const category = categoryFromId(audioId);
+      const src = AUDIO_BASE_PATH + fileEntry.path;
+      this.load(audioId, src, category);
+    }
+  }
+
+  /**
+   * Resolve the best file entry from an audio map entry,
+   * preferring current language, then falling back to "all" or "en-ZA".
+   */
+  private resolveMapEntry(entry: AudioMapEntry) {
+    return entry[this._language] || entry['all'] || entry['en-ZA'] || null;
   }
 
   /** Play a loaded sound. Returns the Howl play ID for stopping specific instances. */
@@ -61,6 +144,27 @@ class AudioManager {
       entry.howl.volume(volume * this._volumes[entry.category], playId);
     }
     return playId;
+  }
+
+  /**
+   * Play a random encouragement clip.
+   * Picks from loaded enc_* sounds for variety.
+   */
+  playRandomEncouragement(): number | undefined {
+    const encIds = [
+      'enc_great',
+      'enc_amazing',
+      'enc_star',
+      'enc_proud',
+      'enc_rainbow',
+      'enc_ubuntu',
+      'enc_together',
+      'enc_keepgoing',
+    ];
+    const loaded = encIds.filter((id) => this.sounds.has(id));
+    if (loaded.length === 0) return undefined;
+    const pick = loaded[Math.floor(Math.random() * loaded.length)];
+    return this.play(pick);
   }
 
   /** Stop a playing sound */
@@ -125,6 +229,7 @@ class AudioManager {
   dispose(): void {
     this.sounds.forEach((entry) => entry.howl.unload());
     this.sounds.clear();
+    this._audioMap = null;
   }
 }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { audioManager } from '@/lib/audio';
+import { useSharedAudio } from '@/lib/useSharedAudio';
 import {
   generateTapSfx,
   generateCorrectChime,
@@ -12,12 +13,13 @@ import {
 } from '../lib/audioGenerator';
 
 /**
- * Generates all Counting Animals audio as Web Audio API blobs on mount.
- * Loads them into the existing AudioManager via blob URLs.
- * Returns ready=true when all audio is loaded (or if generation fails gracefully).
+ * Loads shared pipeline audio (encouragement, instructions, UI sounds)
+ * and generates game-specific synth audio (tap, chimes, counting beeps, etc.)
+ * Returns ready=true when both are loaded.
  */
 export function useAudioSetup(): { ready: boolean } {
-  const [ready, setReady] = useState(false);
+  const { ready: sharedReady } = useSharedAudio();
+  const [synthReady, setSynthReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,7 +27,7 @@ export function useAudioSetup(): { ready: boolean } {
     async function setup() {
       try {
         if (typeof OfflineAudioContext === 'undefined') {
-          setReady(true);
+          setSynthReady(true);
           return;
         }
 
@@ -81,12 +83,11 @@ export function useAudioSetup(): { ready: boolean } {
         }
 
         if (!cancelled) {
-          setReady(true);
+          setSynthReady(true);
         }
       } catch {
-        // Audio generation failed — game still works without audio
         if (!cancelled) {
-          setReady(true);
+          setSynthReady(true);
         }
       }
     }
@@ -98,5 +99,5 @@ export function useAudioSetup(): { ready: boolean } {
     };
   }, []);
 
-  return { ready };
+  return { ready: sharedReady && synthReady };
 }

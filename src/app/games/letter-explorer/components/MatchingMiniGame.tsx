@@ -1,160 +1,285 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo, useEffect, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Text } from '@react-three/drei';
+import * as THREE from 'three';
+import { animate } from 'animejs';
 import { audioManager } from '@/lib/audio';
-import { useExplorerState } from '../hooks/useExplorerState';
 import { ANIMALS, type AnimalDef } from '../lib/constants';
+import { useExplorerState } from '../hooks/useExplorerState';
+import { buildAnimal } from '../lib/animals';
 
 /**
- * HTML overlay matching mini-game.
- * Shows 3 letters (top) and 3 animals (bottom), shuffled.
- * Tap a letter, then tap the matching animal.
- * Correct → pair locks in green. Wrong → gentle shake + reset. No failure states.
+ * Matching mini-game: tap a letter, then tap the matching animal.
+ * 3 letters on top, 3 animals on bottom. Correct = green glow + chime.
+ * Wrong = gentle wobble + "Let's try again!" — no penalty.
  */
 export default function MatchingMiniGame() {
   const matchingAnimals = useExplorerState((s) => s.matchingAnimals);
-  const matchedPairs = useExplorerState((s) => s.matchedPairs);
   const selectedLetter = useExplorerState((s) => s.selectedLetter);
+  const matchedPairs = useExplorerState((s) => s.matchedPairs);
   const selectLetter = useExplorerState((s) => s.selectLetter);
   const attemptMatch = useExplorerState((s) => s.attemptMatch);
 
-  const [shakeAnimal, setShakeAnimal] = useState<string | null>(null);
-
-  // Get full animal definitions for matching animals
-  const matchingAnimalDefs = useMemo(
-    () => matchingAnimals.map((id) => ANIMALS.find((a: AnimalDef) => a.id === id)!).filter(Boolean),
+  // Resolve animal definitions for the 3 matching animals
+  const animalDefs = useMemo(
+    () =>
+      matchingAnimals
+        .map((id) => ANIMALS.find((a) => a.id === id))
+        .filter((a): a is AnimalDef => a != null),
     [matchingAnimals],
   );
 
-  // Shuffle letters and animals independently (stable per game)
-  const shuffledLetters = useMemo(
-    () => [...matchingAnimalDefs].sort(() => Math.random() - 0.5),
-    [matchingAnimalDefs],
-  );
-  const shuffledAnimals = useMemo(
-    () => [...matchingAnimalDefs].sort(() => Math.random() - 0.5),
-    [matchingAnimalDefs],
-  );
+  // Shuffle order for letters vs animals (so they're not aligned)
+  const letterOrder = useMemo(() => {
+    const shuffled = [...animalDefs];
+    // Simple Fisher-Yates shuffle
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [animalDefs]);
 
   const handleLetterTap = useCallback(
     (letter: string) => {
-      selectLetter(selectedLetter === letter ? null : letter);
+      selectLetter(letter);
     },
-    [selectLetter, selectedLetter],
+    [selectLetter],
   );
 
   const handleAnimalTap = useCallback(
-    (animal: AnimalDef) => {
+    (animalId: string) => {
       if (!selectedLetter) return;
-      if (matchedPairs.includes(animal.id)) return;
+
+      const animal = ANIMALS.find((a) => a.id === animalId);
+      if (!animal) return;
 
       if (animal.letter === selectedLetter) {
         // Correct match!
-        attemptMatch(animal.id);
-        audioManager.play('match-correct');
+        attemptMatch(animalId);
+        audioManager.play('ui_success');
+        // Play a random encouragement voice clip after the chime
+        setTimeout(() => audioManager.playRandomEncouragement(), 400);
       } else {
-        // Wrong match — gentle nudge, no punishment
-        audioManager.play('match-try-again');
-        setShakeAnimal(animal.id);
+        // Wrong — gentle voice feedback, no penalty
+        audioManager.play('ui_gentle_error');
+        audioManager.play('enc_gentle_redirect');
         selectLetter(null);
-        setTimeout(() => setShakeAnimal(null), 500);
       }
     },
-    [selectedLetter, matchedPairs, attemptMatch, selectLetter],
+    [selectedLetter, attemptMatch, selectLetter],
   );
 
-  // Play a welcoming sound when matching starts
-  useEffect(() => {
-    audioManager.play('discover-chime');
-  }, []);
+  return (
+    <>
+      {/* Simple background */}
+      <color attach="background" args={['#FFF8E1']} />
+      <ambientLight intensity={1.0} />
+
+      {/* Instruction text at top */}
+      <Text
+        position={[0, 3.2, 0]}
+        fontSize={0.35}
+        color="#5D4E37"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {selectedLetter
+          ? `Now tap the ${selectedLetter} animal!`
+          : 'Tap a letter, then its animal!'}
+      </Text>
+
+      {/* Letter cards — top row */}
+      <group position={[0, 2, 0]}>
+        {letterOrder.map((animal, i) => {
+          const x = (i - 1) * 2;
+          const isMatched = matchedPairs.includes(animal.id);
+          const isSelected = selectedLetter === animal.letter && !isMatched;
+
+          return (
+            <LetterCard
+              key={animal.letter}
+              letter={animal.letter}
+              position={[x, 0, 0]}
+              selected={isSelected}
+              matched={isMatched}
+              onTap={() => !isMatched && handleLetterTap(animal.letter)}
+            />
+          );
+        })}
+      </group>
+
+      {/* Animal cards — bottom row */}
+      <group position={[0, -0.5, 0]}>
+        {animalDefs.map((animal, i) => {
+          const x = (i - 1) * 2.5;
+          const isMatched = matchedPairs.includes(animal.id);
+
+          return (
+            <AnimalCard
+              key={animal.id}
+              animal={animal}
+              position={[x, 0, 0]}
+              matched={isMatched}
+              onTap={() => !isMatched && handleAnimalTap(animal.id)}
+            />
+          );
+        })}
+      </group>
+
+      {/* Encouragement when wrong */}
+      {selectedLetter === null && matchedPairs.length > 0 && matchedPairs.length < matchingAnimals.length && (
+        <Text
+          position={[0, -2.5, 0]}
+          fontSize={0.25}
+          color="#FF6F00"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {"Let's try again!"}
+        </Text>
+      )}
+    </>
+  );
+}
+
+/** Tappable letter card */
+function LetterCard({
+  letter,
+  position,
+  selected,
+  matched,
+  onTap,
+}: {
+  letter: string;
+  position: [number, number, number];
+  selected: boolean;
+  matched: boolean;
+  onTap: () => void;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const bgColor = matched ? '#66BB6A' : selected ? '#FF6F00' : '#FFFFFF';
+  const textColor = matched ? '#FFFFFF' : selected ? '#FFFFFF' : '#5D4E37';
+  const borderColor = matched ? '#4CAF50' : selected ? '#E65100' : '#DDD';
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-[#FEF7EC] to-[#E8F5E0] p-6">
-      {/* Title */}
-      <h2 className="text-2xl font-bold text-[#5D4E37] mb-2">
-        Match the Letters!
-      </h2>
-      <p className="text-sm text-[#8B7355] mb-8">
-        Tap a letter, then tap its animal
-      </p>
+    <group ref={groupRef} position={position} onClick={onTap}>
+      {/* Card background */}
+      <mesh>
+        <planeGeometry args={[1.2, 1.2]} />
+        <meshBasicMaterial color={bgColor} />
+      </mesh>
+      {/* Border */}
+      <mesh position={[0, 0, -0.01]}>
+        <planeGeometry args={[1.35, 1.35]} />
+        <meshBasicMaterial color={borderColor} />
+      </mesh>
+      {/* Letter */}
+      <Text
+        position={[0, 0, 0.02]}
+        fontSize={0.6}
+        color={textColor}
+        anchorX="center"
+        anchorY="middle"
+      >
+        {matched ? '\u2713' : letter}
+      </Text>
+    </group>
+  );
+}
 
-      {/* Letters row */}
-      <div className="flex gap-4 mb-10">
-        {shuffledLetters.map((animal) => {
-          const isMatched = matchedPairs.includes(animal.id);
-          const isSelected = selectedLetter === animal.letter;
+/** Tappable animal card with procedural mesh */
+function AnimalCard({
+  animal,
+  position,
+  matched,
+  onTap,
+}: {
+  animal: AnimalDef;
+  position: [number, number, number];
+  matched: boolean;
+  onTap: () => void;
+}) {
+  const containerRef = useRef<THREE.Group>(null);
+  const animalMeshRef = useRef<THREE.Group>(null);
 
-          return (
-            <button
-              key={`letter-${animal.id}`}
-              onClick={() => !isMatched && handleLetterTap(animal.letter)}
-              disabled={isMatched}
-              className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-lg transition-all duration-200 active:scale-95"
-              style={{
-                backgroundColor: isMatched
-                  ? '#4CAF50'
-                  : isSelected
-                    ? '#FFB800'
-                    : 'white',
-                color: isMatched || isSelected ? 'white' : '#5D4E37',
-                transform: isSelected ? 'scale(1.1)' : undefined,
-                opacity: isMatched ? 0.7 : 1,
-              }}
-            >
-              {animal.letter}
-            </button>
-          );
-        })}
-      </div>
+  const animalGroup = useMemo(
+    () => buildAnimal(animal.id, animal.colors),
+    [animal.id, animal.colors],
+  );
 
-      {/* Animals row */}
-      <div className="flex gap-4">
-        {shuffledAnimals.map((animal) => {
-          const isMatched = matchedPairs.includes(animal.id);
-          const isShaking = shakeAnimal === animal.id;
+  useEffect(() => {
+    if (!animalMeshRef.current) return;
+    while (animalMeshRef.current.children.length > 0) {
+      animalMeshRef.current.remove(animalMeshRef.current.children[0]);
+    }
+    animalMeshRef.current.add(animalGroup);
+  }, [animalGroup]);
 
-          return (
-            <button
-              key={`animal-${animal.id}`}
-              onClick={() => handleAnimalTap(animal)}
-              disabled={isMatched}
-              className={`w-24 h-28 rounded-2xl flex flex-col items-center justify-center shadow-lg transition-all duration-200 active:scale-95 ${isShaking ? 'animate-shake' : ''}`}
-              style={{
-                backgroundColor: isMatched ? '#E8F5E9' : 'white',
-                borderWidth: 3,
-                borderColor: isMatched
-                  ? '#4CAF50'
-                  : selectedLetter
-                    ? '#FFB800'
-                    : animal.colors.primary,
-                opacity: isMatched ? 0.7 : 1,
-              }}
-            >
-              <span className="text-4xl mb-1" aria-hidden="true">
-                {animal.emoji}
-              </span>
-              <span
-                className="text-xs font-semibold"
-                style={{ color: animal.colors.primary }}
-              >
-                {animal.name}
-              </span>
-              {isMatched && (
-                <span className="text-lg absolute" aria-hidden="true">
-                  ✓
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+  // Gentle bob
+  useFrame(({ clock }) => {
+    if (!containerRef.current) return;
+    containerRef.current.position.y =
+      position[1] + Math.sin(clock.elapsedTime * 1.2 + position[0]) * 0.03;
+  });
 
-      {/* Encouraging message */}
-      {shakeAnimal && (
-        <p className="mt-6 text-lg text-[#FB923C] font-semibold animate-pulse">
-          Let&apos;s try again!
-        </p>
+  // Pop on match
+  useEffect(() => {
+    if (!matched || !containerRef.current) return;
+    const proxy = { scale: 1 };
+    animate(proxy, {
+      scale: [1, 1.2, 1],
+      duration: 400,
+      ease: 'outElastic(1, 0.5)',
+      onUpdate: () => {
+        if (containerRef.current) {
+          containerRef.current.scale.setScalar(proxy.scale);
+        }
+      },
+    });
+  }, [matched]);
+
+  return (
+    <group ref={containerRef} position={position} onClick={onTap}>
+      {/* Background card */}
+      <mesh position={[0, 0.5, -0.3]}>
+        <planeGeometry args={[2, 2]} />
+        <meshBasicMaterial
+          color={matched ? '#E8F5E9' : '#FFF8E1'}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+
+      {/* Animal mesh */}
+      <group ref={animalMeshRef} scale={0.8} />
+
+      {/* Name label */}
+      <Text
+        position={[0, -0.3, 0.1]}
+        fontSize={0.2}
+        color={matched ? '#2E7D32' : '#5D4E37'}
+        anchorX="center"
+        anchorY="middle"
+      >
+        {animal.name}
+      </Text>
+
+      {/* Matched checkmark */}
+      {matched && (
+        <Text
+          position={[0.7, 1.2, 0.1]}
+          fontSize={0.4}
+          color="#4CAF50"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {'\u2713'}
+        </Text>
       )}
-    </div>
+    </group>
   );
 }

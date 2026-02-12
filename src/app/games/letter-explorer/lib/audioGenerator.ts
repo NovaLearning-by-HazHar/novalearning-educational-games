@@ -1,19 +1,12 @@
 /**
- * Letter Explorer — Web Audio API sound synthesis.
+ * Letter Explorer — Web Audio API synthesis.
  * Generates all game audio as in-memory WAV blobs — zero file downloads.
- * Includes marimba tones, animal sounds, chimes, and ambient savanna.
+ * Animal tones, letter announcements, match feedback, celebration, ambient.
  */
 
 const SAMPLE_RATE = 22050;
 
-// ─── WAV Encoding ────────────────────────────────────────────────────
-
-function writeString(view: DataView, offset: number, str: string) {
-  for (let i = 0; i < str.length; i++) {
-    view.setUint8(offset + i, str.charCodeAt(i));
-  }
-}
-
+/** Encode an AudioBuffer as a 16-bit PCM WAV blob */
 function audioBufferToWav(buffer: AudioBuffer): Blob {
   const numChannels = 1;
   const length = buffer.length;
@@ -28,6 +21,7 @@ function audioBufferToWav(buffer: AudioBuffer): Blob {
   writeString(view, 0, 'RIFF');
   view.setUint32(4, 36 + dataSize, true);
   writeString(view, 8, 'WAVE');
+
   writeString(view, 12, 'fmt ');
   view.setUint32(16, 16, true);
   view.setUint16(20, 1, true);
@@ -36,6 +30,7 @@ function audioBufferToWav(buffer: AudioBuffer): Blob {
   view.setUint32(28, byteRate, true);
   view.setUint16(32, blockAlign, true);
   view.setUint16(34, 16, true);
+
   writeString(view, 36, 'data');
   view.setUint32(40, dataSize, true);
 
@@ -50,8 +45,13 @@ function audioBufferToWav(buffer: AudioBuffer): Blob {
   return new Blob([arrayBuffer], { type: 'audio/wav' });
 }
 
-// ─── Core Tone Generator ─────────────────────────────────────────────
+function writeString(view: DataView, offset: number, str: string) {
+  for (let i = 0; i < str.length; i++) {
+    view.setUint8(offset + i, str.charCodeAt(i));
+  }
+}
 
+/** Core tone generator with ADSR envelope */
 async function generateTone(config: {
   frequency: number;
   duration: number;
@@ -62,7 +62,17 @@ async function generateTone(config: {
   release: number;
   volume?: number;
 }): Promise<Blob> {
-  const { frequency, duration, type, attack, decay, sustain, release, volume = 0.5 } = config;
+  const {
+    frequency,
+    duration,
+    type,
+    attack,
+    decay,
+    sustain,
+    release,
+    volume = 0.5,
+  } = config;
+
   const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * duration), SAMPLE_RATE);
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -86,294 +96,131 @@ async function generateTone(config: {
   return audioBufferToWav(buffer);
 }
 
-// ─── Marimba Tones (A-F, ascending pentatonic + extra) ───────────────
+// ─── Animal Tones ──────────────────────────────────────────────────
+// Each animal gets a unique pitch/timbre combination
 
-const LETTER_NOTES: Record<string, number> = {
-  A: 261.63, // C4
-  B: 293.66, // D4
-  C: 329.63, // E4
-  D: 392.0, // G4
-  E: 440.0, // A4
-  F: 523.25, // C5
-};
+/** Frequencies loosely mapped to animal character */
+const ANIMAL_CONFIGS: { frequency: number; type: OscillatorType; duration: number }[] = [
+  { frequency: 220, type: 'triangle', duration: 0.5 },   // Aardvark — deep, gentle
+  { frequency: 330, type: 'square', duration: 0.4 },      // Baboon — bright, chattery
+  { frequency: 440, type: 'sawtooth', duration: 0.35 },   // Cheetah — sharp, fast
+  { frequency: 165, type: 'sine', duration: 0.6 },        // Dung Beetle — low hum
+  { frequency: 130, type: 'triangle', duration: 0.7 },    // Elephant — deep rumble
+  { frequency: 523, type: 'sine', duration: 0.45 },       // Flamingo — high, airy
+];
 
-/** Marimba-like tone for each letter discovery */
-export async function generateMarimbaTone(letter: string): Promise<Blob> {
-  const freq = LETTER_NOTES[letter] ?? 261.63;
+/** Generate a unique animal-themed tone by index (0-5) */
+export async function generateAnimalTone(index: number): Promise<Blob> {
+  const cfg = ANIMAL_CONFIGS[Math.min(index, ANIMAL_CONFIGS.length - 1)];
+  return generateTone({
+    frequency: cfg.frequency,
+    duration: cfg.duration,
+    type: cfg.type,
+    attack: 0.01,
+    decay: 0.15,
+    sustain: 0.3,
+    release: 0.15,
+    volume: 0.5,
+  });
+}
+
+// ─── Letter Announcement ──────────────────────────────────────────
+// Short ascending chime when a letter is revealed
+
+const LETTER_FREQS = [523.25, 587.33, 659.25, 698.46, 783.99, 880.0]; // C5-A5
+
+/** Generate letter announcement tone by letter index (0-5 = A-F) */
+export async function generateLetterAnnounce(letterIndex: number): Promise<Blob> {
+  const freq = LETTER_FREQS[Math.min(letterIndex, LETTER_FREQS.length - 1)];
   return generateTone({
     frequency: freq,
-    duration: 0.6,
+    duration: 0.35,
     type: 'sine',
     attack: 0.005,
-    decay: 0.3,
-    sustain: 0.1,
-    release: 0.2,
-    volume: 0.6,
-  });
-}
-
-// ─── Animal Sounds (synthesized approximations) ──────────────────────
-
-/** Aardvark — low snuffle (filtered noise burst) */
-export async function generateAardvarkSound(): Promise<Blob> {
-  const duration = 0.4;
-  const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * duration), SAMPLE_RATE);
-
-  const noiseBuffer = ctx.createBuffer(1, SAMPLE_RATE * duration, SAMPLE_RATE);
-  const data = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-
-  const source = ctx.createBufferSource();
-  source.buffer = noiseBuffer;
-
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 300;
-
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0, 0);
-  gain.gain.linearRampToValueAtTime(0.4, 0.05);
-  gain.gain.linearRampToValueAtTime(0.1, 0.2);
-  gain.gain.linearRampToValueAtTime(0.35, 0.25);
-  gain.gain.linearRampToValueAtTime(0, duration);
-
-  source.connect(filter);
-  filter.connect(gain);
-  gain.connect(ctx.destination);
-  source.start(0);
-
-  const buffer = await ctx.startRendering();
-  return audioBufferToWav(buffer);
-}
-
-/** Baboon — bark (quick frequency sweep) */
-export async function generateBaboonSound(): Promise<Blob> {
-  const duration = 0.3;
-  const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * duration), SAMPLE_RATE);
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(400, 0);
-  osc.frequency.linearRampToValueAtTime(250, 0.1);
-  osc.frequency.linearRampToValueAtTime(350, 0.15);
-  osc.frequency.linearRampToValueAtTime(200, duration);
-
-  gain.gain.setValueAtTime(0, 0);
-  gain.gain.linearRampToValueAtTime(0.5, 0.02);
-  gain.gain.linearRampToValueAtTime(0.3, 0.1);
-  gain.gain.linearRampToValueAtTime(0.4, 0.15);
-  gain.gain.linearRampToValueAtTime(0, duration);
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(0);
-  osc.stop(duration);
-
-  const buffer = await ctx.startRendering();
-  return audioBufferToWav(buffer);
-}
-
-/** Cheetah — chirp (high short tone) */
-export async function generateCheetahSound(): Promise<Blob> {
-  return generateTone({
-    frequency: 900,
-    duration: 0.2,
-    type: 'sine',
-    attack: 0.005,
-    decay: 0.08,
+    decay: 0.15,
     sustain: 0.2,
-    release: 0.08,
-    volume: 0.4,
+    release: 0.1,
+    volume: 0.55,
   });
 }
 
-/** Dung Beetle — buzz (sawtooth + tremolo) */
-export async function generateDungBeetleSound(): Promise<Blob> {
+// ─── Match Feedback ────────────────────────────────────────────────
+
+/** Bright ascending two-note chime for correct match */
+export async function generateMatchCorrect(): Promise<Blob> {
   const duration = 0.5;
   const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * duration), SAMPLE_RATE);
-  const osc = ctx.createOscillator();
-  const tremolo = ctx.createOscillator();
-  const tremoloGain = ctx.createGain();
-  const mainGain = ctx.createGain();
 
-  osc.type = 'sawtooth';
-  osc.frequency.value = 150;
+  // Note 1: C5
+  const osc1 = ctx.createOscillator();
+  const gain1 = ctx.createGain();
+  osc1.type = 'sine';
+  osc1.frequency.value = 523.25;
+  gain1.gain.setValueAtTime(0, 0);
+  gain1.gain.linearRampToValueAtTime(0.5, 0.01);
+  gain1.gain.linearRampToValueAtTime(0, 0.25);
+  osc1.connect(gain1);
+  gain1.connect(ctx.destination);
+  osc1.start(0);
+  osc1.stop(0.25);
 
-  tremolo.type = 'sine';
-  tremolo.frequency.value = 30;
-  tremoloGain.gain.value = 0.15;
-
-  mainGain.gain.setValueAtTime(0, 0);
-  mainGain.gain.linearRampToValueAtTime(0.35, 0.03);
-  mainGain.gain.setValueAtTime(0.35, duration - 0.1);
-  mainGain.gain.linearRampToValueAtTime(0, duration);
-
-  tremolo.connect(tremoloGain);
-  tremoloGain.connect(mainGain.gain);
-  osc.connect(mainGain);
-  mainGain.connect(ctx.destination);
-
-  osc.start(0);
-  tremolo.start(0);
-  osc.stop(duration);
-  tremolo.stop(duration);
-
-  const buffer = await ctx.startRendering();
-  return audioBufferToWav(buffer);
-}
-
-/** Elephant — trumpet (frequency sweep up) */
-export async function generateElephantSound(): Promise<Blob> {
-  const duration = 0.6;
-  const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * duration), SAMPLE_RATE);
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(200, 0);
-  osc.frequency.linearRampToValueAtTime(500, 0.2);
-  osc.frequency.setValueAtTime(500, 0.3);
-  osc.frequency.linearRampToValueAtTime(250, duration);
-
-  gain.gain.setValueAtTime(0, 0);
-  gain.gain.linearRampToValueAtTime(0.5, 0.05);
-  gain.gain.setValueAtTime(0.5, 0.3);
-  gain.gain.linearRampToValueAtTime(0, duration);
-
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 800;
-
-  osc.connect(filter);
-  filter.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(0);
-  osc.stop(duration);
-
-  const buffer = await ctx.startRendering();
-  return audioBufferToWav(buffer);
-}
-
-/** Flamingo — honk (nasal tone) */
-export async function generateFlamingoSound(): Promise<Blob> {
-  const duration = 0.35;
-  const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * duration), SAMPLE_RATE);
-  const osc = ctx.createOscillator();
+  // Note 2: E5
   const osc2 = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.type = 'square';
-  osc.frequency.value = 500;
+  const gain2 = ctx.createGain();
   osc2.type = 'sine';
-  osc2.frequency.value = 502; // slight detuning for nasal quality
-
-  gain.gain.setValueAtTime(0, 0);
-  gain.gain.linearRampToValueAtTime(0.3, 0.02);
-  gain.gain.setValueAtTime(0.3, duration - 0.1);
-  gain.gain.linearRampToValueAtTime(0, duration);
-
-  osc.connect(gain);
-  osc2.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(0);
-  osc2.start(0);
-  osc.stop(duration);
-  osc2.stop(duration);
+  osc2.frequency.value = 659.25;
+  gain2.gain.setValueAtTime(0, 0.15);
+  gain2.gain.linearRampToValueAtTime(0.5, 0.16);
+  gain2.gain.linearRampToValueAtTime(0, 0.45);
+  osc2.connect(gain2);
+  gain2.connect(ctx.destination);
+  osc2.start(0.15);
+  osc2.stop(0.45);
 
   const buffer = await ctx.startRendering();
   return audioBufferToWav(buffer);
 }
 
-// ─── UI Sounds ───────────────────────────────────────────────────────
-
-/** Bright ascending 3-note discovery chime */
-export async function generateDiscoverChime(): Promise<Blob> {
-  const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
-  const noteDuration = 0.15;
-  const totalDuration = notes.length * noteDuration + 0.2;
-  const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * totalDuration), SAMPLE_RATE);
-
-  for (let i = 0; i < notes.length; i++) {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = notes[i];
-
-    const start = i * noteDuration;
-    gain.gain.setValueAtTime(0, start);
-    gain.gain.linearRampToValueAtTime(0.45, start + 0.01);
-    gain.gain.linearRampToValueAtTime(0.1, start + noteDuration * 0.7);
-    gain.gain.linearRampToValueAtTime(0, start + noteDuration + 0.15);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(start);
-    osc.stop(start + noteDuration + 0.15);
-  }
-
-  const buffer = await ctx.startRendering();
-  return audioBufferToWav(buffer);
-}
-
-/** Happy two-tone match correct chime */
-export async function generateMatchCorrect(): Promise<Blob> {
-  const totalDuration = 0.5;
-  const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * totalDuration), SAMPLE_RATE);
-
-  const notes = [523.25, 783.99]; // C5, G5
-  const times = [0, 0.12];
-
-  for (let i = 0; i < notes.length; i++) {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = notes[i];
-
-    gain.gain.setValueAtTime(0, times[i]);
-    gain.gain.linearRampToValueAtTime(0.5, times[i] + 0.01);
-    gain.gain.linearRampToValueAtTime(0, times[i] + 0.35);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(times[i]);
-    osc.stop(times[i] + 0.35);
-  }
-
-  const buffer = await ctx.startRendering();
-  return audioBufferToWav(buffer);
-}
-
-/** Gentle descending nudge for wrong match ("Let's try again") */
-export async function generateMatchTryAgain(): Promise<Blob> {
-  const totalDuration = 0.4;
-  const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * totalDuration), SAMPLE_RATE);
+/** Gentle low wobble for wrong match — encouraging, not punitive */
+export async function generateMatchWrong(): Promise<Blob> {
+  const duration = 0.4;
+  const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * duration), SAMPLE_RATE);
 
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(440, 0);
-  osc.frequency.linearRampToValueAtTime(350, 0.3);
+  osc.frequency.value = 250;
+  // Gentle vibrato
+  const lfo = ctx.createOscillator();
+  const lfoGain = ctx.createGain();
+  lfo.frequency.value = 6;
+  lfoGain.gain.value = 15;
+  lfo.connect(lfoGain);
+  lfoGain.connect(osc.frequency);
+  lfo.start(0);
+  lfo.stop(duration);
 
   gain.gain.setValueAtTime(0, 0);
   gain.gain.linearRampToValueAtTime(0.3, 0.02);
-  gain.gain.setValueAtTime(0.3, 0.2);
-  gain.gain.linearRampToValueAtTime(0, totalDuration);
+  gain.gain.linearRampToValueAtTime(0, duration);
 
   osc.connect(gain);
   gain.connect(ctx.destination);
   osc.start(0);
-  osc.stop(totalDuration);
+  osc.stop(duration);
 
   const buffer = await ctx.startRendering();
   return audioBufferToWav(buffer);
 }
 
-/** 6-note ascending celebration melody (C4→E4→G4→A4→B4→C5) */
+// ─── Celebration ──────────────────────────────────────────────────
+
+/** Ascending marimba celebration melody: C4 D4 E4 G4 A4 C5 */
 export async function generateCelebrationMelody(): Promise<Blob> {
-  const notes = [261.63, 329.63, 392.0, 440.0, 493.88, 523.25];
+  const notes = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25];
   const noteDuration = 0.28;
   const totalDuration = notes.length * noteDuration + 0.3;
+
   const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * totalDuration), SAMPLE_RATE);
 
   for (let i = 0; i < notes.length; i++) {
@@ -384,26 +231,28 @@ export async function generateCelebrationMelody(): Promise<Blob> {
 
     const start = i * noteDuration;
     gain.gain.setValueAtTime(0, start);
-    gain.gain.linearRampToValueAtTime(0.5, start + 0.01);
-    gain.gain.linearRampToValueAtTime(0.15, start + noteDuration * 0.8);
-    gain.gain.linearRampToValueAtTime(0, start + noteDuration + 0.2);
+    gain.gain.linearRampToValueAtTime(0.5, start + 0.008);
+    gain.gain.linearRampToValueAtTime(0.1, start + noteDuration * 0.7);
+    gain.gain.linearRampToValueAtTime(0, start + noteDuration);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(start);
-    osc.stop(start + noteDuration + 0.2);
+    osc.stop(start + noteDuration);
   }
 
   const buffer = await ctx.startRendering();
   return audioBufferToWav(buffer);
 }
 
-/** Ambient savanna — brown noise with filtered chirps (3 seconds) */
-export async function generateAmbientSavanna(): Promise<Blob> {
+// ─── Ambient Savanna ──────────────────────────────────────────────
+
+/** Light wind + distant bird chirp ambience (3 seconds, loopable) */
+export async function generateSavannaAmbient(): Promise<Blob> {
   const duration = 3;
   const ctx = new OfflineAudioContext(1, Math.ceil(SAMPLE_RATE * duration), SAMPLE_RATE);
 
-  // Brown noise base
+  // Brown-ish wind noise
   const noiseBuffer = ctx.createBuffer(1, SAMPLE_RATE * duration, SAMPLE_RATE);
   const noiseData = noiseBuffer.getChannelData(0);
   for (let i = 0; i < noiseData.length; i++) {
@@ -417,31 +266,30 @@ export async function generateAmbientSavanna(): Promise<Blob> {
   filter.type = 'lowpass';
   filter.frequency.value = 400;
 
-  const gain = ctx.createGain();
-  gain.gain.value = 0.12;
+  const windGain = ctx.createGain();
+  windGain.gain.value = 0.1;
 
   source.connect(filter);
-  filter.connect(gain);
-  gain.connect(ctx.destination);
+  filter.connect(windGain);
+  windGain.connect(ctx.destination);
   source.start(0);
 
-  // Add sparse chirps (bird-like)
-  const chirpTimes = [0.5, 1.3, 2.1, 2.7];
+  // Distant bird chirps (short high sine bursts at random intervals)
+  const chirpTimes = [0.4, 1.1, 1.8, 2.5];
   for (const t of chirpTimes) {
-    const chirp = ctx.createOscillator();
+    const chirpOsc = ctx.createOscillator();
     const chirpGain = ctx.createGain();
-    chirp.type = 'sine';
-    chirp.frequency.setValueAtTime(2000 + Math.random() * 1000, t);
-    chirp.frequency.linearRampToValueAtTime(1500 + Math.random() * 500, t + 0.08);
+    chirpOsc.type = 'sine';
+    chirpOsc.frequency.value = 2200 + Math.random() * 800;
 
     chirpGain.gain.setValueAtTime(0, t);
-    chirpGain.gain.linearRampToValueAtTime(0.08, t + 0.01);
-    chirpGain.gain.linearRampToValueAtTime(0, t + 0.1);
+    chirpGain.gain.linearRampToValueAtTime(0.12, t + 0.01);
+    chirpGain.gain.linearRampToValueAtTime(0, t + 0.08);
 
-    chirp.connect(chirpGain);
+    chirpOsc.connect(chirpGain);
     chirpGain.connect(ctx.destination);
-    chirp.start(t);
-    chirp.stop(t + 0.1);
+    chirpOsc.start(t);
+    chirpOsc.stop(t + 0.08);
   }
 
   const buffer = await ctx.startRendering();

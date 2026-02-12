@@ -68,6 +68,8 @@ export default function CountingAnimalsGame() {
         // Correct!
         celebrationMsgRef.current = randomEncouragement();
         audioManager.play('ca-correct');
+        // Play pipeline encouragement voice clip after synth chime
+        setTimeout(() => audioManager.playRandomEncouragement(), 400);
 
         // Play counting beep for the number
         const beepId = `ca-count-${targetCount}`;
@@ -77,8 +79,9 @@ export default function CountingAnimalsGame() {
           advanceRound();
         }, 1500);
       } else {
-        // Gentle retry
+        // Gentle retry — pipeline voice feedback
         audioManager.play('ca-tryagain');
+        audioManager.play('enc_gentle_redirect');
 
         timeoutRef.current = setTimeout(() => {
           clearAnswer();

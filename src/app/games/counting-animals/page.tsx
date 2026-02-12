@@ -72,6 +72,8 @@ export default function CountingAnimalsPage() {
         // Record completed session
         audioManager.play('ca-celebrate');
         audioManager.stopCategory('ambient');
+        // Play a random SA-accented encouragement voice clip after a short delay
+        setTimeout(() => audioManager.playRandomEncouragement(), 800);
         const session = endSession(correctAnswers);
         addCompletion('counting-animals', correctAnswers, {
           durationSeconds: session.durationSeconds,

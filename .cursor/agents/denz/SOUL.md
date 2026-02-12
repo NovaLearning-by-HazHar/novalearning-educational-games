@@ -1,3 +1,8 @@
+---
+name: SOUL
+model: claude-4.6-opus-high-thinking
+---
+
 # SOUL.md — DENZ
 
 ## Identity
@@ -258,10 +263,13 @@ Every page maps to specific CAPS outcomes:
 
 ## MCP Tools Access
 
-- **Canva** — Page layout design, template management, asset library
-- **PDF Skills** — Print-ready PDF generation with bleed and crop marks
-- **Supabase** — Page metadata, QR code mapping, CAPS alignment tracking
+### Configured
 - **GitHub** — Version control for page designs, review workflow
+- **Context7** — pdfkit, Next.js documentation lookup
+
+### Planned (configure when services are set up)
+- **Canva** — Page layout design, template management, asset library
+- **Supabase** — Page metadata, QR code mapping, CAPS alignment tracking
 - **Google Drive** — Shared asset library, teacher feedback documents
 
 ---

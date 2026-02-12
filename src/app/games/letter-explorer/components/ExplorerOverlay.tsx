@@ -1,56 +1,88 @@
 'use client';
 
-import Link from 'next/link';
-import { useExplorerState, useDiscoveryCount } from '../hooks/useExplorerState';
+import { useCallback } from 'react';
+import { audioManager } from '@/lib/audio';
 import { ANIMALS } from '../lib/constants';
+import { useExplorerState } from '../hooks/useExplorerState';
+
+interface ExplorerOverlayProps {
+  /** Show progress dots (hidden during matching/celebrate) */
+  showProgress?: boolean;
+}
 
 /**
- * Minimal HTML overlay for the exploration phase.
- * Back button (top-left) + progress dots (bottom-center).
+ * HTML overlay: back button, mute toggle, 6 progress dots.
+ * Positioned absolute over the 3D canvas.
  */
-export default function ExplorerOverlay() {
+export default function ExplorerOverlay({ showProgress = true }: ExplorerOverlayProps) {
   const discoveries = useExplorerState((s) => s.discoveries);
-  const discoveryCount = useDiscoveryCount();
 
   return (
     <div className="absolute inset-0 z-10 pointer-events-none">
-      {/* Back button — top-left */}
-      <div className="absolute top-4 left-4 pointer-events-auto">
-        <Link
-          href="/"
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-white/80 shadow-md active:scale-95 transition-transform"
-          aria-label="Back to home"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5D4E37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </Link>
+      {/* Top bar */}
+      <div className="flex justify-between items-center px-4 pt-4 pointer-events-auto">
+        <BackButton />
+        <MuteButton />
       </div>
 
-      {/* Discovery count — top-right */}
-      <div className="absolute top-4 right-14 pointer-events-none">
-        <div className="bg-white/80 rounded-full px-3 py-1.5 shadow-md">
-          <span className="text-sm font-bold text-[#5D4E37]">
-            {discoveryCount} / {ANIMALS.length}
-          </span>
+      {/* Progress dots at bottom */}
+      {showProgress && (
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center">
+          <div className="flex gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-md">
+            {ANIMALS.map((animal) => (
+              <div
+                key={animal.id}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                  discoveries.has(animal.id)
+                    ? 'bg-[#FF6F00] text-white scale-110'
+                    : 'bg-gray-200 text-gray-400'
+                }`}
+              >
+                {animal.letter}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Progress dots — bottom-center */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 pointer-events-none">
-        {ANIMALS.map((animal) => (
-          <div
-            key={animal.id}
-            className="w-4 h-4 rounded-full border-2 transition-all duration-300"
-            style={{
-              backgroundColor: discoveries.has(animal.id) ? animal.colors.primary : 'transparent',
-              borderColor: discoveries.has(animal.id) ? animal.colors.primary : 'rgba(255,255,255,0.6)',
-              transform: discoveries.has(animal.id) ? 'scale(1.15)' : 'scale(1)',
-            }}
-            title={animal.name}
-          />
-        ))}
-      </div>
+      )}
     </div>
+  );
+}
+
+function BackButton() {
+  const handleBack = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.history.back();
+    }
+  }, []);
+
+  return (
+    <button
+      onClick={handleBack}
+      className="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-md active:scale-95 transition-transform"
+      aria-label="Go back"
+    >
+      <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#5D4E37" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+  );
+}
+
+function MuteButton() {
+  const handleToggle = useCallback(() => {
+    const next = !audioManager.muted;
+    audioManager.setMuted(next);
+  }, []);
+
+  return (
+    <button
+      onClick={handleToggle}
+      className="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-md active:scale-95 transition-transform"
+      aria-label="Toggle sound"
+    >
+      <span className="text-lg" aria-hidden="true">
+        {audioManager.muted ? '🔇' : '🔊'}
+      </span>
+    </button>
   );
 }
