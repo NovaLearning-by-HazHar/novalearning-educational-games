@@ -38,6 +38,19 @@ export default function Home() {
         </Link>
 
         <Link
+          href="/games/money-mastery"
+          className="flex items-center gap-4 p-4 rounded-2xl bg-amber-100 hover:bg-amber-200 transition-colors"
+        >
+          <span className="text-3xl" aria-hidden="true">🪙</span>
+          <div>
+            <p className="font-display text-lg text-nova-earth">
+              Money Mastery with Lerato
+            </p>
+            <p className="text-xs text-nova-earth/60">Financial Literacy</p>
+          </div>
+        </Link>
+
+        <Link
           href="/games/counting-animals"
           className="flex items-center gap-4 p-4 rounded-2xl bg-green-100 hover:bg-green-200 transition-colors"
         >

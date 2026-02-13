@@ -19,6 +19,7 @@ const QR_SIZE = 300;
 export const WORKBOOK_PAGES: Record<number, { gameId: string; title: string }> = {
   15: { gameId: 'count-to-five', title: 'Count to 5 with Sipho' },
   22: { gameId: 'trace-letter-a', title: 'Trace Letter A with Thandi' },
+  38: { gameId: 'money-mastery', title: 'Money Mastery with Lerato' },
 };
 
 /** Get the game URL for a workbook page */

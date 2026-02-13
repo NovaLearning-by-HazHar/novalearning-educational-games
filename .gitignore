@@ -44,6 +44,7 @@ next-env.d.ts
 # NovaLearning
 *.glb.bak
 *.gltf.bak
+tmpclaude-*
 
 # Generated audio (regenerable via scripts/audio/run_pipeline.py)
 /public/audio/edge-tts/

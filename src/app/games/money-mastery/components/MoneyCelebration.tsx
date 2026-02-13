@@ -43,7 +43,7 @@ export function MoneyCelebration3D() {
  * HTML overlay showing metrics and Play Again button.
  * Rendered OUTSIDE the R3F Canvas (absolute positioned).
  */
-export function MoneyCelebrationOverlay() {
+export function MoneyCelebrationOverlay({ onPlayAgain }: { onPlayAgain?: () => void }) {
   const purchases = useMoneyState((s) => s.purchases);
   const gardenCycleCount = useMoneyState((s) => s.gardenCycleCount);
   const resetMoney = useMoneyState((s) => s.resetMoney);
@@ -57,9 +57,13 @@ export function MoneyCelebrationOverlay() {
     .reduce((sum, a) => sum + (a.incomePerCycle || 0) * Math.max(0, gardenCycleCount - 1), 0);
 
   const handlePlayAgain = () => {
-    resetMoney();
-    reset();
-    setPhase('explore');
+    if (onPlayAgain) {
+      onPlayAgain();
+    } else {
+      resetMoney();
+      reset();
+      setPhase('explore');
+    }
   };
 
   return (
