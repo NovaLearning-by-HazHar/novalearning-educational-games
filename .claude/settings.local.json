@@ -38,7 +38,8 @@
       "Bash(unset:*)",
       "mcp__mcp-registry__search_mcp_registry",
       "mcp__edf92cea-7f7d-4540-8cc2-1cce8167faf7__tavily_search",
-      "Bash(git remote set-url:*)"
+      "Bash(git remote set-url:*)",
+      "Bash(xargs rm -rf:*)"
     ]
   }
 }

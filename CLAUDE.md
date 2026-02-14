@@ -1,212 +1,248 @@
-# NOVALEARNING — CLAUDE CODE TERMINAL PROMPT (Level 3)
-### Version: 2026-02-09 | Optimized for Claude Code CLI
+# NovaLearning Letter Recognition Game - Master Context
+
+> **AUTO-TRIGGER ENABLED** - This file is automatically loaded at session start.
+> Claude Code will read this context before any operation.
+
+## 🎯 Project Mission
+
+Build phygital educational product: 50-page printed workbook + QR-linked web games for SA Grade R (ages 5-6).
+**MVP Focus:** Letters A-F with 6 Ubuntu Buddy characters (SA animals teaching with Ubuntu philosophy).
+
+## 📋 Current Sprint: Letter Recognition MVP
+
+| Field | Value |
+|-------|-------|
+| **Timeline** | 3-4 weeks |
+| **Status** | Planning → Implementation |
+| **Target Device** | Galaxy A03 (2GB RAM, Mali-G52) |
+| **Deployment** | Offline-first PWA |
+| **Owner** | Damian Harrison |
+
+## 🛠️ Tech Stack (DECIDED - NO CHANGES)
+
+| Layer | Technology | Notes |
+|-------|------------|-------|
+| Game Engine | Phaser 3.88 | 2D/2.5D hybrid |
+| 3D Assets | Blender MCP | → rendered sprite sheets (512x512, 8 frames) |
+| Audio | Howler.js | English phonics, animal sounds, feedback |
+| State | Zustand + localStorage | Persistent progress |
+| Offline | Service Worker | 50MB cache budget |
+| Build | Vite → Vercel | Edge deployment |
+
+## 🦁 Ubuntu Buddies Characters (6)
+
+| Letter | Animal | Character | Hex Color | Ubuntu Value | Fun Fact |
+|--------|--------|-----------|-----------|--------------|----------|
+| A | Aardvark | Ayo | #E85D04 | Achievement | "Aardvarks can eat 50,000 termites in one night!" |
+| B | Baboon | Buhle | #4CC9F0 | Bravery | "Baboons live on Table Mountain in Cape Town!" |
+| C | Cheetah | Cindy | #F4A261 | Champions | "Cheetahs are the fastest land animals!" |
+| D | Dung Beetle | Dumisani | #8D6748 | Determination | "Dung beetles can roll balls 10x their weight!" |
+| E | Elephant | Elethu | #52B788 | Empathy (Ubuntu) | "Elephants remember their friends forever!" |
+| F | Flamingo | Fezile | #FF6B9D | Family | "Flamingos turn pink from eating shrimp!" |
+
+## 📦 Asset Inventory (Available Now)
+
+### GitHub Repos (Key Forks)
+- `phaser` - Game engine source
+- `phaser-by-example` - Pattern reference
+- `howler.js` - Audio library
+- `zustand` - State management
+
+### MCP Tools (25+ Available)
+- **Asset Generation:** Blender MCP, Canva MCP, HuggingFace
+- **Development:** GitHub, Vercel, Sentry, Supabase
+- **Automation:** Zapier, N8N (self-hosted)
+
+### Existing Code
+- `RangerNova` - Audio pipeline reference
+- `NovaLearning_MCP` - Automation workflows
+
+## 📁 File Structure
+
+```
+src/games/letter-recognition/
+├── scenes/
+│   ├── BootScene.js       # Asset preload + progress bar
+│   ├── MenuScene.js       # 6 letter cards (A-F) + progress indicators
+│   ├── GameScene.js       # Core gameplay loop
+│   └── RewardScene.js     # Ubuntu celebration + message
+├── config/
+│   ├── letters.js         # A-F data (animal, audio paths, fun facts)
+│   └── difficulty.js      # Easy/Medium/Hard progression
+├── components/
+│   ├── LetterCard.js      # Reusable letter card component
+│   ├── AnimalSprite.js    # Sprite sheet animation controller
+│   └── AudioManager.js    # Howler.js wrapper
+├── utils/
+│   ├── storage.js         # Zustand + localStorage sync
+│   └── performance.js     # FPS monitoring, memory alerts
+├── assets/
+│   ├── sprites/animals/   # 512x512 sprite sheets
+│   ├── audio/phonics/     # Letter sounds
+│   ├── audio/animals/     # Animal sounds
+│   └── audio/feedback/    # Success/error sounds
+└── index.js               # Entry point
+```
+
+## 🎮 Gameplay Loop (Orboot-Style)
+
+```mermaid
+flowchart LR
+    A[Menu] --> B[Tap Letter Card]
+    B --> C[Animal Pops Up + Sound]
+    C --> D[Voice: Letter Intro]
+    D --> E[Mini-Game: Match 4 Pictures]
+    E --> F[Celebration + Ubuntu Message]
+    F --> G[Star Earned]
+    G --> A
+```
+
+**Detailed Flow:**
+1. **Menu** → Child sees 6 letter cards (A-F), some locked based on progress
+2. **Tap** → Letter card selected, transition animation
+3. **Pop-up** → Animal character appears with bounce animation + sound effect
+4. **Voice** → "A is for Aardvark! A says 'ah'!" (preloaded audio)
+5. **Mini-game** → Match letter to 4 pictures (3 wrong, 1 correct)
+6. **Celebration** → Confetti + Ubuntu message + animal does victory animation
+7. **Progress** → Star earned, return to menu (localStorage saves state)
+
+## ⚡ Performance Budgets (NON-NEGOTIABLE)
+
+| Metric | Target | Maximum | Auto-Fail Threshold |
+|--------|--------|---------|---------------------|
+| Initial load | 2s | 3s | >5s |
+| FPS | 30fps | 24fps min | <20fps sustained |
+| Total JS | 150KB | 250KB | >400KB |
+| Total assets | 40MB | 50MB | >75MB |
+| Sprite sheet (each) | 200KB | 500KB | >1MB |
+| Audio file (each) | 50KB | 100KB | >200KB |
+| Memory usage | 100MB | 150MB | >200MB |
+
+## 🌍 Cultural Integration Rules
+
+### MUST Include:
+- Ubuntu philosophy message on EVERY reward screen
+- SA animals ONLY (no generic cartoon animals)
+- Fun facts about South Africa in each lesson
+- Springbok/Protea visual references where appropriate
+- Diverse visual representation (rotate through 6 SA ethnic groups)
+
+### MUST NOT Include:
+- Generic Western characters
+- American English pronunciations (use SA English)
+- Animals not native to South Africa
+- Cultural stereotypes
+
+### Ubuntu Messages (Rotate):
+1. "I am because we are - Ubuntu!"
+2. "We grow when we help each other!"
+3. "Together we are stronger!"
+4. "Your kindness makes our community shine!"
+5. "Sharing is how we show love!"
+6. "Every person matters - that's Ubuntu!"
+
+## 🔧 Auto-Trigger Configuration
+
+### File Watchers (Auto-Execute)
+```yaml
+triggers:
+  - pattern: "src/**/*.js"
+    action: "npm run lint && npm run test:unit"
+  
+  - pattern: "src/assets/sprites/**"
+    action: "/project:validate-assets"
+  
+  - pattern: "package.json"
+    action: "npm install && npm run build"
+  
+  - pattern: "PROGRESS.md"
+    action: "git add PROGRESS.md && git commit -m 'chore: update progress'"
+```
+
+### Session Start Auto-Tasks
+```bash
+# Always run on Claude Code session start:
+1. git pull --rebase
+2. npm run build (verify no errors)
+3. Display last 5 git commits
+4. Check PROGRESS.md for current task
+5. Run /project:verify
+```
+
+### Pre-Commit Hooks
+```bash
+# Automatically run before every commit:
+1. npm run lint --fix
+2. npm run test:unit
+3. npm run build
+4. /project:verify (must pass)
+5. Update PROGRESS.md with commit summary
+```
+
+## 📊 Progress Tracking
+
+### Status Indicators
+- 🔴 Not Started
+- 🟡 In Progress
+- 🟢 Complete
+- ⏸️ Blocked
+
+### Current Sprint Progress
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Fork repos | 🔴 | Claude Code | phaser, howler.js, zustand |
+| Project structure | 🔴 | Claude Code | Vite + Phaser setup |
+| Blender sprites | 🔴 | Blender MCP | 6 animals, 8 frames each |
+| BootScene | 🔴 | Claude Code | Preloader |
+| MenuScene | 🔴 | Claude Code | 6 cards |
+| GameScene | 🔴 | Claude Code | Core loop |
+| RewardScene | 🔴 | Claude Code | Ubuntu celebration |
+| Audio integration | 🔴 | Claude Code | Howler.js |
+| Offline PWA | 🔴 | Claude Code | Service Worker |
+| Galaxy A03 test | 🔴 | Manual | Real device testing |
+
+## 🚨 Critical Reminders for Claude Code
+
+### DO:
+- Read CLAUDE.md FIRST every session
+- Write to PROGRESS.md before `/compact`
+- Use verification loop after implementation
+- Keep changes simple (<7 files per task)
+- Background slow tasks with `&` operator
+- Match thinking level to complexity
+
+### DON'T:
+- Skip verification steps
+- Make architecture changes without `ultrathink`
+- Exceed performance budgets
+- Ignore cultural integration rules
+- Commit without running tests
+- Change tech stack decisions
+
+## 🔗 Quick Reference Commands
+
+```bash
+# Development
+npm run dev          # Start local dev server
+npm run build        # Production build
+npm run test         # Run all tests
+npm run lint         # Lint check
+
+# Claude Code
+/plan               # Extended thinking
+/accept-all         # 1-shot implementation
+/project:verify     # Run verification checklist
+/tasks              # Check background tasks
+/compact            # Compress context
+
+# Git
+git status          # Check changes
+git diff --stat     # Summary of changes
+git log --oneline -5 # Recent commits
+```
 
 ---
 
-## MISSION
-South African EdTech: 50-page workbook (R150-R350) + QR-linked browser 3D games for Grade R (ages 5-6). Ubuntu philosophy ("I am because we are") is ARCHITECTURE, not decoration. Baseline device: Samsung Galaxy A03 (3GB RAM, Mali GPU, WebGL 1.0). English only for MVP. Ship fast.
-
----
-
-## CURRENT STATE
-- **Phase 0** COMPLETE (commit 9485f54) — scaffold, types, stores, agents
-- **Phase 1** COMPLETE (commit 3e14344) — engine, device detect, audio, touch, perf
-- **Phase 2** COMPLETE (commit df5cc88) — "Count to 5 with Sipho" game (14 files)
-- **Phase 3** COMPLETE — auth UI, parent dashboard, QR codes, Vercel config, progress sync
-- **Phase 4** COMPLETE — Trace Letter A with Thandi + pdfkit workbook proof-of-concept (2 pages)
-- **Phase 5** IN PROGRESS — Workbook production (content map created, Canva design next)
-- **Build:** Home 96.3KB | Count 331KB (66%) | Trace 331KB (66%) | Parent 152KB | 0 errors | 10 pages
-- **Tracking:** `projectplan.md` has full phase checklists + decisions log
-- **Content:** `docs/workbook-content-map.md` has 50-page outline for Phase 5b Canva design
-
-### Key Files
-```
-src/app/games/count-to-five/     # 14 files: page, orchestrator, 8 components, 2 hooks, 2 lib
-src/app/games/trace-letter-a/    # 12 files: page, orchestrator, 6 components, 2 hooks, 2 lib
-src/app/parent/login/page.tsx    # Parent auth (sign in/signup, null-safe Supabase)
-src/app/parent/dashboard/page.tsx # Child management + local progress viewer
-src/app/parent/qr-codes/page.tsx  # Workbook QR code reference for print
-src/components/Scene.tsx          # R3F canvas (Galaxy A03 config, WebGL 1.0)
-src/components/ProgressSyncProvider.tsx # Auto-sync wrapper (inert without auth)
-src/stores/gameStore.ts           # Zustand: EXPLORE->DISCOVER->PRACTICE->CELEBRATE
-src/stores/progressStore.ts       # Zustand persist: completed games + session metrics
-src/lib/supabase.ts               # Null-safe client + upsertProgress/getChildProgress
-src/lib/eventBus.ts               # Typed pub-sub singleton for game events
-src/lib/qrCodes.ts                # Workbook page-to-game URL + QR image generation
-src/lib/useSupabaseAuth.ts        # Auth state machine (null-safe when no Supabase)
-src/lib/useGameSession.ts         # Ref-based session tracking, emits via eventBus
-src/lib/useProgressSync.ts        # Debounced Supabase sync, offline-resilient
-scripts/generate-workbook.ts      # pdfkit workbook generator (proof-of-concept, Phase 4)
-scripts/workbook-templates/       # Page templates + shared layout for workbook PDFs
-docs/workbook-content-map.md     # 50-page content outline (template types, SA animals, articulation levels)
-```
-
----
-
-## LOCKED DECISIONS — DO NOT REVISIT
-| Decision | Chosen | REJECTED (never suggest) |
-|----------|--------|--------------------------|
-| AR | **NO AR** | Camera AR, A-Frame, AR.js, WebXR |
-| QR codes | **Opens browser URL** | Camera/marker scanning |
-| MVP language | **English only** | Multi-language (Phase 2+) |
-| Game framework | **React + Three.js (R3F)** | Phaser 3, Unity, native apps |
-| State | **Zustand** | Redux, Context API |
-| Competition | **None** | Leaderboards, scores, rankings |
-| Hosting | **Vercel** | AWS, Netlify, self-hosted |
-| Backend | **Supabase** | Firebase, custom backend |
-| Distribution | **PWA (web only)** | Native app, App Store |
-
-### Red Flags — Stop If You See:
-- AR, A-Frame, WebXR, camera permissions
-- Native app or App Store references
-- Competitive mechanics ("winner", "score", "leaderboard")
-- Failure states ("Game Over", "Wrong!", "Try harder")
-- WebGL 2.0 features (compute shaders, transform feedback)
-- Assets >50KB or textures >512x512
-- Bundle approaching 1MB
-- Content requiring reading ability
-- Firebase or non-Supabase backend
-
----
-
-## VERSION PINS + API GOTCHAS
-
-### Dependencies (exact)
-```
-next@14.2.35  react@18  @react-three/fiber@8.18.0  @react-three/drei@9.122.0
-three@0.160.1  zustand@5.0.11  animejs@4.3.5  howler@2.2.4
-next-pwa@5.6.0  @supabase/supabase-js@2.95.3  posthog-js@1.343.0
-```
-
-**CRITICAL: R3F v8 with React 18.** R3F v9+ requires React 19. Next.js 14 ships React 18. Do NOT upgrade.
-
-### anime.js v4 API (NOT v3)
-```typescript
-import { animate, createTimeline } from 'animejs'  // NO default export
-animate(target, props)                               // NOT anime({ targets })
-createTimeline({ defaults, onComplete })             // NOT anime.timeline()
-timeline.add(target, props, offset)                  // NOT .add({ targets }, offset)
-ease: 'inOutQuad'                                    // NOT easing: 'easeInOutQuad'
-```
-
-### Environment
-- **Shell:** git bash (NOT cmd.exe) — use bash commands
-- **Config:** `next.config.js` (CommonJS, required by next-pwa)
-- **Export:** `output: 'export'` (static SSG, no API routes)
-- **Windows:** `robocopy` exit code 1 = success; `.bashrc` BOM warning is harmless
-
----
-
-## PERFORMANCE BUDGETS
-| Metric | Target | Hard Limit |
-|--------|--------|------------|
-| Initial load | < 3s | 5s |
-| Frame rate | 30 fps | 24 fps min |
-| Bundle size | < 500 KB | 1 MB |
-| Memory | < 200 MB | 300 MB |
-| Per-asset | < 50 KB | 100 KB |
-| Textures | 512x512 | 1024x1024 |
-| Triangles | < 5K/model | 10K |
-
-**Rendering:** WebGL 1.0 ONLY. No post-processing, no real-time shadows, flat/toon shading, GLTF/GLB format.
-
----
-
-## UBUNTU RULES (Enforced in ALL Code)
-```
-DO: Community celebration, characters help each other, "Let's try again!",
-    shared achievement, marimba melodies, Ndebele patterns, diverse representation
-DON'T: Leaderboards, scores, rankings, competition, failure states,
-       game over screens, lives, timer pressure, punitive feedback, reading required
-```
-
-### 6 Rainbow Nation Characters
-| Name | Heritage | Personality | Learning Style |
-|------|----------|-------------|----------------|
-| Sipho | Zulu | Brave explorer | Kinesthetic |
-| Thandi | Xhosa | Creative storyteller | Visual |
-| Lerato | Sotho | Kind helper | Social |
-| Pieter | Afrikaans | Curious builder | Logical |
-| Fatima | Cape Malay | Patient teacher | Auditory |
-| Amahle | Ndebele | Joyful artist | Creative |
-
-MVP uses 3 (Sipho, Thandi, Lerato). All 6 defined in `src/types/constants.ts`.
-
----
-
-## ARCHITECTURE
-### Gameplay Loop (every game)
-`EXPLORE -> DISCOVER -> PRACTICE -> CELEBRATE`
-Managed by `gameStore.ts`: `advancePhase()`, `targetInteractions`, auto-celebrate.
-
-### Established Patterns
-- **Scene.tsx** — DeviceConfig-driven R3F Canvas (dpr, antialias per tier)
-- **SimpleCharacter** — Procedural ~300 tri figure, reusable across games
-- **audioGenerator.ts** — Web Audio API synthesis (zero file downloads)
-- **useCountingState** — Game-specific Zustand store pattern
-- **CountingCelebration** — 3 chars + instanced confetti template
-
-### Agent files: `.claude/agents/` (10 specialist agents with tool permissions)
-
----
-
-## SESSION PROTOCOL
-```
-1. Start: /plan mode
-2. Iterate plan until solid
-3. Implement (auto-accept or per-edit)
-4. Run /project:verify after significant changes
-5. Before clearing: write state to PROGRESS.md
-6. /clear then /project:catchup to resume
-7. NEVER use /compact — always Document & Clear
-```
-
-### Thinking Triggers (match to task complexity)
-- `think` (4K tokens) — quick fixes, config changes
-- `think hard` / `megathink` (10K) — schema design, refactoring
-- `ultrathink` (32K) — architecture, complex debugging (use sparingly)
-
-### Cost Management
-- Standard Opus: $15/$75 per MTok | Fast mode: $30/$150
-- Multi-agent = 3-4x cost. Only use when tasks are genuinely parallel.
-- Check `/cost` every 30 minutes during long sessions.
-
----
-
-## PHASE 5: WORKBOOK PRODUCTION PIPELINE (IN PROGRESS)
-Approach: **Canva Pro** (visual design, $13/mo) + **pdfkit** (print compilation) + **Ghostscript** (RGB->CMYK).
-Content guide: `docs/workbook-content-map.md` (50-page outline with template types, SA animals, cultural values, articulation levels).
-Reference: SA_Workbook_Design_Guide.pdf (5 template types, print specs, cultural elements).
-
-### Articulation Hierarchy (8 levels across 50 pages)
-L1 Discrimination → L2 Isolation → L3 Syllables → L4 Words → L5 Sentences → L6 Stories → L7 Conversation → L8 Generalization
-
-### 50-Page Structure
-- **Pages 1-6:** Rainbow Nation Foundation (welcome, sports pride, patterns, Ubuntu, QR instructions)
-- **Pages 7-32:** Literacy A-Z (SA animal + cultural value per letter)
-- **Pages 33-42:** Rainbow Numeracy (numbers 1-10 with sporting/cultural context)
-- **Pages 43-50:** Ubuntu Life Skills (principles, heritage, environment, community, pledge)
-- **QR codes:** Pages 15 and 22 ONLY (2 MVP games)
-
-### Production Specs
-- **Physical:** A4 portrait, 150gsm paper, perfect bound, laminated cover, 52 total (50 + 2 covers)
-- **Print:** 300 DPI, CMYK (Ghostscript FOGRA39 ICC), PDF/X-1a
-- **Price:** R180 selling, ~R40 production cost, R140 margin (78%), break-even at 303 books
-
-### Phase Checklist
-- [ ] 5a: Canva Pro brand kit + 5 master templates (Activity, Coloring, Writing, Matching, Sequencing)
-- [ ] 5b: Design 50 pages per `docs/workbook-content-map.md` (~5 weeks, 10 pages/week)
-- [ ] 5c: Enhance generate-workbook.ts — stream PNGs, insert QR codes (pp 15+22), bleed, crop marks + Ghostscript RGB->CMYK
-- [ ] 5d: Source printers, test print (verify CMYK), 10-book pilot
-
-### Canva SDK Notes (evaluated, NOT using Enterprise API)
-- Canva Connect API autofill requires Enterprise subscription — rejected for MVP
-- Canva Print Partnerships API has CMYK/bleed/crop marks — useful later if scale justifies
-- Polotno Studio (forked repo) available as self-hosted fallback if Canva dependency becomes an issue
-
-### Manual Steps (before Phase 5)
-- [ ] Deploy to Vercel (npx vercel login + npx vercel --prod)
-- [ ] Verify both games at deployed URL
-- [ ] Subscribe to Canva Pro ($12.99/mo)
-
-**Constraints:** Static export = no API routes. Supabase client-side SDK only. Games MUST work without backend.
+**Last Updated:** Auto-updated on session start
+**Version:** 1.0.0
+**Next Review:** After Phase 1 completion

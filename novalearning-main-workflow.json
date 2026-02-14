@@ -1,0 +1,266 @@
+{
+  "name": "NovaLearning Development Automation",
+  "nodes": [
+    {
+      "id": "trigger-github-push",
+      "name": "GitHub Push Trigger",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "parameters": {
+        "owner": "HazHarCore",
+        "repository": "novalearning-games",
+        "events": ["push", "pull_request"]
+      }
+    },
+    {
+      "id": "trigger-schedule-daily",
+      "name": "Daily Health Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [100, 500],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 24, "triggerAtHour": 6 }]
+        }
+      }
+    },
+    {
+      "id": "trigger-webhook-asset",
+      "name": "Asset Generation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [100, 700],
+      "parameters": {
+        "path": "novalearning/generate-assets",
+        "httpMethod": "POST"
+      }
+    },
+    {
+      "id": "trigger-manual-deploy",
+      "name": "Manual Deploy Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [100, 900],
+      "parameters": {
+        "path": "novalearning/deploy",
+        "httpMethod": "POST"
+      }
+    },
+    {
+      "id": "analyze-changes",
+      "name": "Analyze Changes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 300],
+      "parameters": {
+        "jsCode": "const commits = $input.first().json.body?.commits || [];\nconst changedFiles = [];\n\nfor (const commit of commits) {\n  changedFiles.push(...(commit.added || []));\n  changedFiles.push(...(commit.modified || []));\n}\n\nconst categories = {\n  scenes: changedFiles.filter(f => f.includes('scenes/')),\n  assets: changedFiles.filter(f => f.includes('assets/')),\n  config: changedFiles.filter(f => f.includes('config/')),\n  tests: changedFiles.filter(f => f.includes('.test.')),\n  package: changedFiles.filter(f => f === 'package.json')\n};\n\nconst actions = [];\nif (categories.scenes.length > 0) actions.push('run_tests', 'build_check');\nif (categories.assets.length > 0) actions.push('validate_assets');\nif (categories.package.length > 0) actions.push('install_deps', 'security_audit');\nif (changedFiles.length > 0) actions.push('deploy_preview');\n\nreturn {\n  changedFiles,\n  categories,\n  actions,\n  branch: $input.first().json.body?.ref?.replace('refs/heads/', '') || 'main',\n  commitMessage: commits[0]?.message || 'No message'\n};"
+      }
+    },
+    {
+      "id": "vercel-deploy",
+      "name": "Deploy to Vercel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vercel.com/v13/deployments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "name", "value": "novalearning-games" },
+            { "name": "gitSource.type", "value": "github" },
+            { "name": "gitSource.ref", "value": "={{ $json.branch }}" },
+            { "name": "gitSource.repoId", "value": "YOUR_REPO_ID" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "run-tests",
+      "name": "Run Tests via GitHub Actions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 450],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/HazHarCore/novalearning-games/actions/workflows/test.yml/dispatches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "ref", "value": "={{ $json.branch }}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "slack-success",
+      "name": "Notify Success",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [900, 300],
+      "parameters": {
+        "operation": "message",
+        "channel": "#novalearning-dev",
+        "text": ":white_check_mark: *NovaLearning Build Success*\n\n*Branch:* {{ $json.branch }}\n*Commit:* {{ $json.commitMessage }}\n*Changed:* {{ $json.changedFiles.length }} files\n\n<{{ $json.deployUrl }}|:rocket: View Preview>"
+      }
+    },
+    {
+      "id": "slack-failure",
+      "name": "Notify Failure",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [900, 500],
+      "parameters": {
+        "operation": "message",
+        "channel": "#novalearning-dev",
+        "text": ":x: *NovaLearning Build Failed*\n\n*Branch:* {{ $json.branch }}\n*Error:* {{ $json.error }}\n\n<{{ $json.logsUrl }}|:page_facing_up: View Logs>"
+      }
+    },
+    {
+      "id": "health-check-code",
+      "name": "Generate Health Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 500],
+      "parameters": {
+        "jsCode": "const report = {\n  timestamp: new Date().toISOString(),\n  project: 'NovaLearning Letter Recognition',\n  sprint: 'MVP A-F',\n  checks: {\n    deployment: { status: 'checking', url: 'https://novalearning-games.vercel.app' },\n    assets: { sprites: '0/6', audio: '0/18' },\n    performance: { js_bundle: 'N/A', load_time: 'N/A' },\n    tests: { passed: 0, failed: 0, coverage: '0%' }\n  },\n  nextMilestones: [\n    'Complete BootScene implementation',\n    'Generate 6 Ubuntu Buddy sprites',\n    'Integrate audio pipeline'\n  ]\n};\n\nreturn report;"
+      }
+    },
+    {
+      "id": "health-slack",
+      "name": "Send Health Report",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [600, 500],
+      "parameters": {
+        "operation": "message",
+        "channel": "#novalearning-dev",
+        "text": ":chart_with_upwards_trend: *Daily Health Report*\n\n*Project:* NovaLearning Letter Recognition\n*Date:* {{ $now.format('yyyy-MM-dd') }}\n\n*Deployment:* {{ $json.checks.deployment.status }}\n*Assets:* Sprites {{ $json.checks.assets.sprites }}, Audio {{ $json.checks.assets.audio }}\n*Tests:* {{ $json.checks.tests.passed }} passed\n\n*Next Milestones:*\n{{ $json.nextMilestones.map(m => '• ' + m).join('\\n') }}"
+      }
+    },
+    {
+      "id": "asset-gen-handler",
+      "name": "Process Asset Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 700],
+      "parameters": {
+        "jsCode": "const request = $input.first().json;\nconst character = request.body?.character || 'all';\n\nconst CHARACTERS = [\n  { name: 'aardvark', letter: 'A', color: '#E85D04', value: 'Achievement' },\n  { name: 'baboon', letter: 'B', color: '#4CC9F0', value: 'Bravery' },\n  { name: 'cheetah', letter: 'C', color: '#F4A261', value: 'Champions' },\n  { name: 'dung-beetle', letter: 'D', color: '#8D6748', value: 'Determination' },\n  { name: 'elephant', letter: 'E', color: '#52B788', value: 'Empathy' },\n  { name: 'flamingo', letter: 'F', color: '#FF6B9D', value: 'Family' }\n];\n\nconst toGenerate = character === 'all' ? CHARACTERS : CHARACTERS.filter(c => c.name === character);\n\nreturn {\n  characters: toGenerate,\n  specs: {\n    dimensions: '512x512',\n    frames: 8,\n    layout: '4x2',\n    format: 'PNG',\n    maxSizeKB: 500\n  },\n  outputPath: 'src/assets/sprites/animals/',\n  requestedAt: new Date().toISOString()\n};"
+      }
+    },
+    {
+      "id": "blender-mcp-call",
+      "name": "Call Blender MCP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 700],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3001/mcp/blender",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ operation: 'batch_generate_sprites', characters: $json.characters, specs: $json.specs }) }}"
+      }
+    },
+    {
+      "id": "asset-validation",
+      "name": "Validate Generated Assets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 700],
+      "parameters": {
+        "jsCode": "const results = $input.first().json;\nconst validations = [];\n\nfor (const asset of results.generatedAssets || []) {\n  const validation = {\n    file: asset.filename,\n    checks: {\n      exists: asset.success,\n      dimensions: asset.dimensions === '512x512' ? 'PASS' : 'FAIL',\n      size: asset.sizeKB < 500 ? 'PASS' : 'FAIL',\n      format: asset.format === 'PNG' ? 'PASS' : 'FAIL'\n    },\n    overall: 'PASS'\n  };\n  \n  if (Object.values(validation.checks).includes('FAIL')) {\n    validation.overall = 'FAIL';\n  }\n  \n  validations.push(validation);\n}\n\nconst allPassed = validations.every(v => v.overall === 'PASS');\n\nreturn {\n  validations,\n  summary: {\n    total: validations.length,\n    passed: validations.filter(v => v.overall === 'PASS').length,\n    failed: validations.filter(v => v.overall === 'FAIL').length\n  },\n  allPassed\n};"
+      }
+    },
+    {
+      "id": "asset-slack",
+      "name": "Notify Asset Generation",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [1100, 700],
+      "parameters": {
+        "operation": "message",
+        "channel": "#novalearning-dev",
+        "text": ":art: *Asset Generation Complete*\n\n*Total:* {{ $json.summary.total }} assets\n*Passed:* {{ $json.summary.passed }}\n*Failed:* {{ $json.summary.failed }}\n\n{{ $json.allPassed ? ':white_check_mark: All validations passed!' : ':warning: Some assets need attention' }}"
+      }
+    },
+    {
+      "id": "manual-deploy-handler",
+      "name": "Handle Manual Deploy",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 900],
+      "parameters": {
+        "jsCode": "const request = $input.first().json;\n\nreturn {\n  environment: request.body?.environment || 'preview',\n  branch: request.body?.branch || 'main',\n  force: request.body?.force || false,\n  triggeredBy: request.body?.user || 'api',\n  timestamp: new Date().toISOString()\n};"
+      }
+    },
+    {
+      "id": "deploy-production",
+      "name": "Deploy to Production",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 900],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vercel.com/v13/deployments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ name: 'novalearning-games', target: $json.environment === 'production' ? 'production' : 'preview', gitSource: { type: 'github', ref: $json.branch, repoId: 'YOUR_REPO_ID' } }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "trigger-github-push": {
+      "main": [[{ "node": "analyze-changes", "type": "main", "index": 0 }]]
+    },
+    "analyze-changes": {
+      "main": [
+        [{ "node": "vercel-deploy", "type": "main", "index": 0 }],
+        [{ "node": "run-tests", "type": "main", "index": 0 }]
+      ]
+    },
+    "vercel-deploy": {
+      "main": [[{ "node": "slack-success", "type": "main", "index": 0 }]]
+    },
+    "trigger-schedule-daily": {
+      "main": [[{ "node": "health-check-code", "type": "main", "index": 0 }]]
+    },
+    "health-check-code": {
+      "main": [[{ "node": "health-slack", "type": "main", "index": 0 }]]
+    },
+    "trigger-webhook-asset": {
+      "main": [[{ "node": "asset-gen-handler", "type": "main", "index": 0 }]]
+    },
+    "asset-gen-handler": {
+      "main": [[{ "node": "blender-mcp-call", "type": "main", "index": 0 }]]
+    },
+    "blender-mcp-call": {
+      "main": [[{ "node": "asset-validation", "type": "main", "index": 0 }]]
+    },
+    "asset-validation": {
+      "main": [[{ "node": "asset-slack", "type": "main", "index": 0 }]]
+    },
+    "trigger-manual-deploy": {
+      "main": [[{ "node": "manual-deploy-handler", "type": "main", "index": 0 }]]
+    },
+    "manual-deploy-handler": {
+      "main": [[{ "node": "deploy-production", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": ["novalearning", "automation", "ci-cd"]
+}
