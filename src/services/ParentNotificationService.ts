@@ -17,7 +17,6 @@ import type {
   Domain,
   SessionRecord,
   ProgressSnapshot,
-  ConceptLearned,
   ScaffoldPhase,
 } from '../types/progress';
 import { OfflineProgressStore } from './OfflineProgressStore';
@@ -34,7 +33,7 @@ const DOMAIN_NAMES: Record<Domain, string> = {
   'physical-play': 'Physical Play ⚽',
 };
 
-const PHASE_NAMES: Record<ScaffoldPhase, string> = {
+const _PHASE_NAMES: Record<ScaffoldPhase, string> = {
   ENCOUNTER: 'explored something new',
   IDENTIFY: 'practised recognising patterns',
   COMBINE: 'connected ideas together',

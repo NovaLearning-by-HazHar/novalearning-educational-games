@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { COLORS, SIZES } from '../../../config/theme.js';
+import { COLORS } from '../../../config/theme.js';
 import { DEVICE_CONFIG } from '../../../config/device.js';
-import { DIFFICULTY, DIFFICULTY_ORDER } from '../../../config/difficulty.js';
+import { DIFFICULTY_ORDER } from '../../../config/difficulty.js';
 import { getLetterConfig } from '../../../config/letters.js';
 import { gameStore } from '../../../state/gameStore.js';
 import {
@@ -47,7 +47,7 @@ export class DifficultySelectScene extends Phaser.Scene {
 
     // === LETTER HERO SECTION ===
     // Big card showing the letter + animal
-    const heroCard = drawCard(this, centerX, 190, width - 60, 280, {
+    const _heroCard = drawCard(this, centerX, 190, width - 60, 280, {
       fillColor: 0xFFFFF5,
       radius: 28,
       shadowAlpha: 0.2,
@@ -101,7 +101,7 @@ export class DifficultySelectScene extends Phaser.Scene {
     this.createDifficultyButtons(centerX, 400);
 
     // === ANIMAL FACT ===
-    const factCard = drawCard(this, centerX, height - 90, width - 40, 100, {
+    const _factCard = drawCard(this, centerX, height - 90, width - 40, 100, {
       fillColor: 0x2D9B4E,
       fillAlpha: 0.1,
       radius: 16,

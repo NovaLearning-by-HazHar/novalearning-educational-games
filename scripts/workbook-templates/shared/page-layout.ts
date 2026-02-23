@@ -340,6 +340,44 @@ export function drawQrCode(
     });
 }
 
+/** Logo constants (Design Guide: bottom-left, 15mm) */
+export const LOGO = {
+  /** Logo size (15mm = ~42.5pt) */
+  size: 42.5,
+  /** X position: left margin */
+  get x() {
+    return PAGE.margin;
+  },
+  /** Y position: bottom, aligned with page number */
+  get y() {
+    return PAGE.height - PAGE.margin - 2;
+  },
+} as const;
+
+/**
+ * Draw the NovaLearning logo at bottom-left.
+ * Uses the app icon PNG if available, otherwise draws a text logo.
+ */
+export function drawLogo(doc: PDFKit.PDFDocument, logoPath?: string) {
+  if (logoPath && require('fs').existsSync(logoPath)) {
+    doc.image(logoPath, LOGO.x, LOGO.y, {
+      width: LOGO.size,
+      height: LOGO.size,
+    });
+  } else {
+    // Text fallback: "NL" in brand orange circle
+    const cx = LOGO.x + LOGO.size / 2;
+    const cy = LOGO.y + LOGO.size / 2;
+    const r = LOGO.size / 2;
+
+    doc.circle(cx, cy, r).fillColor(BRAND.siphoOrange).fill();
+    doc
+      .fontSize(16)
+      .fillColor(BRAND.white)
+      .text('NL', cx - 10, cy - 8, { width: 20, align: 'center' });
+  }
+}
+
 /**
  * Draw crop marks at the four corners of the A4 page.
  * Marks are 8.5pt (3mm) long lines positioned at the trim edge,

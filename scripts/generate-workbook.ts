@@ -32,6 +32,7 @@ const ROOT = path.join(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'out');
 const PAGES_DIR = path.join(__dirname, 'pages');
 const QR_CACHE_DIR = path.join(__dirname, 'qr-cache');
+const LOGO_PATH = path.join(ROOT, 'public', 'icons', 'icon-192.png');
 
 // --- QR code mapping (mirrors src/lib/qrCodes.ts for script context) ---
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://novalearning.vercel.app';
@@ -206,7 +207,7 @@ async function main() {
 
     if (canvaPages[pageNum]) {
       // Canva PNG page
-      generateCanvaPage(doc, canvaPages[pageNum], pageNum, qrData);
+      generateCanvaPage(doc, canvaPages[pageNum], pageNum, qrData, { logoPath: LOGO_PATH });
     } else if (PROGRAMMATIC_PAGES[pageNum]) {
       // Programmatic fallback page
       PROGRAMMATIC_PAGES[pageNum](doc);

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, FONTS, NOVA, BACKGROUNDS, BUTTON_STYLES } from '../../config/theme.js';
+import { FONTS, NOVA, BACKGROUNDS, BUTTON_STYLES } from '../../config/theme.js';
 import { DEVICE_CONFIG } from '../../config/device.js';
 
 /**

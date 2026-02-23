@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, SIZES, ANIMATIONS } from '../../../config/theme.js';
+import { COLORS } from '../../../config/theme.js';
 import { DEVICE_CONFIG } from '../../../config/device.js';
 import { getLetterConfig, LETTER_ORDER } from '../../../config/letters.js';
 import { getDifficulty } from '../../../config/difficulty.js';
@@ -557,7 +557,7 @@ export class LetterGameScene extends Phaser.Scene {
     this.time.delayedCall(1500, () => this.showResults());
   }
 
-  onWrongMatch(card, letterText, x, y, size, hitArea) {
+  onWrongMatch(card, letterText, x, y, size, _hitArea) {
     this.mistakes += 1;
     this.matchAttempts += 1;
     audioManager.playFeedback('wrong');
@@ -622,7 +622,7 @@ export class LetterGameScene extends Phaser.Scene {
     // Celebration gradient
     createThemedBackground(this, 'celebration');
 
-    const { width, height } = DEVICE_CONFIG;
+    const { width: _w, height: _h } = DEVICE_CONFIG;
 
     // Calculate stars
     let stars = 1;
@@ -670,7 +670,7 @@ export class LetterGameScene extends Phaser.Scene {
     });
 
     // === UBUNTU VALUE CARD ===
-    const ubuntuCard = drawCard(this, this.centerX, 420, 560, 200, {
+    const _ubuntuCard = drawCard(this, this.centerX, 420, 560, 200, {
       fillColor: 0x2D9B4E,
       fillAlpha: 0.15,
       radius: 24,

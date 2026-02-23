@@ -19,7 +19,7 @@ function loadSavedState() {
 
 function saveState(state) {
   try {
-    const { currentLetter, currentDifficulty, currentGame, ...persistable } = state;
+    const { currentLetter: _cl, currentDifficulty: _cd, currentGame: _cg, ...persistable } = state;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(persistable));
   } catch {
     // Storage full or unavailable — fail silently

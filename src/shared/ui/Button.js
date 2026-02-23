@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, SIZES, ANIMATIONS } from '../../config/theme.js';
+import { COLORS, SIZES } from '../../config/theme.js';
 
 /**
  * Reusable UI Button — rounded rectangle with text

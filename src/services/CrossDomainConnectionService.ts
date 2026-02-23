@@ -22,7 +22,6 @@ import type {
   CrossDomainConnection,
 } from '../types/progress';
 import { OfflineProgressStore } from './OfflineProgressStore';
-import { DomainContextManager } from '../education/DomainContextManager';
 
 // ─── Connection Templates ────────────────────────────────────────
 // Templates for generating cross-domain messages.

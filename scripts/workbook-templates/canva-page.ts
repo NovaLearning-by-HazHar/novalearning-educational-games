@@ -13,18 +13,24 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 import {
   PAGE, QR, FONTS, BRAND,
-  drawQrCode, drawQrPlaceholder, drawCropMarks,
+  drawQrCode, drawQrPlaceholder, drawCropMarks, drawLogo,
 } from './shared/page-layout';
 
 export interface CanvaPageOptions {
   /** Overlay a page number at bottom-center. Default: true (safety net). */
   overlayPageNumber?: boolean;
+  /** Overlay the NovaLearning logo at bottom-left. Default: true. */
+  overlayLogo?: boolean;
+  /** Path to logo PNG file. Falls back to text logo if not provided. */
+  logoPath?: string;
 }
 
 const DEFAULT_OPTIONS: CanvaPageOptions = {
   overlayPageNumber: true,
+  overlayLogo: true,
 };
 
 /**
@@ -63,6 +69,11 @@ export function generateCanvaPage(
   } else if (qrData?.title) {
     // Fallback to placeholder if QR image not available
     drawQrPlaceholder(doc, QR.defaultX, QR.defaultY, qrData.title);
+  }
+
+  // Overlay NovaLearning logo at bottom-left
+  if (opts.overlayLogo) {
+    drawLogo(doc, opts.logoPath);
   }
 
   // Crop marks for print trimming

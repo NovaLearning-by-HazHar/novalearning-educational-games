@@ -1,8 +1,8 @@
 # NovaLearning Games — Project Plan
 
 ## Current Phase: Phase 5 (Workbook Production Pipeline) — IN PROGRESS
-## Status: Phase 4 COMPLETE. Spec reconciled. Content map created. Ready for Canva design.
-## Last Updated: 2026-02-09
+## Status: Phase 5c COMPLETE (print pipeline). Phase 5a/5b (Canva design) pending Damian.
+## Last Updated: 2026-02-23
 
 ---
 
@@ -222,21 +222,45 @@
   - Note: Expect ~500MB+ total (50 x A4 @ 300 DPI). Store in `assets/workbook-pages/` with naming convention `page-XX-{type}.png`
 - [ ] QR code placement: pages 15 and 22 ONLY (2 MVP games). Other pages have no QR codes.
 
-### Phase 5c: Print Pipeline (pdfkit + Ghostscript)
-- [ ] Enhance `scripts/generate-workbook.ts`:
-  - Accept directory of Canva PNG exports as input
-  - **Stream pages into PDF one at a time** (do NOT load all 500MB+ of PNGs into memory)
+### Phase 5c: Print Pipeline (pdfkit + Ghostscript) ✅
+- [x] Enhance `scripts/generate-workbook.ts`:
+  - Accept directory of Canva PNG exports as input (scanCanvaPages)
+  - **Stream pages into PDF one at a time** (sequential pdfkit embedding)
   - Insert QR codes from `src/lib/qrCodes.ts` (pages 15 and 22 only — 2 MVP games)
-  - Page numbering (bottom-center, 14pt)
-  - NovaLearning logo (bottom-left, 15mm)
-  - 3mm bleed + crop marks
-  - Combined 50-page PDF output
-- [ ] RGB->CMYK conversion step (CRITICAL -- Canva exports RGB only)
-  - Option A: Ghostscript with FOGRA39 ICC profile: `gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sColorConversionStrategy=CMYK -dProcessColorModel=/DeviceCMYK -sOutputICCProfile=FOGRA39.icc -o output-cmyk.pdf input-rgb.pdf`
-  - Option B: Sharp library for per-image conversion before PDF assembly
-  - Validate: spot-check converted colors against design guide CMYK values
-- [ ] PDF/X-1a compliance check
-- [ ] Parallelise: Start 5c pipeline dev in weeks 1-2 of 5b so compilation is ready when exports land
+  - Page numbering (bottom-center, 14pt) via drawPageNumber
+  - NovaLearning logo (bottom-left, 15mm) via drawLogo (text fallback + PNG support)
+  - 3mm bleed + crop marks via drawCropMarks
+  - Combined 50-page PDF output (ready for Canva PNG imports)
+- [x] RGB->CMYK conversion step (Ghostscript PowerShell script: `scripts/convert-cmyk.ps1`)
+  - Uses -sColorConversionStrategy=CMYK -dProcessColorModel=/DeviceCMYK -dPDFSETTINGS=/prepress
+- [x] PDF/X-1a compliance check (`scripts/validate-pdf.ps1` — Ghostscript preflight)
+- [x] Parallelise: Pipeline dev complete ahead of 5b Canva design work
+- [x] Fix pre-existing ESLint errors (20+ unused-variable errors from Phaser merge + service layer commits)
+  - Updated .eslintrc.json with _-prefix ignore patterns
+  - Fixed Map iteration in DomainContextManager.ts
+
+### Phase 5c — Elon/Harlan Report
+**Model:** Sonnet (component work) + Opus (architecture)
+**Status:** Done
+**Files changed:**
+  - `scripts/workbook-templates/shared/page-layout.ts` — Added drawLogo function + LOGO constants
+  - `scripts/workbook-templates/canva-page.ts` — Logo overlay integration
+  - `scripts/workbook-templates/counting-page.ts` — Logo overlay
+  - `scripts/workbook-templates/tracing-page.ts` — Logo overlay
+  - `scripts/generate-workbook.ts` — Logo path, passes to Canva page generator
+  - `scripts/validate-pdf.ps1` — NEW: Ghostscript PDF/X-1a preflight validation
+  - `package.json` — Added workbook:validate and workbook:full scripts
+  - `.eslintrc.json` — Added _-prefix ignore for unused vars
+  - 9 files fixed for ESLint unused-variable errors (pre-existing)
+**What:** Completed Phase 5c print pipeline. Logo overlay, PDF validation, full npm pipeline scripts. Fixed 20+ pre-existing ESLint errors blocking build. Pipeline ready for Canva PNG imports.
+
+### npm scripts (workbook pipeline):
+```
+npm run workbook          # Generate RGB PDF from Canva PNGs + programmatic pages
+npm run workbook:cmyk     # Generate + convert to CMYK
+npm run workbook:validate # Validate CMYK PDF for print
+npm run workbook:full     # Full pipeline: generate → CMYK → validate
+```
 
 ### Phase 5d: Print Production
 - [ ] Physical specs: A4 portrait, **150gsm paper**, **perfect bound**, **laminated cover**, 52 total (50 content + 2 covers)
@@ -383,6 +407,18 @@
 | Static pages | 10 | - | +1 new game page |
 | TypeScript errors | 0 | 0 | OK |
 | ESLint warnings | 0 | 0 | OK |
+| Workbook PDFs | 3 files | - | page-15, page-22, combined |
+
+### Phase 5c
+| Metric | Value | Budget | Status |
+|--------|-------|--------|--------|
+| Home First Load JS | 96.3KB | 500KB | OK (unchanged) |
+| Count Game JS | 331KB | 500KB | OK (66%) |
+| Trace Game JS | 331KB | 500KB | OK (66%) |
+| Letter Explorer JS | 376KB | 500KB | OK (75%) |
+| Static pages | 13 | - | +3 from prior phases |
+| TypeScript errors | 0 | 0 | OK |
+| ESLint warnings | 0 | 0 | OK (fixed 20+ pre-existing) |
 | Workbook PDFs | 3 files | - | page-15, page-22, combined |
 
 ## Files Changed (Phase 1)

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, SIZES, NOVA } from '../../../config/theme.js';
+import { COLORS } from '../../../config/theme.js';
 import { DEVICE_CONFIG } from '../../../config/device.js';
 import { LETTER_ORDER, getLetterConfig } from '../../../config/letters.js';
 import { gameStore } from '../../../state/gameStore.js';

@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { SIZES } from '../../config/theme.js';
 import { drawStar, createConfetti } from './UIHelpers.js';
 

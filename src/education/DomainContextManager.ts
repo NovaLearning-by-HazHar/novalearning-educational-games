@@ -16,7 +16,6 @@ import type {
   ScaffoldPhase,
   DomainProgress,
   PhaseCompletion,
-  ConceptLearned,
 } from '../types/progress';
 import { SCAFFOLD_PHASES, DOMAINS } from '../types/progress';
 import { OfflineProgressStore } from '../services/OfflineProgressStore';
@@ -128,7 +127,7 @@ export const DomainContextManager = {
    * @param learnerId — the learner's ID (for progress lookup)
    * @returns SessionContext with the starting phase and level
    */
-  startSession(domain: Domain, learnerId: string): SessionContext | null {
+  startSession(domain: Domain, _learnerId: string): SessionContext | null {
     const pack = contentPackRegistry.get(domain);
     if (!pack) {
       console.error(`[DomainContext] No content pack for domain: ${domain}`);
@@ -308,7 +307,7 @@ export const DomainContextManager = {
   ): { domain: Domain; concept: DomainConcept }[] {
     const results: { domain: Domain; concept: DomainConcept }[] = [];
 
-    for (const [domain, pack] of contentPackRegistry) {
+    for (const [domain, pack] of Array.from(contentPackRegistry)) {
       const concept = pack.concepts.find((c) => c.conceptId === conceptId);
       if (concept) {
         results.push({ domain, concept });

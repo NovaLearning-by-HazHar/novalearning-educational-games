@@ -21,7 +21,6 @@ import type {
 } from '../types/progress';
 import {
   createDefaultProgressSnapshot,
-  SCAFFOLD_PHASES,
 } from '../types/progress';
 
 // ─── Constants ───────────────────────────────────────────────────
