@@ -41,7 +41,7 @@ export default function CountingAnimalsPage() {
   // Initialize game store on mount
   useEffect(() => {
     reset();
-    setActiveCharacter('lerato'); // Lerato = Kind helper, social learning
+    setActiveCharacter('jabu'); // Jabu = Creative builder
     setTargetInteractions(5);
   }, [reset, setActiveCharacter, setTargetInteractions]);
 

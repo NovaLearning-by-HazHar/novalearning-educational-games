@@ -16,7 +16,7 @@ interface MoneyState {
   gardenCycleCount: number;
 
   // UI hints
-  showLeratoHint: boolean;
+  showJabuHint: boolean;
 
   // Actions
   addBalance: (amount: number) => void;
@@ -24,7 +24,7 @@ interface MoneyState {
   addPurchase: (item: ShopItem) => void;
   setGardenActive: (active: boolean) => void;
   incrementGardenCycle: () => void;
-  triggerLeratoHint: () => void;
+  triggerJabuHint: () => void;
   resetMoney: () => void;
 }
 
@@ -33,7 +33,7 @@ export const useMoneyState = create<MoneyState>((set, get) => ({
   purchases: [],
   gardenActive: true, // Start with garden in explore phase
   gardenCycleCount: 0,
-  showLeratoHint: false,
+  showJabuHint: false,
 
   addBalance: (amount) => {
     set({ balance: get().balance + amount });
@@ -56,10 +56,10 @@ export const useMoneyState = create<MoneyState>((set, get) => ({
     set({ gardenCycleCount: get().gardenCycleCount + 1 });
   },
 
-  triggerLeratoHint: () => {
-    set({ showLeratoHint: true });
+  triggerJabuHint: () => {
+    set({ showJabuHint: true });
     setTimeout(() => {
-      set({ showLeratoHint: false });
+      set({ showJabuHint: false });
     }, 2000);
   },
 
@@ -69,7 +69,7 @@ export const useMoneyState = create<MoneyState>((set, get) => ({
       purchases: [],
       gardenActive: true,
       gardenCycleCount: 0,
-      showLeratoHint: false,
+      showJabuHint: false,
     });
   },
 }));

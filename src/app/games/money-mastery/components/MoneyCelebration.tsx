@@ -21,7 +21,7 @@ const CELEBRATION_POSITIONS: [number, number, number][] = [
   [1.5, 0, 0.5],
 ];
 
-const MVP_NAMES = ['sipho', 'thandi', 'lerato'] as const;
+const MVP_NAMES = ['sipho', 'gogo_thandi', 'jabu'] as const;
 
 /**
  * 3D celebration scene with metrics overlay.

@@ -132,16 +132,16 @@ export const TIMINGS = {
 
 // ─── Character Colors (all 6 for celebration) ─────────────────────────
 export const EXPLORER_CHARACTER_COLORS: Record<string, CharacterColors> = {
+  gogo_thandi: { body: '#1565C0', accent: '#42A5F5', skin: '#6D4C41' },
   sipho: { body: '#E65100', accent: '#FF6D00', skin: '#8D6E63' },
-  thandi: { body: '#1565C0', accent: '#42A5F5', skin: '#A1887F' },
-  lerato: { body: '#2E7D32', accent: '#66BB6A', skin: '#8D6E63' },
-  pieter: { body: '#F57F17', accent: '#FFCA28', skin: '#FFCCBC' },
-  fatima: { body: '#6A1B9A', accent: '#AB47BC', skin: '#D7CCC8' },
-  amahle: { body: '#D84315', accent: '#FF8A65', skin: '#8D6E63' },
+  amahle: { body: '#D84315', accent: '#FF8A65', skin: '#795548' },
+  jabu: { body: '#2E7D32', accent: '#66BB6A', skin: '#5D4037' },
+  liya: { body: '#6A1B9A', accent: '#AB47BC', skin: '#A1887F' },
+  themba: { body: '#F57F17', accent: '#FFCA28', skin: '#BCAAA4' },
 };
 
 export const ALL_EXPLORER_CHARACTERS = [
-  'sipho', 'thandi', 'lerato', 'pieter', 'fatima', 'amahle',
+  'gogo_thandi', 'sipho', 'amahle', 'jabu', 'liya', 'themba',
 ] as const;
 
 /** Semicircle formation for 6 characters in celebration */

@@ -7,14 +7,14 @@ interface TracingProgressOverlayProps {
   completedCount: number;
   /** Overall progress 0-1 */
   overallProgress: number;
-  /** Show Thandi's hint */
+  /** Show Gogo Thandi's hint */
   showHint: boolean;
   /** Whether overlay is visible */
   visible: boolean;
 }
 
 /**
- * HTML overlay showing letter tracing progress and Thandi hint bubble.
+ * HTML overlay showing letter tracing progress and Gogo Thandi hint bubble.
  * Positioned absolute over the 3D canvas.
  */
 export default function TracingProgressOverlay({
@@ -58,7 +58,7 @@ export default function TracingProgressOverlay({
         />
       </div>
 
-      {/* Thandi hint bubble */}
+      {/* Gogo Thandi hint bubble */}
       {showHint && (
         <div className="mt-2 bg-white/90 rounded-2xl px-4 py-2 shadow-lg animate-pulse">
           <p className="text-base font-display text-nova-earth">

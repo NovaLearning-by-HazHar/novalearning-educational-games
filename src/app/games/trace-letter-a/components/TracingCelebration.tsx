@@ -70,7 +70,7 @@ function CelebrationCharacters() {
               accentColor={colors.accent}
               scale={1.2}
               bounce
-              wave={i === 1} // Thandi waves (index 1)
+              wave={i === 1} // Gogo Thandi waves (index 1)
             />
           </group>
         );

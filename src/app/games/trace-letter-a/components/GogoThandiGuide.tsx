@@ -1,26 +1,26 @@
 'use client';
 
-import { THANDI_POSITION, MVP_CHARACTER_COLORS } from '../lib/constants';
+import { GOGO_THANDI_POSITION, MVP_CHARACTER_COLORS } from '../lib/constants';
 import SimpleCharacter from '../../count-to-five/components/SimpleCharacter';
 import type { GamePhase } from '@/types/game';
 
-interface ThandiGuideProps {
+interface GogoThandiGuideProps {
   phase: GamePhase;
 }
 
 /**
- * Thandi — Xhosa creative storyteller, guide for the letter tracing game.
+ * Gogo Thandi — Xhosa elder wisdom keeper, guide for the letter tracing game.
  * Phase-aware behavior:
  * - explore: wave to invite child
  * - discover/practice: bounce with encouragement during tracing
  * - celebrate: handled by TracingCelebration scene
  */
-export default function ThandiGuide({ phase }: ThandiGuideProps) {
-  const colors = MVP_CHARACTER_COLORS.thandi;
+export default function GogoThandiGuide({ phase }: GogoThandiGuideProps) {
+  const colors = MVP_CHARACTER_COLORS.gogo_thandi;
 
   return (
     <SimpleCharacter
-      position={THANDI_POSITION}
+      position={GOGO_THANDI_POSITION}
       bodyColor={colors.body}
       headColor={colors.skin}
       accentColor={colors.accent}

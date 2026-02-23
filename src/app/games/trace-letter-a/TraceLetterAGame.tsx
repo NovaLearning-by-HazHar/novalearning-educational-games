@@ -11,11 +11,11 @@ import {
 import WritingEnvironment from './components/WritingEnvironment';
 import LetterPath from './components/LetterPath';
 import TracingInteraction from './components/TracingInteraction';
-import ThandiGuide from './components/ThandiGuide';
+import GogoThandiGuide from './components/GogoThandiGuide';
 
 /**
  * Trace Letter A 3D game scene — orchestrator.
- * Composes WritingEnvironment, LetterPath, TracingInteraction, and ThandiGuide.
+ * Composes WritingEnvironment, LetterPath, TracingInteraction, and GogoThandiGuide.
  * Handles tracing logic, audio triggers, and phase transitions.
  */
 export default function TraceLetterAGame() {
@@ -32,7 +32,7 @@ export default function TraceLetterAGame() {
   const stopTracing = useTracingState((s) => s.stopTracing);
   const updateStrokeProgress = useTracingState((s) => s.updateStrokeProgress);
   const completeCurrentStroke = useTracingState((s) => s.completeCurrentStroke);
-  const triggerThandiHint = useTracingState((s) => s.triggerThandiHint);
+  const triggerGogoThandiHint = useTracingState((s) => s.triggerGogoThandiHint);
 
   const completedStrokes = strokes.map((s) => s.completed);
   const currentProgress = strokes[currentStroke]?.progress ?? 0;
@@ -86,9 +86,9 @@ export default function TraceLetterAGame() {
 
   const handleEmptyTap = useCallback(() => {
     if (phase === 'explore' || phase === 'practice') {
-      triggerThandiHint();
+      triggerGogoThandiHint();
     }
-  }, [phase, triggerThandiHint]);
+  }, [phase, triggerGogoThandiHint]);
 
   return (
     <>
@@ -108,7 +108,7 @@ export default function TraceLetterAGame() {
         onTraceEnd={handleTraceEnd}
         onEmptyTap={handleEmptyTap}
       />
-      <ThandiGuide phase={phase} />
+      <GogoThandiGuide phase={phase} />
 
       {/* Background plane for empty-area taps */}
       <mesh

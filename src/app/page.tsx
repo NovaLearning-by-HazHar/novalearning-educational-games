@@ -31,7 +31,7 @@ export default function Home() {
           <span className="text-3xl" aria-hidden="true">✏️</span>
           <div>
             <p className="font-display text-lg text-nova-earth">
-              Trace Letter A with Thandi
+              Trace Letter A with Gogo Thandi
             </p>
             <p className="text-xs text-nova-earth/60">Language</p>
           </div>
@@ -44,7 +44,7 @@ export default function Home() {
           <span className="text-3xl" aria-hidden="true">🪙</span>
           <div>
             <p className="font-display text-lg text-nova-earth">
-              Money Mastery with Lerato
+              Money Mastery with Jabu
             </p>
             <p className="text-xs text-nova-earth/60">Financial Literacy</p>
           </div>

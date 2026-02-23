@@ -13,7 +13,7 @@ import type { PlantPotState } from '../types/money';
  * Emits earnings when all 3 coins are collected.
  */
 export default function CoinGarden() {
-  const { addBalance, incrementGardenCycle, purchases, triggerLeratoHint } =
+  const { addBalance, incrementGardenCycle, purchases, triggerJabuHint } =
     useMoneyState();
 
   const [pots, setPots] = useState<PlantPotState[]>([
@@ -64,7 +64,7 @@ export default function CoinGarden() {
         setTimeout(() => {
           addBalance(assetBonus);
           audioManager.play('cha-ching');
-          triggerLeratoHint(); // Show "Let's earn together!" hint
+          triggerJabuHint(); // Show "Let's earn together!" hint
         }, GAME_SETTINGS.assetBonusAudioDelay);
       }
 
@@ -83,7 +83,7 @@ export default function CoinGarden() {
         ]);
       }, 1000);
     }
-  }, [pots, purchases, addBalance, incrementGardenCycle, triggerLeratoHint]);
+  }, [pots, purchases, addBalance, incrementGardenCycle, triggerJabuHint]);
 
   const positions = [
     COIN_GARDEN_POSITIONS.pot1,

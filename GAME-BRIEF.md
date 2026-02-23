@@ -26,21 +26,21 @@ Gogo Thandi:  #6D4C41    Sipho:   #8D6E63    Amahle:  #795548
 Jabu:         #5D4037    Liya:    #A1887F    Themba:  #BCAAA4
 ```
 
-### Legacy Code Characters (existing in src/types/game.ts)
+### Legacy Code Characters (MIGRATED)
 
-The codebase currently uses: `sipho`, `thandi`, `lerato`, `pieter`, `fatima`, `amahle`.
-These map to the Bible roster as follows:
+Migration to Bible v1.0 completed 2026-02-23. The codebase now uses:
+`gogo_thandi`, `sipho`, `amahle`, `jabu`, `liya`, `themba`.
 
-| Code Name | Bible Name | Notes |
+| Old Code Name | Bible v1.0 Name | Migration |
 |---|---|---|
-| sipho | Sipho Dlamini | Direct match |
-| thandi | Gogo Thandi | Now an elder character |
-| amahle | Amahle Ndlovu | Direct match |
-| lerato | — | Not in Bible v1.0 (replace with Jabu) |
-| pieter | — | Not in Bible v1.0 (replace with Themba) |
-| fatima | — | Not in Bible v1.0 (replace with Liya) |
+| sipho | Sipho Dlamini | Kept (metadata updated) |
+| thandi | Gogo Thandi (`gogo_thandi`) | Renamed to elder role |
+| amahle | Amahle Ndlovu | Kept (metadata updated) |
+| lerato | Jabu Mokoena (`jabu`) | Replaced |
+| pieter | Themba van der Merwe (`themba`) | Replaced |
+| fatima | Liya Abrahams (`liya`) | Replaced |
 
-**Migration note:** Update `CharacterName` type in `src/types/game.ts` when ready.
+Types: `CharacterId` + `CompanionId` in `src/types/game.ts`. Data: `src/types/constants.ts`.
 
 ---
 

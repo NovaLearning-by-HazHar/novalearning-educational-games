@@ -5,7 +5,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { audioManager } from '@/lib/audio';
 import ShopEnvironment from './components/ShopEnvironment';
 import PlantPot from './components/PlantPot';
-import LeratoGuide from './components/LeratoGuide';
+import JabuGuide from './components/JabuGuide';
 import { useMoneyState, calculateEarnings } from './hooks/useMoneyState';
 import {
   COIN_GARDEN_POSITIONS,
@@ -29,7 +29,7 @@ const POT_POSITIONS: [number, number, number][] = [
 /**
  * MoneyMasteryGame — Pure 3D orchestrator.
  *
- * Composes ShopEnvironment + 3 PlantPots + LeratoGuide.
+ * Composes ShopEnvironment + 3 PlantPots + JabuGuide.
  * Manages garden cycle logic and phase transitions.
  * All HTML overlays (ShopItemCards, balance HUD, speech bubble) go in page.tsx.
  */
@@ -40,7 +40,7 @@ export default function MoneyMasteryGame() {
   const purchases = useMoneyState((s) => s.purchases);
   const addBalance = useMoneyState((s) => s.addBalance);
   const incrementGardenCycle = useMoneyState((s) => s.incrementGardenCycle);
-  const triggerLeratoHint = useMoneyState((s) => s.triggerLeratoHint);
+  const triggerJabuHint = useMoneyState((s) => s.triggerJabuHint);
 
   const [pots, setPots] = useState<PlantPotState[]>(INITIAL_POTS);
   const gardenCycleRef = useRef(0);
@@ -138,11 +138,11 @@ export default function MoneyMasteryGame() {
   useEffect(() => {
     if (phase === 'explore') {
       const timer = setTimeout(() => {
-        triggerLeratoHint();
+        triggerJabuHint();
       }, GAME_SETTINGS.exploreHintDelay);
       return () => clearTimeout(timer);
     }
-  }, [phase, triggerLeratoHint]);
+  }, [phase, triggerJabuHint]);
 
   // -------------------------------------------------------------------------
   // Garden visible during explore + practice (not discover/celebrate)
@@ -167,7 +167,7 @@ export default function MoneyMasteryGame() {
           />
         ))}
 
-      <LeratoGuide />
+      <JabuGuide />
     </>
   );
 }

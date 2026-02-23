@@ -10,6 +10,12 @@
 2026-02-23 | Elon | Fixed WebGL crash on low-RAM Android devices | FIX-001 logged | Harlan to validate renderer config
 -->
 
+AGENT: Elon + Kimbal + Harlan | 2026-02-23
+DONE: Character roster migration — Bible v1.0. lerato→jabu, pieter→themba, fatima→liya, thandi→gogo_thandi. Added CompanionId type + Companion interface + full character/companion data.
+FIX: none
+BUNDLE: Home 96.3KB | Games 331KB | Letter Explorer 376KB | 13 static pages
+NEXT: Phase 5 workbook pipeline (use v6 prompt)
+
 AGENT: Elon + Harlan | 2026-02-23
 DONE: Phase 5c print pipeline — logo overlay, PDF/X-1a validation script, fixed 20+ pre-existing ESLint errors
 FIX: none (ESLint fixes were pre-existing, not new bugs)

@@ -88,18 +88,18 @@ Every game follows: **EXPLORE -> DISCOVER -> PRACTICE -> CELEBRATE**
 
 No failure states, no competition, no timers. Encouragement only.
 
-## Rainbow Nation Characters
+## Character Bible v1.0
 
-| Name | Heritage | Personality | Learning Style |
-|------|----------|-------------|----------------|
-| Sipho | Zulu | Brave explorer | Kinesthetic |
-| Thandi | Xhosa | Creative storyteller | Visual |
-| Lerato | Sotho | Kind helper | Social |
-| Pieter | Afrikaans | Curious builder | Logical |
-| Fatima | Cape Malay | Patient teacher | Auditory |
-| Amahle | Ndebele | Joyful artist | Creative |
+| Name | Role | Ethnicity | Companion |
+|------|------|-----------|-----------|
+| Gogo Thandi | Wisdom Keeper | Xhosa elder | Elephant Calf |
+| Sipho Dlamini | Curious Explorer | Zulu | Springbok |
+| Amahle Ndlovu | Caring Helper | Zulu/Xhosa | Meerkat |
+| Jabu Mokoena | Creative Builder | Sotho | Weaver Bird |
+| Liya Abrahams | Joyful Storyteller | Cape Malay | Cape Penguin |
+| Themba van der Merwe | Gentle Protector | Afrikaans/mixed | Tortoise |
 
-MVP uses Sipho, Thandi, and Lerato. All six are defined in `src/types/constants.ts`.
+All six characters and companions are defined in `src/types/constants.ts`.
 
 ## Scripts
 

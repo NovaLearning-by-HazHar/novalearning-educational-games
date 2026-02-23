@@ -68,7 +68,7 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 export const SHOP_COLORS = {
   // Border colors for asset vs consumption
-  assetBorder: '#2E7D32', // GREEN (Lerato's green)
+  assetBorder: '#2E7D32', // GREEN (Jabu's green)
   consumptionBorder: '#C62828', // RED
 
   // Shop scene colors
@@ -94,8 +94,8 @@ export const SHOP_COLORS = {
 // POSITIONS (3D Scene Layout)
 // ============================================================================
 
-// Lerato's position (right side of counter)
-export const LERATO_POSITION: [number, number, number] = [2.5, 0, 1];
+// Jabu's position (right side of counter)
+export const JABU_POSITION: [number, number, number] = [2.5, 0, 1];
 
 // Shop counter position and dimensions
 export const SHOP_COUNTER = {
@@ -141,20 +141,20 @@ export const ASSET_DISPLAY_POSITIONS: Record<string, [number, number, number]> =
 // ============================================================================
 
 export const MVP_CHARACTER_COLORS: Record<string, CharacterColors> = {
-  lerato: {
+  jabu: {
     body: '#2E7D32', // Green
     accent: '#66BB6A', // Lighter green
-    skin: '#8D6E63', // Brown
+    skin: '#5D4037', // Brown (Bible v1.0)
   },
   sipho: {
     body: '#E65100', // Orange
     accent: '#FF6D00',
     skin: '#8D6E63',
   },
-  thandi: {
+  gogo_thandi: {
     body: '#1565C0', // Blue
     accent: '#42A5F5',
-    skin: '#A1887F',
+    skin: '#6D4C41',
   },
 };
 

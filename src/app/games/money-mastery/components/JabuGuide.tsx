@@ -1,20 +1,20 @@
 'use client';
 
 import { useGameStore } from '@/stores/gameStore';
-import { LERATO_POSITION, MVP_CHARACTER_COLORS } from '../lib/constants';
+import { JABU_POSITION, MVP_CHARACTER_COLORS } from '../lib/constants';
 import SimpleCharacter from '../../count-to-five/components/SimpleCharacter';
 
 /**
- * Lerato 3D character guide positioned at the shop counter.
+ * Jabu 3D character guide positioned at the shop counter.
  * Speech bubble is rendered as HTML overlay in page.tsx (outside R3F Canvas).
  */
-export default function LeratoGuide() {
+export default function JabuGuide() {
   const phase = useGameStore((s) => s.phase);
-  const colors = MVP_CHARACTER_COLORS.lerato;
+  const colors = MVP_CHARACTER_COLORS.jabu;
 
   return (
     <SimpleCharacter
-      position={LERATO_POSITION}
+      position={JABU_POSITION}
       bodyColor={colors.body}
       headColor={colors.skin}
       accentColor={colors.accent}

@@ -21,9 +21,9 @@ import {
 } from './lib/constants';
 
 /**
- * Money Mastery with Lerato — Financial Literacy game.
+ * Money Mastery with Jabu — Financial Literacy game.
  *
- * Gameplay: Lerato guides child through a coin garden + spaza shop.
+ * Gameplay: Jabu guides child through a coin garden + spaza shop.
  * Water pots → grow coins → buy assets/treats → learn saving vs spending.
  * After 4 purchases: 3 MVP characters celebrate together (Ubuntu).
  */
@@ -36,7 +36,7 @@ export default function MoneyMasteryPage() {
 
   const { ready: audioReady } = useAudioSetup();
   const balance = useMoneyState((s) => s.balance);
-  const showLeratoHint = useMoneyState((s) => s.showLeratoHint);
+  const showJabuHint = useMoneyState((s) => s.showJabuHint);
   const resetMoney = useMoneyState((s) => s.resetMoney);
 
   // Phase 3: Session tracking
@@ -46,7 +46,7 @@ export default function MoneyMasteryPage() {
   // Initialize game state on mount
   useEffect(() => {
     reset();
-    setActiveCharacter('lerato');
+    setActiveCharacter('jabu');
     setTargetInteractions(GAME_SETTINGS.targetInteractions);
   }, [reset, setActiveCharacter, setTargetInteractions]);
 
@@ -82,20 +82,20 @@ export default function MoneyMasteryPage() {
     resetMoney();
     reset();
     resetSession();
-    setActiveCharacter('lerato');
+    setActiveCharacter('jabu');
     setTargetInteractions(GAME_SETTINGS.targetInteractions);
     setLoaded(true);
     audioManager.play(AUDIO_IDS.ambientWind);
   }, [resetMoney, reset, resetSession, setActiveCharacter, setTargetInteractions, setLoaded]);
 
-  // Lerato speech bubble text (replicated from LeratoGuide — HTML inside R3F is ignored)
+  // Jabu speech bubble text (replicated from JabuGuide — HTML inside R3F is ignored)
   let bubbleText = '';
   if (phase === 'explore') {
-    bubbleText = showLeratoHint ? TEXT_CONTENT.explore.prompt : TEXT_CONTENT.explore.greeting;
+    bubbleText = showJabuHint ? TEXT_CONTENT.explore.prompt : TEXT_CONTENT.explore.greeting;
   } else if (phase === 'discover') {
     bubbleText = TEXT_CONTENT.discover.prompt;
   } else if (phase === 'practice') {
-    bubbleText = showLeratoHint ? TEXT_CONTENT.practice.bonusGarden : '';
+    bubbleText = showJabuHint ? TEXT_CONTENT.practice.bonusGarden : '';
   }
 
   // ---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ export default function MoneyMasteryPage() {
   if (phase === 'celebrate') {
     return (
       <ErrorBoundary>
-        <GameShell title="Money Mastery with Lerato">
+        <GameShell title="Money Mastery with Jabu">
           <div className="relative w-full h-full">
             <Scene
               cameraPosition={[0, 1.5, 5]}
@@ -126,7 +126,7 @@ export default function MoneyMasteryPage() {
   // ---------------------------------------------------------------------------
   return (
     <ErrorBoundary>
-      <GameShell title="Money Mastery with Lerato">
+      <GameShell title="Money Mastery with Jabu">
         <div className="relative w-full h-full">
           <Scene
             cameraPosition={[0, 2, 5]}
@@ -152,7 +152,7 @@ export default function MoneyMasteryPage() {
             </span>
           </div>
 
-          {/* Lerato speech bubble (HTML overlay — HTML inside R3F Canvas is ignored) */}
+          {/* Jabu speech bubble (HTML overlay — HTML inside R3F Canvas is ignored) */}
           {bubbleText && (
             <div
               className="absolute z-10 pointer-events-none"

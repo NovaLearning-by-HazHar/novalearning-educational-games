@@ -26,7 +26,7 @@ export default function ShopItemCards() {
   const balance = useMoneyState((s) => s.balance);
   const deductBalance = useMoneyState((s) => s.deductBalance);
   const addPurchase = useMoneyState((s) => s.addPurchase);
-  const triggerLeratoHint = useMoneyState((s) => s.triggerLeratoHint);
+  const triggerJabuHint = useMoneyState((s) => s.triggerJabuHint);
 
   const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -49,8 +49,8 @@ export default function ShopItemCards() {
         }, GAME_SETTINGS.assetBonusAudioDelay);
       }
 
-      // Lerato feedback
-      triggerLeratoHint();
+      // Jabu feedback
+      triggerJabuHint();
 
       // Card pulse animation
       const el = cardRefs.current[item.id];
@@ -62,7 +62,7 @@ export default function ShopItemCards() {
         });
       }
     },
-    [balance, deductBalance, addPurchase, incrementInteraction, triggerLeratoHint]
+    [balance, deductBalance, addPurchase, incrementInteraction, triggerJabuHint]
   );
 
   // Only show during discover and practice phases
