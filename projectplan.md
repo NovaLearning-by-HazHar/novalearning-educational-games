@@ -1,7 +1,7 @@
 # NovaLearning Games — Project Plan
 
-## Current Phase: Phase 5 (Workbook Production Pipeline) — IN PROGRESS
-## Status: Phase 5c COMPLETE (print pipeline). Phase 5a/5b (Canva design) pending Damian.
+## Current Phase: Phase 7 COMPLETE — Phase 8 (PWA) NEXT
+## Status: All 6 game modes built. Phase 5a/5b (Canva design) pending Damian.
 ## Last Updated: 2026-02-23
 
 ---
@@ -271,6 +271,49 @@ npm run workbook:full     # Full pipeline: generate → CMYK → validate
   - Specifically verify CMYK conversion didn't shift brand colors
   - Verify QR codes on pages 15 and 22 scan correctly to deployed URLs
 - [ ] 10-book pilot print run
+
+## Phase 7: Game Modes Suite ✅
+
+- [x] Mode 1: Bontse — Discover Mode (Sipho guide, SA animals/cultures/landmarks discovery)
+  - 4 categories: Animals, Cultures, Landmarks, Provinces
+  - Data: discoveries.ts — 13 items, 3 facts each in EN/AF/ZU/XH/ST
+  - 3D: Procedural animal display, savanna environment
+  - Ubuntu: Community Discovery Counter
+  - First Load JS: 322KB (64% of 500KB budget)
+- [x] Mode 2: Mzansi Journey — Tour Mode (Liya guide, SA provinces SVG map tour)
+  - 9 provinces with animal, language, landmark, cuisine data
+  - SVG map with clickable provinces, slide-in fact panels
+  - 3D: Province animal display + Cape Penguin companion
+  - Ubuntu: Community sticker book — "Collect a friend from each province!"
+  - First Load JS: 337KB (67% of 500KB budget)
+- [x] Mode 3: Ubuntu Stories — Narrative Mode (Gogo Thandi guide, story chapters)
+  - 2 stories: "The Missing Rain" + "Market Day"
+  - Chapters with literacy/numeracy/life-skills clues + mini-tasks
+  - Tap-to-advance narrative with character portraits
+  - Ubuntu: "Together we solve the mystery!"
+  - First Load JS: 323KB (65% of 500KB budget)
+- [x] Mode 4: Ubuntu Garden — Build Mode (Jabu guide, collaborative garden)
+  - 16 items across 4 categories (animals, trees, flowers, structures)
+  - Grid-based placement with learning tasks before each placement
+  - Low-poly procedural items (<500 vertices each)
+  - Ubuntu: "Our garden has X items!" shared garden concept
+  - First Load JS: 321KB (64% of 500KB budget)
+- [x] Mode 5: Thina Trivia — Quiz Mode (Amahle guide, cooperative quiz)
+  - 210 questions across 6 categories, 5-language translations
+  - Community Star Meter, optional 30s discussion timer
+  - UI-only (no 3D) — lightest mode
+  - Ubuntu: "Siyabonga! You helped the class!"
+  - First Load JS: 124KB (41% of 300KB budget)
+- [x] Mode 6: My Ubuntu Stars — Achievement Display (Themba guide)
+  - 81 badges across all game modes + community milestones
+  - 3 point types: Langa (sun), Izulu (rain), Umhlaba (earth)
+  - Individual + Community tabs, no ranking/comparison
+  - UI-only (no 3D)
+  - First Load JS: 116KB (46% of 250KB budget)
+- [x] Home page updated with all 11 game links
+- [x] TypeScript: 0 errors, ESLint: 0 warnings
+- [x] Build: 19 static pages, all within budget
+- [x] Commit: 1b72c54 (73 files, 9429 insertions)
 
 ## Phase 6: School Pilots & Market Launch
 
