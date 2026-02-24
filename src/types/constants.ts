@@ -1,6 +1,6 @@
-import type { Character, Companion, CharacterId, CompanionId } from './game';
+import type { Character, Companion, CoreCharacterId, CompanionId } from './game';
 
-export const CHARACTERS: Record<CharacterId, Character> = {
+export const CHARACTERS: Record<CoreCharacterId, Character> = {
   gogo_thandi: {
     id: 'gogo_thandi',
     fullName: 'Gogo Thandi',

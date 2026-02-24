@@ -1,6 +1,17 @@
 /** Money Skills L1 — Game Constants */
 
 import type { CoinData, CoinId, PracticeRoundData } from '../types/money-skills';
+import type { MoneyCharacterId } from '@/types/game';
+
+// ---- Money Skills Characters ----
+export const CHARACTERS: Record<
+  MoneyCharacterId,
+  { name: string; role: string; trait: string; image: string; cardBg: string; accent: string }
+> = {
+  chanel: { name: 'Chanel', role: 'Storyteller', trait: 'Loves to share', image: '/characters/chanel-front.png', cardBg: '#FDE8D8', accent: '#E67E22' },
+  priya:  { name: 'Priya',  role: 'Thinker',     trait: 'Loves to explore', image: '/characters/priya-front.png', cardBg: '#D8F0E8', accent: '#27AE60' },
+  naledi: { name: 'Naledi', role: 'Leader',       trait: 'Loves to lead together', image: '/characters/naledi-front.png', cardBg: '#D8E8FF', accent: '#4A90D9' },
+};
 
 // ---- 7 SA Coins ----
 export const SA_COINS: CoinData[] = [

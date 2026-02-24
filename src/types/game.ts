@@ -1,5 +1,12 @@
 /** Character Bible v1.0 identifiers */
-export type CharacterId = 'gogo_thandi' | 'sipho' | 'amahle' | 'jabu' | 'liya' | 'themba';
+/** Bible v1.0 core cast */
+export type CoreCharacterId = 'gogo_thandi' | 'sipho' | 'amahle' | 'jabu' | 'liya' | 'themba';
+
+/** Money Skills game-specific character IDs */
+export type MoneyCharacterId = 'chanel' | 'priya' | 'naledi';
+
+/** All character identifiers across the project */
+export type CharacterId = CoreCharacterId | MoneyCharacterId;
 
 /** Companion animal identifiers */
 export type CompanionId = 'elephant_calf' | 'springbok' | 'meerkat' | 'weaver_bird' | 'cape_penguin' | 'tortoise';

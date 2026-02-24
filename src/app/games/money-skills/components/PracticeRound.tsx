@@ -18,7 +18,7 @@ interface PracticeRoundProps {
  */
 export default function PracticeRound({ onComplete }: PracticeRoundProps) {
   const practiceRound = useMoneySkillsState((s) => s.practiceRound);
-  const practiceCorrect = useMoneySkillsState((s) => s.practiceCorrect);
+  const _practiceCorrect = useMoneySkillsState((s) => s.practiceCorrect);
   const wrongAttemptsThisRound = useMoneySkillsState((s) => s.wrongAttemptsThisRound);
   const showHintGlow = useMoneySkillsState((s) => s.showHintGlow);
   const submitPracticeAnswer = useMoneySkillsState((s) => s.submitPracticeAnswer);

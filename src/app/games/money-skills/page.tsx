@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import GameShell from '@/components/GameShell';
 import Scene from '@/components/Scene';
@@ -26,9 +27,10 @@ import ProgressBeads from './components/ProgressBeads';
  * Ubuntu: no scores, no competition, community celebration.
  */
 export default function MoneySkillsPage() {
+  const router = useRouter();
   const phase = useGameStore((s) => s.phase);
   const reset = useGameStore((s) => s.reset);
-  const setActiveCharacter = useGameStore((s) => s.setActiveCharacter);
+  const activeCharacter = useGameStore((s) => s.activeCharacter);
   const setTargetInteractions = useGameStore((s) => s.setTargetInteractions);
   const setLoaded = useGameStore((s) => s.setLoaded);
   const advancePhase = useGameStore((s) => s.advancePhase);
@@ -50,12 +52,17 @@ export default function MoneySkillsPage() {
   const { trackPhase, endSession, resetSession } = useGameSession('money-skills');
   const addCompletion = useProgressStore((s) => s.addCompletion);
 
+  // Redirect to character select if no character chosen
+  useEffect(() => {
+    if (!activeCharacter) {
+      router.replace('/games/money-skills/select');
+    }
+  }, [activeCharacter, router]);
+
   // Initialize game state on mount
   useEffect(() => {
-    reset();
-    setActiveCharacter('sipho');
     setTargetInteractions(7);
-  }, [reset, setActiveCharacter, setTargetInteractions]);
+  }, [setTargetInteractions]);
 
   // Mark loaded when audio is ready
   useEffect(() => {
@@ -117,16 +124,13 @@ export default function MoneySkillsPage() {
     }
   }, [practiceRound, setPhase]);
 
-  // Play Again handler
+  // Play Again handler — reset clears activeCharacter, redirect sends to /select
   const handlePlayAgain = useCallback(() => {
     reset();
     resetMoneySkills();
     resetSession();
-    setActiveCharacter('sipho');
-    setTargetInteractions(7);
-    setLoaded(true);
-    audioManager.play('ambient-market');
-  }, [reset, resetMoneySkills, resetSession, setActiveCharacter, setTargetInteractions, setLoaded]);
+    audioManager.stopCategory('ambient');
+  }, [reset, resetMoneySkills, resetSession]);
 
   // -- Celebrate phase rendering --
   if (phase === 'celebrate') {
