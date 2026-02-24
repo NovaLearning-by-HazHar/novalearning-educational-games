@@ -1,7 +1,7 @@
 'use client';
 
-import SimpleCharacter from '@/app/games/count-to-five/components/SimpleCharacter';
-import { ALL_CHARACTER_COLORS } from '@/app/games/count-to-five/lib/constants';
+import SimpleCharacter from '@/components/SimpleCharacter';
+import { ALL_CHARACTER_COLORS } from '@/lib/characterColors';
 import { SIPHO_POSITION } from '../lib/constants';
 
 interface SiphoGuideProps {

@@ -3,8 +3,8 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import SimpleCharacter from '@/app/games/count-to-five/components/SimpleCharacter';
-import { ALL_CHARACTER_COLORS } from '@/app/games/count-to-five/lib/constants';
+import SimpleCharacter from '@/components/SimpleCharacter';
+import { ALL_CHARACTER_COLORS } from '@/lib/characterColors';
 import { CELEBRATION_POSITIONS, CONFETTI_COLORS, CONFETTI_COUNT } from '../lib/constants';
 
 const CHARACTERS = [

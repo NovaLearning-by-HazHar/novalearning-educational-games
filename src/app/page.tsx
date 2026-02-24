@@ -38,6 +38,19 @@ export default function Home() {
         </Link>
 
         <Link
+          href="/games/money-skills/select"
+          className="flex items-center gap-4 p-4 rounded-2xl bg-amber-100 hover:bg-amber-200 transition-colors"
+        >
+          <span className="text-3xl" aria-hidden="true">🪙</span>
+          <div>
+            <p className="font-display text-lg text-nova-earth">
+              Discover Gogo&apos;s Coins
+            </p>
+            <p className="text-xs text-nova-earth/60">Money Skills</p>
+          </div>
+        </Link>
+
+        <Link
           href="/games/money-mastery"
           className="flex items-center gap-4 p-4 rounded-2xl bg-amber-100 hover:bg-amber-200 transition-colors"
         >
