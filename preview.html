@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NovaLearning — Game Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800;900&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-display: 'Fredoka One', sans-serif;
+      --font-body: 'Nunito', sans-serif;
+      --font-hint: 'Quicksand', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: #1A0F05;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ============= PHONE SHELL ============= */
+    .phone {
+      width: 100vw; height: 100vh;
+      max-width: 414px; max-height: 896px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (min-width: 500px) {
+      .phone {
+        border-radius: 40px;
+        box-shadow: 0 0 0 4px #333, 0 0 0 6px #111, 0 30px 80px rgba(0,0,0,0.7);
+      }
+    }
+
+    /* ============= SCREEN ============= */
+    .screen {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      transform: scale(0.95);
+      overflow: hidden;
+    }
+    .screen.active { opacity: 1; pointer-events: all; transform: scale(1); }
+
+    /* ============= WORLD BACKGROUNDS ============= */
+    /* Safari savanna — golden hour */
+    .world-safari {
+      background: linear-gradient(180deg, #87CEEB 0%, #FDEBD0 30%, #F5CBA7 50%, #D4A76A 70%, #5D4037 100%);
+    }
+    .world-safari::before {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 45%;
+      background: linear-gradient(180deg, transparent 0%, #C4A76A 30%, #A0855A 60%, #6B4226 100%);
+      border-radius: 50% 50% 0 0 / 20% 20% 0 0;
+    }
+    .world-safari::after {
+      content: '';
+      position: absolute; bottom: 35%; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,220,150,0.6), transparent);
+    }
+
+    /* Sky world — clouds and blue */
+    .world-sky {
+      background: linear-gradient(180deg, #1B4F72 0%, #2E86C1 25%, #85C1E9 50%, #AED6F1 70%, #D5F5E3 100%);
+    }
+
+    /* Jungle — deep greens */
+    .world-jungle {
+      background: linear-gradient(180deg, #0D2818 0%, #145A32 25%, #1E8449 50%, #58D68D 75%, #A9DFBF 100%);
+    }
+
+    /* Celebration — sunset burst */
+    .world-celeb {
+      background: radial-gradient(ellipse at 50% 20%, #FDEBD0 0%, #F5B041 30%, #E67E22 55%, #BA4A00 80%, #6E2C00 100%);
+    }
+
+    /* ============= SCENIC LAYERS ============= */
+    .scene-layer {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    /* Sun / Moon */
+    .sun {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFF9C4 0%, #FFD54F 40%, #FF8F00 100%);
+      box-shadow: 0 0 60px 30px rgba(255,213,79,0.4), 0 0 120px 60px rgba(255,143,0,0.15);
+      position: absolute;
+      top: 40px; right: 50px;
+      animation: sunPulse 4s ease-in-out infinite;
+    }
+    @keyframes sunPulse {
+      0%, 100% { box-shadow: 0 0 60px 30px rgba(255,213,79,0.4), 0 0 120px 60px rgba(255,143,0,0.15); }
+      50% { box-shadow: 0 0 80px 40px rgba(255,213,79,0.5), 0 0 140px 70px rgba(255,143,0,0.2); }
+    }
+
+    /* Acacia trees */
+    .tree {
+      position: absolute;
+    }
+    .tree-trunk {
+      width: 8px; height: 60px;
+      background: linear-gradient(180deg, #5D4037, #3E2723);
+      margin: 0 auto;
+      border-radius: 2px;
+    }
+    .tree-canopy {
+      width: 80px; height: 30px;
+      background: radial-gradient(ellipse, #2E7D32 20%, #1B5E20 60%, transparent 100%);
+      border-radius: 50%;
+      margin-bottom: -5px;
+    }
+    .tree-canopy.golden {
+      background: radial-gradient(ellipse, #F9A825 20%, #E65100 60%, transparent 100%);
+    }
+
+    /* Grass tufts */
+    .grass {
+      position: absolute;
+      font-size: 24px;
+      animation: grassSway 3s ease-in-out infinite;
+    }
+    @keyframes grassSway {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+
+    /* Clouds */
+    .cloud {
+      position: absolute;
+      background: rgba(255,255,255,0.85);
+      border-radius: 50px;
+      animation: cloudDrift 25s linear infinite;
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: inherit;
+      border-radius: 50%;
+    }
+    .cloud::before { width: 60%; height: 160%; top: -60%; left: 15%; }
+    .cloud::after { width: 40%; height: 140%; top: -40%; right: 15%; }
+    @keyframes cloudDrift {
+      0% { transform: translateX(-120px); }
+      100% { transform: translateX(calc(100vw + 120px)); }
+    }
+
+    /* Birds */
+    .bird {
+      position: absolute;
+      font-size: 16px;
+      animation: birdFly 12s linear infinite;
+    }
+    @keyframes birdFly {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(30px, -10px); }
+      50% { transform: translate(60px, 5px); }
+      75% { transform: translate(90px, -8px); }
+      100% { transform: translate(120px, 0); }
+    }
+
+    /* Floating dust/fireflies */
+    .sparkle {
+      position: absolute;
+      width: 4px; height: 4px;
+      background: rgba(255,223,100,0.8);
+      border-radius: 50%;
+      animation: sparkleFloat 6s ease-in-out infinite;
+    }
+    @keyframes sparkleFloat {
+      0%, 100% { opacity: 0; transform: translateY(0); }
+      30% { opacity: 1; }
+      70% { opacity: 0.8; }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+
+    /* ============= BIG CHUNKY TITLE ============= */
+    .game-title {
+      font-family: var(--font-display);
+      font-size: 42px;
+      color: #FFFFFF;
+      text-shadow:
+        0 4px 0 #7C2D12,
+        0 6px 0 #5C1A08,
+        0 8px 20px rgba(0,0,0,0.3);
+      letter-spacing: 2px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .game-title .accent {
+      color: #FACC15;
+      text-shadow:
+        0 4px 0 #92400E,
+        0 6px 0 #5C1A08,
+        0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    /* ============= WOODEN PANEL ============= */
+    .wood-panel {
+      background: linear-gradient(180deg, #D4A76A 0%, #B8864A 50%, #A0703A 100%);
+      border: 4px solid #8B5A2B;
+      border-radius: 20px;
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,0.2),
+        inset 0 -2px 0 rgba(0,0,0,0.15),
+        0 6px 0 #6B3A1A,
+        0 10px 25px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    .wood-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 8px,
+        rgba(139,90,43,0.1) 8px,
+        rgba(139,90,43,0.1) 9px
+      );
+      pointer-events: none;
+    }
+
+    /* ============= ANIMAL STAGE ============= */
+    .animal-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .animal-pedestal {
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #FFF8E1 0%, #FEF3C7 40%, #FBBF24 100%);
+      border: 6px solid #F59E0B;
+      box-shadow:
+        0 0 0 4px rgba(245,158,11,0.3),
+        0 0 30px 10px rgba(251,191,36,0.2),
+        0 8px 0 #92400E,
+        0 12px 30px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 90px;
+      position: relative;
+      z-index: 5;
+      animation: pedestalFloat 3s ease-in-out infinite;
+    }
+    @keyframes pedestalFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Shadow under animal */
+    .animal-shadow {
+      width: 120px; height: 20px;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.25), transparent);
+      border-radius: 50%;
+      margin-top: 8px;
+      animation: shadowPulse 3s ease-in-out infinite;
+    }
+    @keyframes shadowPulse {
+      0%, 100% { transform: scaleX(1); }
+      50% { transform: scaleX(0.85); }
+    }
+
+    .animal-name-ribbon {
+      background: linear-gradient(180deg, #FB923C, #EA580C);
+      color: white;
+      font-family: var(--font-display);
+      font-size: 20px;
+      padding: 8px 36px;
+      border-radius: 30px;
+      text-shadow: 1px 2px 0 rgba(0,0,0,0.2);
+      box-shadow: 0 4px 0 #9A3412, 0 6px 15px rgba(0,0,0,0.3);
+      margin-top: -12px;
+      position: relative;
+      z-index: 6;
+    }
+
+    /* ============= HERO LETTER ============= */
+    .letter-massive {
+      font-family: var(--font-display);
+      font-size: 160px;
+      line-height: 1;
+      color: #FBBF24;
+      text-shadow:
+        0 0 40px rgba(251,191,36,0.5),
+        0 6px 0 #92400E,
+        0 8px 0 #78350F,
+        0 10px 30px rgba(0,0,0,0.4);
+      -webkit-text-stroke: 3px #F59E0B;
+      position: relative;
+      z-index: 10;
+      animation: letterAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes letterAppear {
+      0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    .letter-pair {
+      font-family: var(--font-display);
+      font-size: 42px;
+      color: rgba(255,255,255,0.7);
+      text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ============= 3D GAME BUTTONS ============= */
+    .btn-game {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 18px 44px;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 24px;
+      font-weight: 800;
+      color: white;
+      text-shadow: 1px 2px 2px rgba(0,0,0,0.25);
+      transition: transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      z-index: 20;
+    }
+    .btn-game::before {
+      content: '';
+      position: absolute;
+      top: 3px; left: 6px; right: 6px;
+      height: 45%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+      border-radius: 22px 22px 50% 50%;
+      pointer-events: none;
+    }
+    .btn-game:active { transform: translateY(4px) !important; }
+
+    .btn-orange {
+      background: linear-gradient(180deg, #FB923C 0%, #DC5613 100%);
+      box-shadow: 0 6px 0 #7C2D12, 0 10px 25px rgba(0,0,0,0.35);
+    }
+    .btn-orange:active { box-shadow: 0 2px 0 #7C2D12; }
+
+    .btn-green {
+      background: linear-gradient(180deg, #4ADE80 0%, #15803D 100%);
+      box-shadow: 0 6px 0 #14532D, 0 10px 25px rgba(0,0,0,0.35);
+    }
+    .btn-green:active { box-shadow: 0 2px 0 #14532D; }
+
+    .btn-blue {
+      background: linear-gradient(180deg, #38BDF8 0%, #0369A1 100%);
+      box-shadow: 0 6px 0 #0C4A6E, 0 10px 25px rgba(0,0,0,0.35);
+    }
+    .btn-blue:active { box-shadow: 0 2px 0 #0C4A6E; }
+
+    .btn-sm { font-size: 18px; padding: 14px 32px; border-radius: 20px; }
+
+    /* ============= MATCH TILES ============= */
+    .match-tiles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 0 20px;
+    }
+
+    .tile {
+      aspect-ratio: 1;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+      background: linear-gradient(180deg, #FFF8E1 0%, #F5EBD0 100%);
+      border: 3px solid #D4A76A;
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,0.5),
+        0 5px 0 #A0703A,
+        0 8px 16px rgba(0,0,0,0.2);
+    }
+    .tile::before {
+      content: '';
+      position: absolute;
+      top: 4px; left: 8px; right: 8px;
+      height: 35%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+    .tile:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), 0 2px 0 #A0703A; }
+
+    .tile-letter {
+      font-family: var(--font-display);
+      font-size: 52px;
+      color: #5D4037;
+      text-shadow: 1px 2px 0 rgba(0,0,0,0.08);
+      position: relative;
+      z-index: 1;
+    }
+
+    .tile.correct {
+      background: linear-gradient(180deg, #BBF7D0 0%, #4ADE80 100%);
+      border-color: #16A34A;
+      box-shadow: 0 0 30px rgba(74,222,128,0.6), 0 5px 0 #166534;
+      animation: tileCorrect 0.4s ease;
+    }
+    .tile.correct .tile-letter { color: #166534; }
+
+    .tile.wrong {
+      animation: tileWrong 0.4s ease;
+      border-color: #E11D48;
+    }
+    .tile.wrong .tile-letter { color: #E11D48; opacity: 0.4; }
+
+    @keyframes tileCorrect {
+      0%,100% { transform: scale(1); }
+      40% { transform: scale(1.15); }
+    }
+    @keyframes tileWrong {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+
+    /* ============= LETTER CARDS (MENU) ============= */
+    .cards-scroll {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      padding: 0 16px;
+    }
+
+    .letter-card {
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.12s ease;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+    .letter-card:active { transform: scale(0.95); }
+
+    .card-scene {
+      height: 100px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Mini savanna inside each card */
+    .card-scene::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, #87CEEB 0%, #F5D6A0 60%, #C4A76A 100%);
+    }
+    .card-scene .card-animal {
+      font-size: 56px;
+      position: relative;
+      z-index: 2;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+      margin-bottom: -2px;
+    }
+    .card-scene .card-letter-overlay {
+      position: absolute;
+      top: 6px; left: 10px;
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+      z-index: 3;
+    }
+    .card-scene .card-mini-sun {
+      position: absolute;
+      top: 8px; right: 10px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFF9C4, #FFD54F);
+      box-shadow: 0 0 10px rgba(255,213,79,0.5);
+      z-index: 3;
+    }
+
+    .card-info {
+      background: linear-gradient(180deg, #FFFBF0, #FEF3C7);
+      padding: 10px 12px;
+      text-align: center;
+      border-top: 3px solid rgba(212,167,106,0.3);
+    }
+    .card-animal-name {
+      font-weight: 800;
+      font-size: 15px;
+      color: #3E2723;
+    }
+    .card-value {
+      font-family: var(--font-hint);
+      font-size: 12px;
+      color: #8B5E3C;
+      font-style: italic;
+    }
+    .card-stars-row {
+      display: flex; justify-content: center; gap: 3px; margin-top: 4px;
+    }
+    .card-star { width: 14px; height: 14px; }
+    .card-star svg { width: 100%; height: 100%; }
+    .card-star.on svg { fill: #FBBF24; filter: drop-shadow(0 0 2px rgba(251,191,36,0.5)); }
+    .card-star.off svg { fill: #D1C7B8; }
+
+    .letter-card { box-shadow: 0 5px 0 rgba(139,90,43,0.4), 0 8px 20px rgba(0,0,0,0.15); }
+
+    /* ============= PHASE INDICATOR ============= */
+    .phase-dots {
+      display: flex; justify-content: center; gap: 10px;
+      padding: 10px 0;
+      position: relative;
+      z-index: 10;
+    }
+    .pdot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      border: 2px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+    }
+    .pdot.active {
+      background: #FB923C;
+      width: 28px;
+      border-radius: 6px;
+      border-color: #FDBA74;
+      box-shadow: 0 0 10px rgba(251,146,60,0.5);
+    }
+    .pdot.done {
+      background: #4ADE80;
+      border-color: #86EFAC;
+    }
+
+    /* ============= BANNER ============= */
+    .ribbon-banner {
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 10;
+      padding: 0 30px;
+    }
+    .ribbon-body {
+      background: linear-gradient(180deg, #FB923C 0%, #DC5613 100%);
+      padding: 10px 40px;
+      border-radius: 14px;
+      position: relative;
+      box-shadow: 0 4px 0 #7C2D12, 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .ribbon-body::before {
+      content: '';
+      position: absolute;
+      top: 3px; left: 8px; right: 8px; height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent);
+      border-radius: 10px 10px 50% 50%;
+    }
+    .ribbon-tail {
+      position: absolute; top: 6px;
+      width: 22px; height: 28px;
+    }
+    .ribbon-tail.l { left: -10px; background: #EA580C; clip-path: polygon(100% 0, 100% 100%, 0 50%); }
+    .ribbon-tail.r { right: -10px; background: #EA580C; clip-path: polygon(0 0, 0 100%, 100% 50%); }
+    .ribbon-text {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: white;
+      text-shadow: 1px 2px 0 rgba(0,0,0,0.2);
+      position: relative; z-index: 1;
+    }
+
+    /* ============= CELEBRATION ============= */
+    .stars-display {
+      display: flex; justify-content: center; gap: 14px;
+      z-index: 10; position: relative;
+    }
+    .big-star {
+      width: 64px; height: 64px;
+      position: relative;
+    }
+    .big-star svg {
+      width: 100%; height: 100%;
+      fill: #FBBF24;
+      filter: drop-shadow(0 0 16px rgba(251,191,36,0.6)) drop-shadow(0 3px 4px rgba(0,0,0,0.2));
+    }
+    .big-star::before {
+      content: '';
+      position: absolute;
+      top: 12px; left: 16px;
+      width: 12px; height: 12px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 50%;
+    }
+    .big-star { animation: starPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    @keyframes starPop {
+      0% { transform: scale(0) rotate(-30deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+
+    .score-panel {
+      background: linear-gradient(180deg, #FFFBF0 0%, #FEF3C7 100%);
+      border: 5px solid #F59E0B;
+      border-radius: 24px;
+      padding: 20px;
+      margin: 0 24px;
+      text-align: center;
+      box-shadow: 0 6px 0 #92400E, 0 12px 35px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 10;
+      overflow: hidden;
+    }
+    .score-panel::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 40px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+    }
+
+    .score-number {
+      font-family: var(--font-display);
+      font-size: 56px;
+      color: #F59E0B;
+      text-shadow: 0 3px 0 #92400E;
+      position: relative;
+    }
+    .score-label {
+      font-weight: 800;
+      font-size: 16px;
+      color: #5D4037;
+    }
+    .ubuntu-value {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: #16A34A;
+      margin-top: 8px;
+    }
+    .ubuntu-meaning {
+      font-family: var(--font-hint);
+      font-size: 13px;
+      color: #8B7355;
+      font-style: italic;
+      margin-top: 2px;
+    }
+    .ubuntu-zulu {
+      font-size: 12px;
+      color: #A0855A;
+      margin-top: 4px; margin-bottom: 16px;
+    }
+
+    /* ============= CONFETTI ============= */
+    #confetti {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      overflow: hidden;
+    }
+    .confetti-p {
+      position: absolute;
+      border-radius: 2px;
+    }
+
+    /* ============= UTILITY ============= */
+    .z10 { position: relative; z-index: 10; }
+    .flex-c { display: flex; align-items: center; justify-content: center; }
+    .flex-col { display: flex; flex-direction: column; }
+    .grow { flex: 1; }
+    .gap-8 { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .gap-16 { gap: 16px; }
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    .text-center { text-align: center; }
+    .scroll-y { overflow-y: auto; flex: 1; }
+
+    .hint-text {
+      font-family: var(--font-hint);
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      position: relative; z-index: 10;
+    }
+
+    .instruction {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: white;
+      text-align: center;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+      position: relative; z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+
+    <!-- ========== SCREEN 1: SAFARI MENU ========== -->
+    <div class="screen world-safari active" id="s-menu">
+      <!-- Scenery -->
+      <div class="sun"></div>
+      <div class="cloud" style="width:90px;height:28px;top:60px;left:-80px;animation-delay:0s"></div>
+      <div class="cloud" style="width:60px;height:20px;top:100px;left:-60px;animation-delay:-12s;opacity:0.6"></div>
+      <div class="bird" style="top:80px;left:20px">🦅</div>
+      <div class="bird" style="top:120px;left:60px;animation-delay:-5s;font-size:12px">🕊️</div>
+
+      <div class="tree" style="bottom:52%;left:8%">
+        <div class="tree-canopy golden"></div>
+        <div class="tree-trunk" style="height:50px"></div>
+      </div>
+      <div class="tree" style="bottom:48%;right:5%">
+        <div class="tree-canopy"></div>
+        <div class="tree-trunk" style="height:70px"></div>
+      </div>
+
+      <div class="grass" style="bottom:42%;left:20%">🌾</div>
+      <div class="grass" style="bottom:44%;right:25%;animation-delay:-1s">🌾</div>
+      <div class="grass" style="bottom:40%;left:55%;animation-delay:-2s">🌿</div>
+
+      <div class="sparkle" style="top:30%;left:30%;animation-delay:0s"></div>
+      <div class="sparkle" style="top:25%;right:20%;animation-delay:-2s"></div>
+      <div class="sparkle" style="top:35%;left:60%;animation-delay:-4s"></div>
+
+      <!-- Content -->
+      <div style="padding-top:20px" class="z10">
+        <div class="game-title">Nova<span class="accent">Learning</span></div>
+        <div class="hint-text mt-8">🌍 South African Safari ABC</div>
+      </div>
+
+      <div class="scroll-y mt-12 z10" style="padding-bottom:16px">
+        <div class="cards-scroll">
+          <div class="letter-card" onclick="go('s-intro')">
+            <div class="card-scene">
+              <span class="card-letter-overlay">Aa</span>
+              <div class="card-mini-sun"></div>
+              <span class="card-animal">🐜</span>
+            </div>
+            <div class="card-info">
+              <div class="card-animal-name">Aardvark</div>
+              <div class="card-value">Appreciation</div>
+              <div class="card-stars-row">
+                <div class="card-star on"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star on"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="letter-card" onclick="go('s-intro')">
+            <div class="card-scene" style="background:linear-gradient(180deg,#87CEEB,#D4C49A,#8B7355)">
+              <span class="card-letter-overlay">Bb</span>
+              <div class="card-mini-sun"></div>
+              <span class="card-animal">🐒</span>
+            </div>
+            <div class="card-info">
+              <div class="card-animal-name">Baboon</div>
+              <div class="card-value">Bravery</div>
+              <div class="card-stars-row">
+                <div class="card-star on"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="letter-card">
+            <div class="card-scene" style="background:linear-gradient(180deg,#A5D6A7,#66BB6A,#2E7D32)">
+              <span class="card-letter-overlay">Cc</span>
+              <span class="card-animal">🐊</span>
+            </div>
+            <div class="card-info">
+              <div class="card-animal-name">Crocodile</div>
+              <div class="card-value">Compassion</div>
+              <div class="card-stars-row">
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="letter-card">
+            <div class="card-scene" style="background:linear-gradient(180deg,#FFCC80,#E0A050,#8D6E3F)">
+              <span class="card-letter-overlay">Dd</span>
+              <span class="card-animal">🦌</span>
+            </div>
+            <div class="card-info">
+              <div class="card-animal-name">Duiker</div>
+              <div class="card-value">Dignity</div>
+              <div class="card-stars-row">
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="letter-card">
+            <div class="card-scene" style="background:linear-gradient(180deg,#90CAF9,#B0BEC5,#78909C)">
+              <span class="card-letter-overlay">Ee</span>
+              <span class="card-animal">🐘</span>
+            </div>
+            <div class="card-info">
+              <div class="card-animal-name">Elephant</div>
+              <div class="card-value">Empathy</div>
+              <div class="card-stars-row">
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="letter-card">
+            <div class="card-scene" style="background:linear-gradient(180deg,#F48FB1,#E91E63,#AD1457)">
+              <span class="card-letter-overlay">Ff</span>
+              <span class="card-animal">🦩</span>
+            </div>
+            <div class="card-info">
+              <div class="card-animal-name">Flamingo</div>
+              <div class="card-value">Friendship</div>
+              <div class="card-stars-row">
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+                <div class="card-star off"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== SCREEN 2: LETTER INTRO ========== -->
+    <div class="screen world-safari" id="s-intro">
+      <div class="sun" style="width:60px;height:60px;top:30px;right:40px"></div>
+      <div class="cloud" style="width:70px;height:22px;top:50px;left:-60px;animation-delay:-4s"></div>
+      <div class="tree" style="bottom:42%;left:3%">
+        <div class="tree-canopy golden" style="width:60px;height:24px"></div>
+        <div class="tree-trunk" style="height:45px;width:6px"></div>
+      </div>
+      <div class="tree" style="bottom:38%;right:2%">
+        <div class="tree-canopy" style="width:50px;height:20px"></div>
+        <div class="tree-trunk" style="height:55px;width:5px"></div>
+      </div>
+      <div class="grass" style="bottom:36%;left:30%">🌾</div>
+      <div class="grass" style="bottom:38%;right:15%;animation-delay:-1.5s">🌿</div>
+
+      <div class="sparkle" style="top:22%;left:25%;animation-delay:0s"></div>
+      <div class="sparkle" style="top:28%;right:30%;animation-delay:-3s"></div>
+      <div class="sparkle" style="top:18%;left:55%;animation-delay:-1s"></div>
+
+      <div class="phase-dots mt-16">
+        <div class="pdot active"></div>
+        <div class="pdot"></div>
+        <div class="pdot"></div>
+        <div class="pdot"></div>
+      </div>
+
+      <div class="grow flex-col flex-c gap-8">
+        <div class="letter-massive">A</div>
+        <div class="letter-pair">a</div>
+
+        <div class="animal-stage mt-8">
+          <div class="animal-pedestal">🐜</div>
+          <div class="animal-shadow"></div>
+          <div class="animal-name-ribbon">Aardvark</div>
+        </div>
+
+        <div class="hint-text mt-12">🔊 "A is for Aardvark!"</div>
+        <div class="hint-text" style="font-size:12px;opacity:0.6">iSambane • Appreciation</div>
+      </div>
+
+      <div class="flex-c z10" style="padding:0 0 28px">
+        <button class="btn-game btn-orange" onclick="go('s-match')">▶ Let's Go!</button>
+      </div>
+    </div>
+
+    <!-- ========== SCREEN 3: MATCH GAME ========== -->
+    <div class="screen world-sky" id="s-match">
+      <div class="cloud" style="width:100px;height:30px;top:20px;left:-80px;animation-delay:-3s"></div>
+      <div class="cloud" style="width:60px;height:18px;top:70px;left:-40px;animation-delay:-15s;opacity:0.5"></div>
+      <div class="sparkle" style="top:10%;left:20%;background:rgba(255,255,255,0.8);animation-delay:-1s"></div>
+      <div class="sparkle" style="top:15%;right:25%;background:rgba(255,255,255,0.6);animation-delay:-3s"></div>
+
+      <div class="phase-dots mt-16">
+        <div class="pdot done"></div>
+        <div class="pdot done"></div>
+        <div class="pdot active"></div>
+        <div class="pdot"></div>
+      </div>
+
+      <div class="ribbon-banner mt-12">
+        <div class="ribbon-body">
+          <div class="ribbon-tail l"></div>
+          <div class="ribbon-tail r"></div>
+          <div class="ribbon-text">Find the letter A!</div>
+        </div>
+      </div>
+
+      <div class="flex-c mt-16 z10">
+        <div style="font-family:var(--font-display);font-size:80px;color:#FBBF24;text-shadow:0 4px 0 rgba(0,0,0,0.2);-webkit-text-stroke:2px #F59E0B;">A</div>
+      </div>
+
+      <div class="grow flex-col" style="justify-content:center">
+        <div class="match-tiles" id="matchGrid">
+          <div class="tile" onclick="tap(this,'H')"><span class="tile-letter">H</span></div>
+          <div class="tile" onclick="tap(this,'A')"><span class="tile-letter">A</span></div>
+          <div class="tile" onclick="tap(this,'V')"><span class="tile-letter">V</span></div>
+          <div class="tile" onclick="tap(this,'a')"><span class="tile-letter">a</span></div>
+          <div class="tile" onclick="tap(this,'M')"><span class="tile-letter">M</span></div>
+          <div class="tile" onclick="tap(this,'N')"><span class="tile-letter">N</span></div>
+        </div>
+      </div>
+
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- ========== SCREEN 4: CELEBRATION ========== -->
+    <div class="screen world-celeb" id="s-celeb">
+      <div id="confetti"></div>
+
+      <div class="sparkle" style="top:8%;left:15%;width:6px;height:6px;background:rgba(255,255,255,0.9)"></div>
+      <div class="sparkle" style="top:12%;right:20%;width:5px;height:5px;background:rgba(251,191,36,0.9);animation-delay:-2s"></div>
+      <div class="sparkle" style="top:18%;left:40%;width:4px;height:4px;background:rgba(255,255,255,0.8);animation-delay:-4s"></div>
+
+      <div class="grow flex-col flex-c gap-16 z10">
+        <div style="font-family:var(--font-display);font-size:44px;color:white;text-shadow:0 4px 0 #7C2D12,0 6px 0 #5C1A08;text-align:center;line-height:1.1">
+          🎉 Well Done! 🎉
+        </div>
+
+        <div class="stars-display">
+          <div class="big-star" style="animation-delay:0.1s"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+          <div class="big-star" style="animation-delay:0.4s"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+          <div class="big-star" style="animation-delay:0.7s"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        </div>
+
+        <div class="score-panel">
+          <div class="score-label">Score</div>
+          <div class="score-number">100</div>
+          <div class="ubuntu-value">🌍 Appreciation</div>
+          <div class="ubuntu-meaning">"Seeing the good in others and saying thank you."</div>
+          <div class="ubuntu-zulu">isiZulu: Ukwazisa</div>
+
+          <div class="flex-c gap-12" style="flex-wrap:wrap">
+            <button class="btn-game btn-blue btn-sm" onclick="go('s-match')">🔄 Replay</button>
+            <button class="btn-game btn-green btn-sm" onclick="go('s-menu')">→ Next</button>
+          </div>
+        </div>
+
+        <button class="btn-game btn-orange btn-sm" style="opacity:0.85" onclick="go('s-menu')">🏠 Menu</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function go(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      requestAnimationFrame(() => {
+        document.getElementById(id).classList.add('active');
+        if (id === 's-celeb') confetti();
+        // Reset match tiles
+        if (id === 's-match') {
+          document.querySelectorAll('.tile').forEach(t => {
+            t.classList.remove('correct','wrong');
+            t.style.pointerEvents = '';
+          });
+        }
+      });
+    }
+
+    function tap(el, letter) {
+      if (el.classList.contains('correct') || el.classList.contains('wrong')) return;
+      if (letter === 'A' || letter === 'a') {
+        el.classList.add('correct');
+        // Flash screen
+        const flash = document.createElement('div');
+        Object.assign(flash.style, {
+          position:'absolute', inset:'0', background:'rgba(74,222,128,0.3)',
+          zIndex:'30', pointerEvents:'none',
+          animation:'fadeOut 0.5s ease forwards'
+        });
+        el.closest('.screen').appendChild(flash);
+        setTimeout(() => flash.remove(), 600);
+        setTimeout(() => go('s-celeb'), 1000);
+      } else {
+        el.classList.add('wrong');
+        setTimeout(() => el.style.pointerEvents = 'none', 400);
+      }
+    }
+
+    function confetti() {
+      const c = document.getElementById('confetti');
+      c.innerHTML = '';
+      const colors = ['#FB923C','#4ADE80','#38BDF8','#FBBF24','#FB7185','#A78BFA','#FFF'];
+      for (let i = 0; i < 60; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-p';
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const w = 4 + Math.random() * 8;
+        const circle = Math.random() > 0.5;
+        const x = Math.random() * 100;
+        const delay = Math.random() * 0.8;
+        const dur = 2 + Math.random() * 2;
+        const rot = Math.random() * 720;
+        Object.assign(p.style, {
+          width: circle ? w+'px' : w*0.5+'px',
+          height: circle ? w+'px' : w*1.8+'px',
+          borderRadius: circle ? '50%' : '2px',
+          background: color,
+          left: x + '%',
+          top: '-20px',
+          animation: `fall ${dur}s ease-out ${delay}s forwards`,
+        });
+        c.appendChild(p);
+        setTimeout(() => p.remove(), (dur + delay) * 1000 + 200);
+      }
+    }
+
+    // Add CSS animation dynamically (so it works on refresh)
+    const dynStyle = document.createElement('style');
+    dynStyle.textContent = `
+      @keyframes fall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        80% { opacity: 0.8; }
+        100% { transform: translateY(800px) rotate(720deg); opacity: 0; }
+      }
+      @keyframes fadeOut {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+    `;
+    document.head.appendChild(dynStyle);
+  </script>
+</body>
+</html>

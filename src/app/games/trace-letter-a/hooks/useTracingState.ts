@@ -19,8 +19,8 @@ interface TracingState {
   currentStroke: number;
   /** Whether the user is actively touching/tracing */
   isTracing: boolean;
-  /** Show Thandi's hint bubble */
-  showThandiHint: boolean;
+  /** Show Gogo Thandi's hint bubble */
+  showGogoThandiHint: boolean;
   /** Whether all strokes are complete */
   allComplete: boolean;
 
@@ -32,8 +32,8 @@ interface TracingState {
   updateStrokeProgress: (checkpoint: number, totalCheckpoints: number) => void;
   /** Mark current stroke as complete, advance to next */
   completeCurrentStroke: () => void;
-  /** Show Thandi hint (auto-dismiss after 2s) */
-  triggerThandiHint: () => void;
+  /** Show Gogo Thandi hint (auto-dismiss after 2s) */
+  triggerGogoThandiHint: () => void;
   /** Reset all tracing state */
   resetTracing: () => void;
 }
@@ -49,7 +49,7 @@ export const useTracingState = create<TracingState>((set, get) => ({
   strokes: initialStrokes(),
   currentStroke: 0,
   isTracing: false,
-  showThandiHint: false,
+  showGogoThandiHint: false,
   allComplete: false,
 
   startTracing: () => set({ isTracing: true }),
@@ -93,10 +93,10 @@ export const useTracingState = create<TracingState>((set, get) => ({
     });
   },
 
-  triggerThandiHint: () => {
-    set({ showThandiHint: true });
+  triggerGogoThandiHint: () => {
+    set({ showGogoThandiHint: true });
     setTimeout(() => {
-      set({ showThandiHint: false });
+      set({ showGogoThandiHint: false });
     }, 2000);
   },
 
@@ -105,7 +105,7 @@ export const useTracingState = create<TracingState>((set, get) => ({
       strokes: initialStrokes(),
       currentStroke: 0,
       isTracing: false,
-      showThandiHint: false,
+      showGogoThandiHint: false,
       allComplete: false,
     });
   },

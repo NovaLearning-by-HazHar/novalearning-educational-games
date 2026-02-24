@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '--- Recent commits ---' && git log --oneline -5 2>/dev/null && echo '--- Working tree ---' && git status --short 2>/dev/null | head -15"
+            "command": "bash -c \"echo '--- Recent commits ---' && git log --oneline -5 2>/dev/null && echo '--- Working tree ---' && git status --short 2>/dev/null | head -15\""
           }
         ]
       }
@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx eslint --fix \"$CC_TOOL_INPUT_file_path\" 2>/dev/null || true"
+            "command": "bash -c \"npx eslint --fix \\\"$CC_TOOL_INPUT_file_path\\\" 2>/dev/null || true\""
           }
         ]
       }

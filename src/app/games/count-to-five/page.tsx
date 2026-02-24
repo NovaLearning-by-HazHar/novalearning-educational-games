@@ -58,10 +58,12 @@ export default function CountToFivePage() {
     trackPhase(phase);
   }, [phase, trackPhase]);
 
-  // Play celebration melody and record session on celebrate
+  // Play celebration melody + encouragement and record session on celebrate
   useEffect(() => {
     if (phase === 'celebrate') {
       audioManager.play('celebrate-melody');
+      // Play a random SA-accented encouragement voice clip after a short delay
+      setTimeout(() => audioManager.playRandomEncouragement(), 800);
       // Record completed session to progressStore
       const session = endSession(5);
       addCompletion('count-to-five', 5, {

@@ -56,9 +56,9 @@ export const MIN_CHECKPOINT_DISTANCE = 0.15;
 /** How close to stroke start to begin a new stroke */
 export const STROKE_START_TOLERANCE = 0.5;
 
-// ─── Thandi Position ──────────────────────────────────────────────
-/** Thandi guide position (right of letter) */
-export const THANDI_POSITION: [number, number, number] = [2.8, -0.5, 1];
+// ─── Gogo Thandi Position ─────────────────────────────────────────
+/** Gogo Thandi guide position (right of letter) */
+export const GOGO_THANDI_POSITION: [number, number, number] = [2.8, -0.5, 1];
 
 // ─── Animation Timing ─────────────────────────────────────────────
 /** Duration of stroke completion flash (ms) */

@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "project": "NovaLearning",
+    "target_audience": "Grade R (ages 4-6)",
+    "languages": ["en-ZA", "af-ZA", "zu-ZA"],
+    "audio_specs": {
+      "format": "mp3",
+      "bitrate": "64k",
+      "sample_rate": 22050,
+      "max_effect_size_kb": 20,
+      "max_voice_clip_size_kb": 50
+    }
+  },
+
+  "voices": {
+    "edge_tts": {
+      "en-ZA": {
+        "female": "en-ZA-LeahNeural",
+        "male": "en-ZA-LukeNeural"
+      },
+      "af-ZA": {
+        "female": "af-ZA-AdriNeural",
+        "male": "af-ZA-WillemNeural"
+      },
+      "zu-ZA": {
+        "female": "zu-ZA-ThandoNeural",
+        "male": "zu-ZA-ThembaNeural"
+      }
+    },
+    "elevenlabs": {
+      "narrator": {
+        "voice_id": "YOUR_VOICE_ID_HERE",
+        "model": "eleven_multilingual_v2",
+        "note": "Used for hero moments: intro, key story beats, celebration"
+      },
+      "thandi": {
+        "voice_id": "YOUR_CLONED_VOICE_ID",
+        "model": "eleven_multilingual_v2",
+        "note": "Main character - warm, encouraging young female"
+      }
+    }
+  },
+
+  "categories": {
+
+    "phonics": {
+      "tier": "edge_tts",
+      "description": "Letter sounds, word pronunciations, phonics drills",
+      "voice_preference": "female",
+      "rate": "-10%",
+      "pitch": "+5Hz",
+      "items": [
+        {"id": "phon_a", "en": "A says ah, like in apple", "af": "A sê ah, soos in appel", "zu": "U-A uthi ah, njengaku i-apple"},
+        {"id": "phon_b", "en": "B says buh, like in ball", "af": "B sê buh, soos in bal", "zu": "U-B uthi buh, njengaku ibhola"},
+        {"id": "phon_c", "en": "C says kuh, like in cat", "af": "C sê kuh, soos in kat", "zu": "U-C uthi kuh, njengaku ikati"},
+        {"id": "phon_d", "en": "D says duh, like in dog", "af": "D sê duh, soos in hond", "zu": "U-D uthi duh, njengaku inja"},
+        {"id": "phon_e", "en": "E says eh, like in egg", "af": "E sê eh, soos in eier", "zu": "U-E uthi eh, njengaku iqanda"},
+        {"id": "phon_m", "en": "M says mmm, like in mama", "af": "M sê mmm, soos in mama", "zu": "U-M uthi mmm, njengaku umama"},
+        {"id": "phon_s", "en": "S says sss, like in sun", "af": "S sê sss, soos in son", "zu": "U-S uthi sss, njengaku ilanga"},
+        {"id": "phon_t", "en": "T says tuh, like in tree", "af": "T sê tuh, soos in boom", "zu": "U-T uthi tuh, njengaku isihlahla"}
+      ]
+    },
+
+    "narration": {
+      "tier": "elevenlabs",
+      "description": "Hero moments - intro, story beats, key celebrations",
+      "items": [
+        {"id": "narr_welcome", "en": "Welcome to NovaLearning! I'm Thandi, and together we're going to explore the beautiful Rainbow Nation of South Africa!", "af": "Welkom by NovaLearning! Ek is Thandi, en saam gaan ons die pragtige Reënboognasie van Suid-Afrika verken!", "zu": "Siyakwamukela ku-NovaLearning! NginguThandi, futhi ndawonye sizovakashela iRainbow Nation yaseNingizimu Afrika!"},
+        {"id": "narr_ubuntu_intro", "en": "Ubuntu means I am because we are. In our world, we learn together, we grow together, and we celebrate together!", "af": "Ubuntu beteken ek is omdat ons is. In ons wêreld leer ons saam, groei ons saam en vier ons saam!", "zu": "Ubuntu kusho ukuthi ngingumuntu ngabantu. Emhlabeni wethu, sifunda ndawonye, sikhula ndawonye, sigubha ndawonye!"},
+        {"id": "narr_level_complete", "en": "You did it! You're a true Rainbow Nation champion! Your Ubuntu spirit shines bright!", "af": "Jy het dit reggekry! Jy is 'n ware Reënboognasie kampioen! Jou Ubuntu gees skyn helder!", "zu": "Ukwenzile! Uyiqhawe leRainbow Nation langempela! Umoya wakho we-Ubuntu ukhanya kakhulu!"},
+        {"id": "narr_stokvel_intro", "en": "Welcome to the Ubuntu Stokvel! Here we learn about sharing and saving together, just like our communities do.", "af": "Welkom by die Ubuntu Stokvel! Hier leer ons oor deel en spaar saam, net soos ons gemeenskappe doen.", "zu": "Siyakwamukela ku-Ubuntu Stokvel! Lapha sifunda ngokwabelana nokonga ndawonye, njengoba imiphakathi yethu yenza."},
+        {"id": "narr_spaza_intro", "en": "Welcome to the Spaza Shop! Let's learn about coins and trading at our very own community shop.", "af": "Welkom by die Spaza Winkel! Kom ons leer oor munte en handel by ons eie gemeenskapswinkel.", "zu": "Siyakwamukela esitolo se-Spaza! Masifunde ngezinhlamvu zemali nokuhweba esitolo sethu somphakathi."}
+      ]
+    },
+
+    "encouragement": {
+      "tier": "edge_tts",
+      "description": "Positive reinforcement clips",
+      "voice_preference": "female",
+      "rate": "+5%",
+      "items": [
+        {"id": "enc_great", "en": "Great job!", "af": "Goed gedoen!", "zu": "Usebenze kahle!"},
+        {"id": "enc_amazing", "en": "Amazing! You're so clever!", "af": "Fantasties! Jy is so slim!", "zu": "Kuhle kakhulu! Uhlakaniphile!"},
+        {"id": "enc_tryagain", "en": "Almost there! Let's try again together.", "af": "Amper daar! Kom ons probeer weer saam.", "zu": "Cishe! Masizame futhi ndawonye."},
+        {"id": "enc_keepgoing", "en": "Keep going, you can do it!", "af": "Hou aan, jy kan dit doen!", "zu": "Qhubeka, ungakwenza!"},
+        {"id": "enc_star", "en": "You're a star!", "af": "Jy is 'n ster!", "zu": "Uyinkanyezi!"},
+        {"id": "enc_proud", "en": "I'm so proud of you!", "af": "Ek is so trots op jou!", "zu": "Ngiyaziqhenya ngawe!"},
+        {"id": "enc_rainbow", "en": "You're making our rainbow shine brighter!", "af": "Jy laat ons reënboog helderder skyn!", "zu": "Wenza uthingo lwethu lukhanya kakhulu!"},
+        {"id": "enc_ubuntu", "en": "That's the Ubuntu spirit!", "af": "Dit is die Ubuntu gees!", "zu": "Lowo ngumoya we-Ubuntu!"},
+        {"id": "enc_together", "en": "Together we can do anything!", "af": "Saam kan ons enigiets doen!", "zu": "Ndawonye singenza noma yini!"},
+        {"id": "enc_gentle_redirect", "en": "Hmm, not quite. Let's look at this together!", "af": "Hmm, nie heeltemal nie. Kom ons kyk saam hierna!", "zu": "Hmm, akukhona kahle. Masibheke lokhu ndawonye!"}
+      ]
+    },
+
+    "instructions": {
+      "tier": "edge_tts",
+      "description": "Game instructions and UI guidance",
+      "voice_preference": "female",
+      "rate": "-15%",
+      "items": [
+        {"id": "inst_drag", "en": "Drag the shape to the right place", "af": "Sleep die vorm na die regte plek", "zu": "Hudulela isimo endaweni efanele"},
+        {"id": "inst_tap", "en": "Tap the picture that matches", "af": "Tik op die prentjie wat pas", "zu": "Thepha isithombe esifanayo"},
+        {"id": "inst_listen", "en": "Listen carefully and choose the right answer", "af": "Luister aandagtig en kies die regte antwoord", "zu": "Lalela kahle ukhethe impendulo efanele"},
+        {"id": "inst_count", "en": "Count the objects and tap the number", "af": "Tel die voorwerpe en tik op die nommer", "zu": "Bala izinto bese uthepha inombolo"},
+        {"id": "inst_trace", "en": "Use your finger to trace the letter", "af": "Gebruik jou vinger om die letter na te trek", "zu": "Sebenzisa umunwe wakho ulandele uhlamvu"},
+        {"id": "inst_coin_match", "en": "Match the coin to the right amount", "af": "Pas die muntstuk by die regte bedrag", "zu": "Fana inhlamvu yemali nenani elifanele"},
+        {"id": "inst_color_pick", "en": "Pick the colour that matches", "af": "Kies die kleur wat pas", "zu": "Khetha umbala ofanayo"}
+      ]
+    },
+
+    "ui_sounds": {
+      "tier": "generate_synthetic",
+      "description": "Short UI feedback sounds - generated programmatically, not TTS",
+      "items": [
+        {"id": "ui_tap", "description": "Soft tap/click sound"},
+        {"id": "ui_success", "description": "Happy chime - 3 ascending notes"},
+        {"id": "ui_gentle_error", "description": "Soft double-note (not negative)"},
+        {"id": "ui_star_collect", "description": "Sparkle/twinkle sound"},
+        {"id": "ui_level_up", "description": "Triumphant short fanfare"},
+        {"id": "ui_coin_drop", "description": "Coin clink sound"},
+        {"id": "ui_whoosh", "description": "Gentle transition swoosh"},
+        {"id": "ui_pop", "description": "Soft bubble pop"}
+      ]
+    }
+  }
+}

@@ -9,8 +9,8 @@ interface GameState {
   phase: GamePhase;
   /** Whether the game scene is loaded and ready */
   isLoaded: boolean;
-  /** Active guide character for this game */
-  activeCharacter: CharacterName;
+  /** Active guide character for this game (null = no selection yet) */
+  activeCharacter: CharacterName | null;
   /** Number of interactions completed in current session */
   interactionCount: number;
   /** Target interactions needed to advance from practice → celebrate */
@@ -31,7 +31,7 @@ interface GameState {
 export const useGameStore = create<GameState>((set, get) => ({
   phase: 'explore',
   isLoaded: false,
-  activeCharacter: 'sipho',
+  activeCharacter: null,
   interactionCount: 0,
   targetInteractions: 5,
 
@@ -68,6 +68,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       phase: 'explore',
       isLoaded: false,
+      activeCharacter: null,
       interactionCount: 0,
     }),
 }));

@@ -17,7 +17,7 @@ You are the Content Agent for NovaLearning.
 - All assets < 50KB each
 - Audio: Howler.js, formats mp3/ogg, < 50KB per clip
 - 3D models: GLTF/GLB, < 5000 triangles, 512x512 textures
-- Characters: Sipho (Zulu), Thandi (Xhosa), Lerato (Sotho), Pieter (Afrikaans), Fatima (Cape Malay), Amahle (Ndebele)
+- Characters (Bible v1.0): Gogo Thandi (Xhosa elder), Sipho (Zulu), Amahle (Zulu/Xhosa), Jabu (Sotho), Liya (Cape Malay), Themba (Afrikaans/mixed)
 - No content requiring reading ability (audio instructions only)
 
 ## RESPONSIBILITIES

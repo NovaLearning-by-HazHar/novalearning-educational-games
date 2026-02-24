@@ -17,9 +17,9 @@ import { useCompletedStrokeCount, useOverallProgress } from './hooks/useTracingS
 import { TOTAL_STROKES } from './lib/constants';
 
 /**
- * Trace Letter A with Thandi — Language/Literacy game.
+ * Trace Letter A with Gogo Thandi — Language/Literacy game.
  *
- * Gameplay: Thandi guides child to trace the letter "A" on an easel.
+ * Gameplay: Gogo Thandi guides child to trace the letter "A" on an easel.
  * 3 strokes: left leg, right leg, crossbar.
  * Each stroke: visual + audio feedback as finger follows the path.
  * After all 3: 3 MVP characters celebrate together (Ubuntu).
@@ -34,7 +34,7 @@ export default function TraceLetterAPage() {
   const { ready: audioReady } = useAudioSetup();
   const completedCount = useCompletedStrokeCount();
   const overallProgress = useOverallProgress();
-  const showThandiHint = useTracingState((s) => s.showThandiHint);
+  const showGogoThandiHint = useTracingState((s) => s.showGogoThandiHint);
   const resetTracing = useTracingState((s) => s.resetTracing);
 
   // Session tracking
@@ -44,7 +44,7 @@ export default function TraceLetterAPage() {
   // Initialize game state on mount
   useEffect(() => {
     reset();
-    setActiveCharacter('thandi');
+    setActiveCharacter('gogo_thandi');
     setTargetInteractions(1); // 1 letter = 1 interaction
   }, [reset, setActiveCharacter, setTargetInteractions]);
 
@@ -61,10 +61,12 @@ export default function TraceLetterAPage() {
     trackPhase(phase);
   }, [phase, trackPhase]);
 
-  // Play celebration melody and record session
+  // Play celebration melody + encouragement and record session
   useEffect(() => {
     if (phase === 'celebrate') {
       audioManager.play('celebrate-melody');
+      // Play a random SA-accented encouragement voice clip after a short delay
+      setTimeout(() => audioManager.playRandomEncouragement(), 800);
       const session = endSession(TOTAL_STROKES);
       addCompletion('trace-letter-a', TOTAL_STROKES, {
         durationSeconds: session.durationSeconds,
@@ -79,7 +81,7 @@ export default function TraceLetterAPage() {
     reset();
     resetTracing();
     resetSession();
-    setActiveCharacter('thandi');
+    setActiveCharacter('gogo_thandi');
     setTargetInteractions(1);
     setLoaded(true);
     audioManager.play('ambient-nature');
@@ -88,7 +90,7 @@ export default function TraceLetterAPage() {
   if (phase === 'celebrate') {
     return (
       <ErrorBoundary>
-        <GameShell title="Trace Letter A with Thandi">
+        <GameShell title="Trace Letter A with Gogo Thandi">
           <div className="relative w-full h-full">
             <Scene
               cameraPosition={[0, 1.5, 5]}
@@ -118,7 +120,7 @@ export default function TraceLetterAPage() {
 
   return (
     <ErrorBoundary>
-      <GameShell title="Trace Letter A with Thandi">
+      <GameShell title="Trace Letter A with Gogo Thandi">
         <div className="relative w-full h-full">
           <Scene
             cameraPosition={[0, 1.5, 5]}
@@ -132,7 +134,7 @@ export default function TraceLetterAPage() {
           <TracingProgressOverlay
             completedCount={completedCount}
             overallProgress={overallProgress}
-            showHint={showThandiHint}
+            showHint={showGogoThandiHint}
             visible={phase !== 'explore'}
           />
         </div>

@@ -1,13 +1,39 @@
-/** Character heritage identifiers */
-export type CharacterName = 'sipho' | 'thandi' | 'lerato' | 'pieter' | 'fatima' | 'amahle';
+/** Character Bible v1.0 identifiers */
+/** Bible v1.0 core cast */
+export type CoreCharacterId = 'gogo_thandi' | 'sipho' | 'amahle' | 'jabu' | 'liya' | 'themba';
 
-/** Character definition */
+/** Money Skills game-specific character IDs */
+export type MoneyCharacterId = 'chanel' | 'priya' | 'naledi';
+
+/** All character identifiers across the project */
+export type CharacterId = CoreCharacterId | MoneyCharacterId;
+
+/** Companion animal identifiers */
+export type CompanionId = 'elephant_calf' | 'springbok' | 'meerkat' | 'weaver_bird' | 'cape_penguin' | 'tortoise';
+
+/** @deprecated Use CharacterId instead */
+export type CharacterName = CharacterId;
+
+/** Character definition (Bible v1.0) */
 export interface Character {
-  name: CharacterName;
-  displayName: string;
-  heritage: string;
-  personality: string;
-  learningStyle: 'kinesthetic' | 'visual' | 'social' | 'logical' | 'auditory' | 'creative';
+  id: CharacterId;
+  fullName: string;
+  role: 'wisdom_keeper' | 'curious_explorer' | 'caring_helper' | 'creative_builder' | 'joyful_storyteller' | 'gentle_protector';
+  ethnicity: string;
+  companion: CompanionId;
+  skinTone: string;
+  languages: string[];
+  catchphrase: Record<string, string>;
+  vertices: number;
+}
+
+/** Companion animal definition */
+export interface Companion {
+  id: CompanionId;
+  animal: string;
+  belongsTo: CharacterId;
+  vertices: number;
+  sounds: string[];
 }
 
 /** Device performance tiers */

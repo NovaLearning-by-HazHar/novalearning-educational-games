@@ -14,7 +14,7 @@ import PDFDocument from 'pdfkit';
 import {
   PAGE, BRAND, FONTS, QR,
   drawPageNumber, drawHeader, drawNdebeleBorder,
-  drawRoundedRect, drawQrPlaceholder,
+  drawRoundedRect, drawQrPlaceholder, drawLogo,
 } from './shared/page-layout';
 
 export function generateCountingPage(doc: typeof PDFDocument.prototype) {
@@ -141,6 +141,9 @@ export function generateCountingPage(doc: typeof PDFDocument.prototype) {
 
   // --- QR Code ---
   drawQrPlaceholder(doc, QR.defaultX, QR.defaultY, 'Count to 5');
+
+  // --- Logo (bottom-left) ---
+  drawLogo(doc);
 
   // --- Page number ---
   drawPageNumber(doc, PAGE_NUM);

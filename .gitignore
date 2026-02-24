@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -44,7 +45,16 @@ next-env.d.ts
 # NovaLearning
 *.glb.bak
 *.gltf.bak
+tmpclaude-*
+
+# Generated audio (regenerable via scripts/audio/run_pipeline.py)
+/public/audio/edge-tts/
+/public/audio/elevenlabs/
+/public/audio/audio_map.json
 
 
 #Ignore cursor AI rules
 .cursor\rules\codacy.mdc
+
+# Cursor MCP config (contains API tokens)
+.cursor/mcp.json

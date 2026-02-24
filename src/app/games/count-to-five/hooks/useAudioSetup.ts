@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { audioManager } from '@/lib/audio';
+import { useSharedAudio } from '@/lib/useSharedAudio';
 import {
   generateMarimbaTone,
   generatePickSfx,
@@ -11,26 +12,25 @@ import {
 } from '../lib/audioGenerator';
 
 /**
- * Generates all game audio as Web Audio API blobs on mount.
- * Loads them into the existing AudioManager via blob URLs.
- * Returns ready=true when all audio is loaded (or if audio generation fails).
+ * Loads shared pipeline audio (encouragement, instructions, UI sounds)
+ * and generates game-specific synth audio (marimba, counting beeps, etc.)
+ * Returns ready=true when both are loaded.
  */
 export function useAudioSetup(): { ready: boolean } {
-  const [ready, setReady] = useState(false);
+  const { ready: sharedReady } = useSharedAudio();
+  const [synthReady, setSynthReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function setup() {
       try {
-        // Check if OfflineAudioContext is available
         if (typeof OfflineAudioContext === 'undefined') {
-          // Audio generation not supported — game still works without audio
-          setReady(true);
+          setSynthReady(true);
           return;
         }
 
-        // Generate all audio blobs in parallel
+        // Generate all game-specific audio blobs in parallel
         const [
           marimba1, marimba2, marimba3, marimba4, marimba5,
           pickSfx,
@@ -55,7 +55,6 @@ export function useAudioSetup(): { ready: boolean } {
 
         if (cancelled) return;
 
-        // Load into AudioManager as blob URLs
         const blobs: [string, Blob, 'sfx' | 'music' | 'voice' | 'ambient'][] = [
           ['marimba-1', marimba1, 'sfx'],
           ['marimba-2', marimba2, 'sfx'],
@@ -78,12 +77,11 @@ export function useAudioSetup(): { ready: boolean } {
         }
 
         if (!cancelled) {
-          setReady(true);
+          setSynthReady(true);
         }
       } catch {
-        // Audio generation failed — game playable without audio
         if (!cancelled) {
-          setReady(true);
+          setSynthReady(true);
         }
       }
     }
@@ -95,5 +93,5 @@ export function useAudioSetup(): { ready: boolean } {
     };
   }, []);
 
-  return { ready };
+  return { ready: sharedReady && synthReady };
 }

@@ -62,23 +62,23 @@ export interface CharacterColors {
 
 export const MVP_CHARACTER_COLORS: Record<string, CharacterColors> = {
   sipho: { body: '#E65100', accent: '#FF6D00', skin: '#8D6E63' },
-  thandi: { body: '#1565C0', accent: '#42A5F5', skin: '#A1887F' },
-  lerato: { body: '#2E7D32', accent: '#66BB6A', skin: '#8D6E63' },
+  gogo_thandi: { body: '#1565C0', accent: '#42A5F5', skin: '#6D4C41' },
+  jabu: { body: '#2E7D32', accent: '#66BB6A', skin: '#5D4037' },
 };
 
-/** All 6 Rainbow Nation character colors */
+/** All 6 Bible v1.0 character colors */
 export const ALL_CHARACTER_COLORS: Record<string, CharacterColors> = {
   ...MVP_CHARACTER_COLORS,
-  pieter: { body: '#F57F17', accent: '#FFCA28', skin: '#FFCCBC' },
-  fatima: { body: '#6A1B9A', accent: '#AB47BC', skin: '#D7CCC8' },
-  amahle: { body: '#D84315', accent: '#FF8A65', skin: '#8D6E63' },
+  amahle: { body: '#D84315', accent: '#FF8A65', skin: '#795548' },
+  liya: { body: '#6A1B9A', accent: '#AB47BC', skin: '#A1887F' },
+  themba: { body: '#F57F17', accent: '#FFCA28', skin: '#BCAAA4' },
 };
 
 /** Single source of truth for which characters appear in MVP */
-export const MVP_CHARACTERS = ['sipho', 'thandi', 'lerato'] as const;
+export const MVP_CHARACTERS = ['sipho', 'gogo_thandi', 'jabu'] as const;
 
-/** All 6 characters for full celebration scenes */
-export const ALL_CHARACTERS = ['sipho', 'thandi', 'lerato', 'pieter', 'fatima', 'amahle'] as const;
+/** All 6 characters (Bible v1.0) */
+export const ALL_CHARACTERS = ['gogo_thandi', 'sipho', 'amahle', 'jabu', 'liya', 'themba'] as const;
 
 /** Celebration character positions (3-character arc) */
 export const CELEBRATION_POSITIONS: [number, number, number][] = [

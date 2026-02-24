@@ -10,7 +10,7 @@ import { CHARACTERS } from '@/types/constants';
  * Phase 0: Placeholder. Phase 1: 3D animated scene with audio.
  */
 export default function CelebrationScene() {
-  const characterNames = Object.values(CHARACTERS).map((c) => c.displayName);
+  const characterNames = Object.values(CHARACTERS).map((c) => c.fullName);
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-nova-sun/20 p-8">

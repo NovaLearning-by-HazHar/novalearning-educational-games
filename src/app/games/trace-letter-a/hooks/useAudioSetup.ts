@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { audioManager } from '@/lib/audio';
+import { useSharedAudio } from '@/lib/useSharedAudio';
 import {
   generateTracingTone,
   generateCheckpointTone,
@@ -12,12 +13,13 @@ import {
 } from '../lib/audioGenerator';
 
 /**
- * Generates all tracing game audio as Web Audio API blobs on mount.
- * Loads them into AudioManager via blob URLs.
- * Returns ready=true when all audio is loaded.
+ * Loads shared pipeline audio (encouragement, instructions, UI sounds)
+ * and generates game-specific synth audio (tracing tones, checkpoints, etc.)
+ * Returns ready=true when both are loaded.
  */
 export function useAudioSetup(): { ready: boolean } {
-  const [ready, setReady] = useState(false);
+  const { ready: sharedReady } = useSharedAudio();
+  const [synthReady, setSynthReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,7 +27,7 @@ export function useAudioSetup(): { ready: boolean } {
     async function setup() {
       try {
         if (typeof OfflineAudioContext === 'undefined') {
-          setReady(true);
+          setSynthReady(true);
           return;
         }
 
@@ -73,11 +75,11 @@ export function useAudioSetup(): { ready: boolean } {
         }
 
         if (!cancelled) {
-          setReady(true);
+          setSynthReady(true);
         }
       } catch {
         if (!cancelled) {
-          setReady(true);
+          setSynthReady(true);
         }
       }
     }
@@ -89,5 +91,5 @@ export function useAudioSetup(): { ready: boolean } {
     };
   }, []);
 
-  return { ready };
+  return { ready: sharedReady && synthReady };
 }
