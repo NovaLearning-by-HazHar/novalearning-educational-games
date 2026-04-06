@@ -1,11 +1,13 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Img,
   useCurrentFrame,
   useVideoConfig,
   spring,
   interpolate,
   random,
+  staticFile,
 } from "remotion";
 import { KIDS } from "../data/characters";
 import { CHARACTER_COLORS } from "../types";
@@ -97,8 +99,8 @@ export const GroupScene: React.FC = () => {
             }}
           >
             {kid.file ? (
-              <img
-                src={`/characters/${kid.id}.png`}
+              <Img
+                src={staticFile(kid.file)}
                 style={{ height: charSize, objectFit: "contain" }}
               />
             ) : (
