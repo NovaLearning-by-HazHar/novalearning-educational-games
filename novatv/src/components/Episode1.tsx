@@ -1,76 +1,79 @@
 import React from "react";
-import {
-  AbsoluteFill,
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-} from "remotion";
+import { AbsoluteFill, Sequence } from "remotion";
+import { TIMELINE, CHARACTER_ORDER } from "../data/script";
+import { AUDIO_MANIFEST } from "../data/audio-manifest";
+import { CHARACTERS } from "../data/characters";
+import { TitleCard } from "./TitleCard";
+import { MissVanDerMerwe } from "./MissVanDerMerwe";
+import { CharacterIntro } from "./CharacterIntro";
+import { GroupScene } from "./GroupScene";
+import "../styles/global.css";
 
 export const Episode1: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { width, fps } = useVideoConfig();
-
-  const titleOpacity = interpolate(frame, [0, fps * 0.5], [0, 1], {
-    extrapolateRight: "clamp",
-  });
-
-  const subtitleOpacity = interpolate(frame, [fps * 0.5, fps * 1], [0, 1], {
-    extrapolateRight: "clamp",
-  });
-
-  const scale = interpolate(frame, [0, fps * 0.3], [0.8, 1], {
-    extrapolateRight: "clamp",
-  });
+  const missIntroAudio = AUDIO_MANIFEST.find((a) => a.id === "miss-vdm-intro")!;
+  const missOutroAudio = AUDIO_MANIFEST.find((a) => a.id === "miss-vdm-outro")!;
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: "#1A1A2E",
-        justifyContent: "center",
-        alignItems: "center",
-        fontFamily: "Nunito, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          textAlign: "center",
-          transform: `scale(${scale})`,
-        }}
+    <AbsoluteFill style={{ background: "#1a1a2e" }}>
+      {/* Title Card */}
+      <Sequence
+        from={TIMELINE.titleCard.start}
+        durationInFrames={TIMELINE.titleCard.duration}
+        name="Title Card"
       >
-        <h1
-          style={{
-            color: "#FFB612",
-            fontSize: Math.round(width * 0.06),
-            margin: 0,
-            opacity: titleOpacity,
-            fontWeight: 800,
-            letterSpacing: 2,
-          }}
-        >
-          NovaTV
-        </h1>
-        <p
-          style={{
-            color: "#FFFFFF",
-            fontSize: Math.round(width * 0.025),
-            marginTop: 16,
-            opacity: subtitleOpacity,
-            fontWeight: 600,
-          }}
-        >
-          Episode 1: Meet the Crew
-        </p>
-        <p
-          style={{
-            color: "#666666",
-            fontSize: Math.round(width * 0.014),
-            marginTop: 8,
-            opacity: subtitleOpacity,
-          }}
-        >
-          Placeholder — components built in Task 4
-        </p>
-      </div>
+        <TitleCard />
+      </Sequence>
+
+      {/* Miss van der Merwe Intro */}
+      <Sequence
+        from={TIMELINE.missIntro.start}
+        durationInFrames={TIMELINE.missIntro.duration}
+        name="Miss vdM Intro"
+      >
+        <MissVanDerMerwe segment="intro" audioLine={missIntroAudio} />
+      </Sequence>
+
+      {/* 8 Character Intros */}
+      {CHARACTER_ORDER.map((charId, index) => {
+        const segment = TIMELINE[charId];
+        const character = CHARACTERS.find((c) => c.id === charId);
+        const audioLine = AUDIO_MANIFEST.find((a) => a.id === charId);
+
+        if (!character || !audioLine || !segment) return null;
+
+        return (
+          <Sequence
+            key={charId}
+            from={segment.start}
+            durationInFrames={segment.duration}
+            name={character.name}
+          >
+            <CharacterIntro
+              character={character}
+              audioLine={audioLine}
+              index={index}
+            />
+          </Sequence>
+        );
+      })}
+
+      {/* Group Finale */}
+      <Sequence
+        from={TIMELINE.groupFinale.start}
+        durationInFrames={TIMELINE.groupFinale.duration}
+        name="Group Scene"
+      >
+        <GroupScene />
+      </Sequence>
+
+      {/* Miss van der Merwe Outro */}
+      <Sequence
+        from={TIMELINE.missOutro.start}
+        durationInFrames={TIMELINE.missOutro.duration}
+        name="Miss vdM Outro"
+      >
+        <MissVanDerMerwe segment="outro" audioLine={missOutroAudio} />
+      </Sequence>
     </AbsoluteFill>
   );
 };
