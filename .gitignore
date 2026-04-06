@@ -58,3 +58,7 @@ tmpclaude-*
 
 # Cursor MCP config (contains API tokens)
 .cursor/mcp.json
+
+# NovaTV Remotion
+novatv/out/
+novatv/dist/
