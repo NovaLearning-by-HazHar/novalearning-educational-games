@@ -7,6 +7,7 @@ import { SignatureMoment } from "./SignatureMoment";
 import { Subtitles } from "./Subtitles";
 import type { Character as CharacterData, AudioLine } from "../types";
 import { CHARACTER_COLORS, INTRO_BEATS } from "../types";
+import { CHARACTER_BACKGROUNDS } from "../data/backgrounds";
 
 export interface CharacterIntroProps {
   character: CharacterData;
@@ -36,7 +37,11 @@ export const CharacterIntro: React.FC<CharacterIntroProps> = ({
   return (
     <AbsoluteFill>
       {/* Background */}
-      <SceneBackground color={colors.bg} seed={character.id} />
+      <SceneBackground
+        color={colors.bg}
+        seed={character.id}
+        backgroundImage={CHARACTER_BACKGROUNDS[character.id]}
+      />
 
       {/* Signature moment (behind character) */}
       <Sequence from={INTRO_BEATS.SIGNATURE_START} durationInFrames={INTRO_BEATS.TOTAL - INTRO_BEATS.SIGNATURE_START}>

@@ -5,6 +5,7 @@ import { Character } from "./Character";
 import { SpeechBubble } from "./SpeechBubble";
 import { Subtitles } from "./Subtitles";
 import type { AudioLine } from "../types";
+import { SCENE_BACKGROUNDS } from "../data/backgrounds";
 
 export interface MissVanDerMerweProps {
   segment: "intro" | "outro";
@@ -25,7 +26,11 @@ export const MissVanDerMerwe: React.FC<MissVanDerMerweProps> = ({
 
   return (
     <AbsoluteFill>
-      <SceneBackground color="#FFF8E1" seed={`miss-vdm-${segment}`} />
+      <SceneBackground
+        color="#FFF8E1"
+        seed={`miss-vdm-${segment}`}
+        backgroundImage={SCENE_BACKGROUNDS[`miss-vdm-${segment}`]}
+      />
 
       <Character
         src={null}
