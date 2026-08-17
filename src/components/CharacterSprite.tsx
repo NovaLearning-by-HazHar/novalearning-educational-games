@@ -5,7 +5,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
-type SpriteCharacter = 'chanel' | 'priya' | 'naledi';
+type SpriteCharacter = 'chanel' | 'priya' | 'naledi' | 'aisha' | 'sipho';
 type SpriteAnimation = 'idle' | 'bounce' | 'wave';
 
 interface CharacterSpriteProps {

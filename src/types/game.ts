@@ -3,7 +3,7 @@
 export type CoreCharacterId = 'gogo_thandi' | 'sipho' | 'amahle' | 'jabu' | 'liya' | 'themba';
 
 /** Money Skills game-specific character IDs */
-export type MoneyCharacterId = 'chanel' | 'priya' | 'naledi';
+export type MoneyCharacterId = 'chanel' | 'priya' | 'naledi' | 'aisha' | 'sipho';
 
 /** All character identifiers across the project */
 export type CharacterId = CoreCharacterId | MoneyCharacterId;
