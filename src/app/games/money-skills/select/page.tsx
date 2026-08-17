@@ -7,9 +7,11 @@ import { CHARACTERS } from '../lib/constants';
 type MoneyCharId = keyof typeof CHARACTERS;
 const CHARACTER_IDS: MoneyCharId[] = ['chanel', 'priya', 'naledi'];
 const EMOJIS: Record<MoneyCharId, string> = {
-  chanel: '\uD83D\uDCD6',
-  priya: '\uD83D\uDD0D',
-  naledi: '\u2B50',
+  chanel: '📖',
+  priya: '🔍',
+  naledi: '⭐',
+  aisha: '🍲',
+  sipho: '🔢',
 };
 
 /** Stars background — procedural twinkle dots */
@@ -89,7 +91,7 @@ export default function CharacterSelectPage() {
   const handleStart = useCallback(() => {
     if (!selected || starting) return;
     setStarting(true);
-    setBurst({ emoji: '\uD83C\uDF89', active: true });
+    setBurst({ emoji: '🎉', active: true });
 
     setActiveCharacter(selected);
 
