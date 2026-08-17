@@ -11,8 +11,8 @@ export interface Character {
 
 export const CHARACTERS: Character[] = [
   { id: 'miss-vdm', name: 'Miss van der Merwe', community: 'Afrikaans', file: null, placeholder: true, color: '#8B5CF6', interest: 'teaching', role: 'teacher' },
-  { id: 'sipho', name: 'Sipho', community: 'Zulu', file: null, placeholder: true, color: '#E65100', interest: 'counting', role: 'child' },
-  { id: 'aisha', name: 'Aisha', community: 'Cape Malay', file: null, placeholder: true, color: '#E91E63', interest: 'cooking', role: 'child' },
+  { id: 'sipho', name: 'Sipho', community: 'Zulu', file: '/characters/sipho.png', placeholder: false, color: '#E65100', interest: 'counting', role: 'child' },
+  { id: 'aisha', name: 'Aisha', community: 'Cape Malay', file: '/characters/aisha.png', placeholder: false, color: '#E91E63', interest: 'cooking', role: 'child' },
   { id: 'jaedon', name: 'Jaedon', community: 'Mixed heritage', file: null, placeholder: true, color: '#4CAF50', interest: 'sport', role: 'child' },
   { id: 'emma', name: 'Emma', community: 'English', file: null, placeholder: true, color: '#FF9800', interest: 'animals', role: 'child' },
   { id: 'priya', name: 'Priya', community: 'Indian/Tamil', file: '/characters/priya.png', placeholder: false, color: '#27AE60', interest: 'music', role: 'child' },
