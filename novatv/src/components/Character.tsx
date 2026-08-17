@@ -111,8 +111,8 @@ export const Character: React.FC<CharacterProps> = ({
           fontFamily: "Nunito, sans-serif",
           fontWeight: 700,
           fontSize,
-          color,
-          textShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          color: "white",
+          textShadow: `0 2px 6px rgba(0,0,0,0.6), 0 0 12px ${color}88`,
           textAlign: "center",
         }}
       >

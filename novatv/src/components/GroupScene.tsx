@@ -12,6 +12,8 @@ import {
 import { KIDS } from "../data/characters";
 import { CHARACTER_COLORS } from "../types";
 import { Subtitles } from "./Subtitles";
+import { SceneBackground } from "./SceneBackground";
+import { SCENE_BACKGROUNDS } from "../data/backgrounds";
 
 export const GroupScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -56,6 +58,12 @@ export const GroupScene: React.FC = () => {
         background: "linear-gradient(180deg, #FFF3E0 0%, #FFE0B2 100%)",
       }}
     >
+      <SceneBackground
+        color="#FFF3E0"
+        seed="group-finale"
+        backgroundImage={SCENE_BACKGROUNDS["group-finale"]}
+      />
+
       {/* Characters entering with stagger */}
       {KIDS.map((kid, i) => {
         const enterFrame = i * 12;
@@ -130,7 +138,8 @@ export const GroupScene: React.FC = () => {
                 fontFamily: "Nunito, sans-serif",
                 fontWeight: 700,
                 fontSize: Math.round(width * 0.014),
-                color: colors?.text ?? kid.color,
+                color: "white",
+                textShadow: "0 2px 6px rgba(0,0,0,0.6)",
               }}
             >
               {kid.name}

@@ -1,12 +1,15 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Img,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
   spring,
   interpolate,
   random,
 } from "remotion";
+import { BACKGROUNDS } from "../data/backgrounds";
 
 export const TitleCard: React.FC = () => {
   const frame = useCurrentFrame();
@@ -36,6 +39,10 @@ export const TitleCard: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
+  const bgScale = interpolate(frame, [0, 150], [1.05, 1.1], {
+    extrapolateRight: "clamp",
+  });
+
   return (
     <AbsoluteFill
       style={{
@@ -44,6 +51,20 @@ export const TitleCard: React.FC = () => {
         alignItems: "center",
       }}
     >
+      {/* Neighbourhood backdrop with dark overlay */}
+      <AbsoluteFill>
+        <Img
+          src={staticFile(BACKGROUNDS.neighbourhood)}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            transform: `scale(${bgScale})`,
+          }}
+        />
+        <AbsoluteFill style={{ background: "rgba(15, 20, 50, 0.72)" }} />
+      </AbsoluteFill>
+
       {/* Sparkles */}
       {Array.from({ length: 15 }, (_, i) => {
         const x = random(`spark-x-${i}`) * 90 + 5;
