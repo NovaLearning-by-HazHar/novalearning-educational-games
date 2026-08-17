@@ -11,6 +11,8 @@ export const CHARACTERS: Record<
   chanel: { name: 'Chanel', role: 'Storyteller', trait: 'Loves to share', image: '/characters/chanel-front.png', cardBg: '#FDE8D8', accent: '#E67E22' },
   priya:  { name: 'Priya',  role: 'Thinker',     trait: 'Loves to explore', image: '/characters/priya-front.png', cardBg: '#D8F0E8', accent: '#27AE60' },
   naledi: { name: 'Naledi', role: 'Leader',       trait: 'Loves to lead together', image: '/characters/naledi-front.png', cardBg: '#D8E8FF', accent: '#4A90D9' },
+  aisha:  { name: 'Aisha',  role: 'Helper',       trait: 'Loves to cook and care', image: '/characters/aisha-front.png', cardBg: '#FCE4EC', accent: '#E91E63' },
+  sipho:  { name: 'Sipho',  role: 'Counter',      trait: 'Loves to count everything', image: '/characters/sipho-front.png', cardBg: '#FFF3E0', accent: '#E65100' },
 };
 
 // ---- 7 SA Coins ----
